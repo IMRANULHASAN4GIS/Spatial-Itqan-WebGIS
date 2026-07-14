@@ -125,6 +125,11 @@
 
   /* north arrow */
   .element-hidden{display:none !important}
+  .ui-restore-chip{display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:3000;
+    padding:8px 18px;border:1px solid var(--brand);border-radius:999px;background:var(--brand);color:#fff;
+    font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.45);white-space:nowrap}
+  .ui-restore-chip.show{display:block}
+  .ui-restore-chip:hover{filter:brightness(1.12)}
   .northarrow{
     position:absolute;top:58px;right:356px;z-index:600;width:44px;height:54px;
     background:var(--map-overlay);border:1px solid var(--line);border-radius:10px;color:var(--ink);
@@ -5275,6 +5280,58 @@ function styleColors(style){
     : {panel:'rgba(15,26,46,.92)',ink:'#E8EEF6',dim:'#94A6BE',accent:'#F59E0B',brand:'#3B82F6',line:'#23344f'};
 }
 
+/* Paint all visible vector layers + labels straight onto a captured map canvas.
+   Engine-independent: works whether the base was captured by leaflet-image (which drops SVG vectors)
+   or html2canvas — data always appears in exports with correct categorized/graduated symbology. */
+function svPaintOverlaysOnMapCanvas(canvas){
+  if(!canvas)return canvas;
+  try{
+    var size=map.getSize(), sx=canvas.width/size.x, sy=canvas.height/size.y;
+    var ctx=canvas.getContext('2d');
+    function XY(lng,lat){ var p=map.latLngToContainerPoint([lat,lng]); return [p.x*sx,p.y*sy]; }
+    function ring(coords){ coords.forEach(function(c,i){ var p=XY(c[0],c[1]); i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); }); }
+    function hexA(hex,a){ var m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex||''); if(!m)return hex||'#3B82F6';
+      return 'rgba('+parseInt(m[1],16)+','+parseInt(m[2],16)+','+parseInt(m[3],16)+','+a+')'; }
+    Object.keys(layers).forEach(function(id){
+      var L0=layers[id]; if(!L0||!L0.visible||L0.isRaster||!L0.geojson||!L0.geojson.features)return;
+      var op=(L0.opacity!=null?L0.opacity:1), pt=(L0.size||6)*sx, lw=2.5*sx;
+      L0.geojson.features.forEach(function(f){
+        var g=f.geometry; if(!g)return;
+        var c=svColorForFeature(L0,f);
+        ctx.strokeStyle=c; ctx.lineWidth=lw; ctx.fillStyle=hexA(c,op);
+        try{
+          if(g.type==='Point'){ var p=XY(g.coordinates[0],g.coordinates[1]);
+            ctx.beginPath();ctx.arc(p[0],p[1],pt,0,6.2832);ctx.fillStyle=hexA(c,Math.max(op,.85));ctx.fill();ctx.lineWidth=1.5*sx;ctx.strokeStyle='#ffffff';ctx.stroke(); }
+          else if(g.type==='MultiPoint'){ g.coordinates.forEach(function(cc){ var p=XY(cc[0],cc[1]);
+            ctx.beginPath();ctx.arc(p[0],p[1],pt,0,6.2832);ctx.fillStyle=hexA(c,Math.max(op,.85));ctx.fill();ctx.lineWidth=1.5*sx;ctx.strokeStyle='#ffffff';ctx.stroke(); }); }
+          else if(g.type==='LineString'){ ctx.beginPath();ring(g.coordinates);ctx.stroke(); }
+          else if(g.type==='MultiLineString'){ g.coordinates.forEach(function(ls){ ctx.beginPath();ring(ls);ctx.stroke(); }); }
+          else if(g.type==='Polygon'){ ctx.beginPath();g.coordinates.forEach(ring);ctx.closePath();ctx.fillStyle=hexA(c,Math.min(op,.55));ctx.fill('evenodd');ctx.stroke(); }
+          else if(g.type==='MultiPolygon'){ g.coordinates.forEach(function(poly){ ctx.beginPath();poly.forEach(ring);ctx.closePath();ctx.fillStyle=hexA(c,Math.min(op,.55));ctx.fill('evenodd');ctx.stroke(); }); }
+        }catch(e){}
+      });
+    });
+    // labels on top
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    Object.keys(layers).forEach(function(id){
+      var L0=layers[id]; if(!L0||!L0.visible||!L0.advLabelStyle||!L0.advLabelStyle.field||!L0.geojson)return;
+      var st=L0.advLabelStyle, fpx=Math.max(Number(st.size||11)*sx,6);
+      ctx.font='800 '+fpx+'px Inter,Arial';
+      (L0.geojson.features||[]).forEach(function(f){
+        var v=(f.properties||{})[st.field]; if(v==null||v==='')return;
+        try{
+          var cc=turf.centerOfMass(f).geometry.coordinates, p=XY(cc[0],cc[1]);
+          if(p[0]<-30||p[0]>canvas.width+30||p[1]<-30||p[1]>canvas.height+30)return;
+          ctx.lineWidth=Math.max(fpx*.28,2); ctx.strokeStyle=st.halo||'#000';
+          ctx.strokeText(String(v),p[0],p[1]);
+          ctx.fillStyle=st.color||'#fff'; ctx.fillText(String(v),p[0],p[1]);
+        }catch(e){}
+      });
+    });
+    ctx.textAlign='start'; ctx.textBaseline='alphabetic';
+  }catch(e){}
+  return canvas;
+}
 function buildLayoutCanvas(cb){
   var page=document.getElementById('exPage').value;
   var orient=document.getElementById('exOrient').value;
@@ -5297,28 +5354,28 @@ function buildLayoutCanvas(cb){
     Object.keys(lg||{}).forEach(function(id){ var fg=lg[id]; if(fg&&map.hasLayer(fg)){ labelGroups.push(fg); map.removeLayer(fg); } });
     function restore(){ hidden.forEach(function(h){ h[0].style.display=h[1]; }); if(hadYAH){ youAreHere.addTo(map); } labelGroups.forEach(function(fg){ try{fg.addTo(map);}catch(e){} }); }
     var done=false;
-    function finishCb(cv){ if(done)return; done=true; restore(); cb(cv); }
-    function liFallback(reason){
+    function finishCb(cv){ if(done)return; done=true; try{svPaintOverlaysOnMapCanvas(cv);}catch(e){} restore(); cb(cv); }
+    // Fallback: html2canvas — captures tiles/markers from the DOM; SVG vector panes are skipped (the painter draws vectors from data)
+    function h2cFallback(reason){
       if(done)return;
-      if(typeof leafletImage==='undefined'){ done=true; restore(); toast('Export failed: '+reason+' (no fallback available)',true); if(zoomOverride)map.setZoom(prevZoom); return; }
+      if(typeof html2canvas==='undefined'){ done=true; restore(); toast('Export failed: '+reason+' (no fallback available)',true); if(zoomOverride)map.setZoom(prevZoom); return; }
       toast('Using fallback capture…');
+      html2canvas(document.getElementById('map'),{useCORS:true,allowTaint:false,logging:false,backgroundColor:null,ignoreElements:function(el){return (el.classList&&(el.classList.contains('leaflet-control-container')||el.classList.contains('leaflet-control-attribution')))||(el.tagName&&String(el.tagName).toLowerCase()==='svg');}})
+        .then(function(cv){ try{ cv.getContext('2d').getImageData(0,0,1,1); finishCb(cv); }catch(taint){ done=true; restore(); toast('Export failed: cross-origin tiles',true); if(zoomOverride)map.setZoom(prevZoom); } })
+        .catch(function(e){ done=true; restore(); toast('Export failed: '+(e&&e.message||'capture error'),true); if(zoomOverride)map.setZoom(prevZoom); });
+    }
+    // Primary: leaflet-image — renders tiles + vector layers directly from Leaflet's data (reliable). DOM labels are hidden and redrawn as crisp vector text in doRender.
+    if(typeof leafletImage!=='undefined'){
       try{
         leafletImage(map,function(err,canvas){
           if(done)return;
-          if(err||!canvas){ done=true; restore(); toast('Export failed: '+(err?err.message:'no canvas'),true); if(zoomOverride)map.setZoom(prevZoom); return; }
+          if(err||!canvas){ h2cFallback(err?err.message:'no canvas'); return; }
           try{ canvas.getContext('2d').getImageData(0,0,1,1); finishCb(canvas); }
-          catch(taint){ done=true; restore(); toast('Export failed: cross-origin tiles',true); if(zoomOverride)map.setZoom(prevZoom); }
+          catch(taint){ h2cFallback('cross-origin tiles'); }
         });
-        setTimeout(function(){ if(!done){ done=true; restore(); toast('Export failed: timeout',true); if(zoomOverride)map.setZoom(prevZoom); } },8000);
-      }catch(e){ done=true; restore(); toast('Export failed: '+e.message,true); if(zoomOverride)map.setZoom(prevZoom); }
-    }
-    // Primary: html2canvas — captures the full map DOM (raster tiles, vector overlays, markers) exactly as displayed
-    if(typeof html2canvas!=='undefined'){
-      html2canvas(document.getElementById('map'),{useCORS:true,allowTaint:false,logging:false,backgroundColor:null,ignoreElements:function(el){return el.classList&&(el.classList.contains('leaflet-control-container')||el.classList.contains('leaflet-control-attribution'));}})
-        .then(function(cv){ try{ cv.getContext('2d').getImageData(0,0,1,1); finishCb(cv); }catch(taint){ liFallback('cross-origin tiles'); } })
-        .catch(function(e){ liFallback(e&&e.message||'capture error'); });
-      setTimeout(function(){ if(!done) liFallback('timeout'); },9000);
-    } else { liFallback('html2canvas not loaded'); }
+        setTimeout(function(){ if(!done) h2cFallback('timeout'); },8000);
+      }catch(e){ h2cFallback(e.message); }
+    } else { h2cFallback('leaflet-image not loaded'); }
   }
   function doRender(){
     toast('Rendering layout…');
@@ -5375,25 +5432,7 @@ function buildLayoutCanvas(cb){
           ['polygon','line','point'].forEach(function(k){ drawn[k].forEach(function(rec){ try{ drawGeom(rec.layer.toGeoJSON().geometry, rec.style); }catch(e){} }); });
           if(typeof ptItems!=='undefined'){ ptItems.forEach(function(it){ try{ var ll=it.marker.getLatLng(); drawGeom({type:'Point',coordinates:[ll.lng,ll.lat]},{fill:it.color,ptSize:6}); if(it.labelOn&&it.text){var p=toXY(ll.lng,ll.lat);ctx.fillStyle=C.ink;ctx.font=(11*(dw/size.x))+'px Inter,Arial';ctx.fillText(it.text,p[0]+8,p[1]-6);} }catch(e){} }); }
         }catch(e){}
-        // ---- layer labels (advLabelStyle) drawn as vector text: crisp at any export resolution ----
-        try{
-          Object.keys(layers).forEach(function(id){
-            var L0=layers[id]; if(!L0||!L0.visible||!L0.advLabelStyle||!L0.advLabelStyle.field||!L0.geojson)return;
-            var st=L0.advLabelStyle, fpx=Math.max(Number(st.size||11)*(dw/size.x),6);
-            ctx.font='800 '+fpx+'px Inter,Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-            (L0.geojson.features||[]).forEach(function(f){
-              var v=(f.properties||{})[st.field]; if(v==null||v==='')return;
-              try{
-                var c=turf.centerOfMass(f).geometry.coordinates, p=toXY(c[0],c[1]);
-                if(p[0]<dx-20||p[0]>dx+dw+20||p[1]<dy-20||p[1]>dy+dh+20)return;
-                ctx.lineWidth=Math.max(fpx*.28,2); ctx.strokeStyle=st.halo||'#000';
-                ctx.strokeText(String(v),p[0],p[1]);
-                ctx.fillStyle=st.color||'#fff'; ctx.fillText(String(v),p[0],p[1]);
-              }catch(e){}
-            });
-          });
-          ctx.textAlign='start'; ctx.textBaseline='alphabetic';
-        }catch(e){}
+        /* layer vectors + labels are already painted onto the captured map canvas by svPaintOverlaysOnMapCanvas */
       })();
       var S=res; // scale fonts/boxes with resolution for crispness
       // Title
@@ -5954,33 +5993,35 @@ document.getElementById('exportPDF').onclick=function(){
   function $(id){return document.getElementById(id);}
   var designer=$('layoutDesigner'), stage=$('ldStage'), pageEl=$('ldPageEl');
 
-  /* ---- capture the current map to a canvas (html2canvas first: captures labels/markers/raster as displayed) ---- */
+  /* ---- capture the current map to a canvas: leaflet-image for the basemap, then vectors + labels
+          are painted directly from the layer data (svPaintOverlaysOnMapCanvas) so the layout always shows them ---- */
   function captureMap(cb){
     var hidden=[];
     document.querySelectorAll('#map .leaflet-control-container').forEach(function(el){ hidden.push([el,el.style.display]); el.style.display='none'; });
     var hadYAH=(typeof youAreHere!=='undefined') && youAreHere && map.hasLayer(youAreHere);
     if(hadYAH){ map.removeLayer(youAreHere); }
-    function restore(){ hidden.forEach(function(h){h[0].style.display=h[1];}); if(hadYAH){youAreHere.addTo(map);} }
+    var labelGroups=[], lg=(window.__svAdvLabelGroups?window.__svAdvLabelGroups():{});
+    Object.keys(lg||{}).forEach(function(id){ var fg=lg[id]; if(fg&&map.hasLayer(fg)){ labelGroups.push(fg); map.removeLayer(fg); } });
+    function restore(){ hidden.forEach(function(h){h[0].style.display=h[1];}); if(hadYAH){youAreHere.addTo(map);} labelGroups.forEach(function(fg){ try{fg.addTo(map);}catch(e){} }); }
     var done=false;
-    function finish(cv){ if(done)return; done=true; restore(); cb(cv); }
+    function finish(cv){ if(done)return; done=true; try{svPaintOverlaysOnMapCanvas(cv);}catch(e){} restore(); cb(cv); }
     function fb(){
       if(done)return;
-      if(typeof leafletImage==='undefined'){ done=true; restore(); cb(null); return; }
+      if(typeof html2canvas==='undefined'){ done=true; restore(); cb(null); return; }
+      html2canvas(document.getElementById('map'),{useCORS:true,logging:false,backgroundColor:null,
+        ignoreElements:function(el){return (el.classList&&el.classList.contains('leaflet-control-container'))||(el.tagName&&String(el.tagName).toLowerCase()==='svg');}})
+        .then(function(cv){ try{ cv.getContext('2d').getImageData(0,0,1,1); finish(cv); }catch(e){ done=true; restore(); cb(null); } })
+        .catch(function(){ done=true; restore(); cb(null); });
+    }
+    if(typeof leafletImage!=='undefined'){
       try{
         leafletImage(map,function(err,canvas){
           if(done)return;
-          if(err||!canvas){ done=true; restore(); cb(null); return; }
-          try{ canvas.getContext('2d').getImageData(0,0,1,1); finish(canvas); }catch(e){ done=true; restore(); cb(null); }
+          if(err||!canvas){ fb(); return; }
+          try{ canvas.getContext('2d').getImageData(0,0,1,1); finish(canvas); }catch(e){ fb(); }
         });
-        setTimeout(function(){ if(!done){ done=true; restore(); cb(null); } },8000);
-      }catch(e){ done=true; restore(); cb(null); }
-    }
-    if(typeof html2canvas!=='undefined'){
-      html2canvas(document.getElementById('map'),{useCORS:true,logging:false,backgroundColor:null,
-        ignoreElements:function(el){return el.classList&&el.classList.contains('leaflet-control-container');}})
-        .then(function(cv){ try{ cv.getContext('2d').getImageData(0,0,1,1); finish(cv); }catch(e){ fb(); } })
-        .catch(function(){ fb(); });
-      setTimeout(function(){ if(!done) fb(); },9000);
+        setTimeout(function(){ if(!done) fb(); },8000);
+      }catch(e){ fb(); }
     } else fb();
   }
 
@@ -7041,6 +7082,7 @@ function uxSetElement(key,on,silent){
   if(key==='footer')uxSetHidden(uxQS('.pagefoot'),hide);
   if(key==='panel'){
     uxSetHidden(document.getElementById('panel'),hide);
+    uxSetHidden(document.getElementById('panelDock'),hide);
     document.body.classList.toggle('panel-hidden',hide);
     var mapEl=document.getElementById('map');
     if(mapEl){mapEl.style.right=on?(window.innerWidth<=860?'0':'340px'):'0';}
