@@ -135,10 +135,12 @@
 
   /* legend (on-map, Esri-style, floating) */
   .legendbox{
-    position:absolute;bottom:34px;right:356px;z-index:600;min-width:150px;max-width:240px;
+    position:absolute;bottom:34px;right:356px;z-index:600;min-width:170px;max-width:300px;
     background:var(--map-overlay);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);
     overflow:hidden;
   }
+  .legendbox .lh{cursor:move;user-select:none}
+  .legendbox.dragging{opacity:.88;box-shadow:0 8px 30px rgba(0,0,0,.5)}
   @media (max-width:860px){.legendbox{right:16px}}
   .legendbox .lh{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-dim);
     padding:8px 11px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
@@ -280,7 +282,7 @@
     background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#06121f;border:none;box-shadow:var(--shadow);font-size:20px;cursor:pointer;align-items:center;justify-content:center}
 
   /* attribute table */
-  .attrdrawer{position:absolute;left:0;right:344px;bottom:0;height:240px;z-index:650;background:var(--panel);
+  .attrdrawer{position:absolute;left:0;right:344px;bottom:0;height:240px;z-index:1150;background:var(--panel);
     border-top:2px solid var(--brand);border-right:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.5);transform:translateY(100%);transition:transform .26s;display:flex;flex-direction:column;overflow:hidden}
   .attrdrawer.open{transform:translateY(0)}
   .attrdrawer .attrtable-wrap{overflow:auto;flex:1}
@@ -296,11 +298,16 @@
   .attrdrawer .head button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:7px;padding:4px 9px;font-size:11px;cursor:pointer}
   .attrdrawer .head input{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:7px;padding:5px 9px;font-size:11.5px;width:180px}
   .attrtable-wrap{flex:1;overflow:auto}
+  .attr-hscroll{display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--bg-2);border-top:1px solid var(--line);flex:none}
+  .attr-hscroll button{width:24px;height:22px;border:1px solid var(--line);border-radius:6px;background:var(--chip);color:var(--ink);cursor:pointer;font-size:13px;flex:none;line-height:1}
+  .attr-hscroll button:hover{border-color:var(--brand)}
+  .attr-hscroll-track{flex:1;height:8px;background:var(--chip);border-radius:4px;position:relative;cursor:pointer}
+  .attr-hscroll-track #attrHScrollThumb{position:absolute;top:0;left:0;height:100%;min-width:30px;background:var(--brand);border-radius:4px;cursor:grab}
   table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
   table.grid th{position:sticky;top:0;background:var(--bg-2);text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;color:var(--ink)}
   table.grid td{padding:5px 9px;border-bottom:1px solid var(--line);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   table.grid tr:hover td{background:var(--panel-2);cursor:pointer}
-  table.grid tr.sel td{background:rgba(59,130,246,.25)}
+  table.grid tr.sel td{background:rgba(0,229,255,.22)}
 
   .leaflet-popup-content-wrapper{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
   .leaflet-popup-tip{background:var(--panel)}
@@ -650,6 +657,84 @@
   #importPreview .ip-actions{display:flex;gap:10px;margin-top:16px}
   #importPreview .ip-actions .btn.accent{flex:1}
 
+  /* ===== Selection measurements + ESRI-style field header tools ===== */
+  .selection-summary{
+    position:absolute;left:12px;bottom:76px;z-index:690;display:none;align-items:center;gap:7px;flex-wrap:wrap;
+    max-width:min(780px,calc(100vw - 390px));padding:8px 10px;background:var(--map-overlay);backdrop-filter:blur(7px);
+    border:1px solid var(--line);border-left:3px solid var(--brand-2);border-radius:10px;box-shadow:var(--shadow);
+    color:var(--ink);font-size:11px;line-height:1.35
+  }
+  .selection-summary.show{display:flex}
+  .selection-summary .ss-title{font-weight:900;color:var(--brand-2);margin-right:2px}
+  .selection-summary .ss-item{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;background:var(--chip);white-space:nowrap}
+  .selection-summary .ss-item b{color:var(--ink)}
+  body.panel-docked .selection-summary{max-width:calc(100vw - 24px)}
+  @media(max-width:860px){.selection-summary{max-width:calc(100vw - 24px);bottom:72px}}
+
+  .attr-field-menu{position:fixed;z-index:5200;display:none;min-width:220px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+  .attr-field-menu.open{display:block}
+  .attr-field-menu .afm-title{padding:6px 9px 7px;font-size:10px;font-weight:900;letter-spacing:.55px;text-transform:uppercase;color:var(--brand-2);border-bottom:1px solid var(--line);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .attr-field-menu button{display:flex;width:100%;align-items:center;gap:8px;border:none;border-radius:7px;background:transparent;color:var(--ink);padding:8px 9px;font-size:11.5px;text-align:left;cursor:pointer}
+  .attr-field-menu button:hover{background:var(--panel-2);color:var(--brand-2)}
+  .attr-field-menu .afm-sep{height:1px;background:var(--line);margin:4px 3px}
+  table.grid th.field-menu-active{outline:2px solid var(--brand-2);outline-offset:-2px}
+
+  .attr-stats-overlay{position:fixed;inset:0;z-index:5250;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.58)}
+  .attr-stats-overlay.open{display:flex}
+  .attr-stats-card{width:min(620px,96vw);max-height:86vh;display:flex;flex-direction:column;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 54px rgba(0,0,0,.55)}
+  .attr-stats-head{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg-2);border-bottom:1px solid var(--line)}
+  .attr-stats-head b{font-size:13px;color:var(--ink)}
+  .attr-stats-head span{flex:1}
+  .attr-stats-head button{border:1px solid var(--line);border-radius:7px;background:var(--chip);color:var(--ink);padding:5px 9px;font-size:11px;cursor:pointer}
+  .attr-stats-body{padding:14px;overflow:auto;color:var(--ink);font-size:12px}
+  .attr-stats-scope{margin-bottom:10px;color:var(--ink-dim);font-size:11px}
+  .attr-stats-grid{width:100%;border-collapse:collapse}
+  .attr-stats-grid th,.attr-stats-grid td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .attr-stats-grid th{width:42%;color:var(--brand-2);font-weight:800;background:var(--bg-2)}
+  .attr-stats-grid td{font-family:var(--mono);word-break:break-word}
+  .attr-stats-note{margin-top:10px;color:var(--ink-dim);font-size:10.5px;line-height:1.5}
+
+
+  /* ===== ESRI-style multi-layer selection, table editing and attribute tools ===== */
+  .attrdrawer{height:300px}
+  .attrdrawer .head.attr-head-pro{flex-wrap:wrap;gap:6px;padding:7px 9px}
+  .attrdrawer .head.attr-head-pro .attr-primary{display:flex;align-items:center;gap:7px;min-width:0;flex:1 1 420px}
+  .attrdrawer .head.attr-head-pro .attr-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex:1 1 620px}
+  .attr-layer-select{height:29px;max-width:190px;border:1px solid var(--line);border-radius:7px;background:var(--chip);color:var(--ink);font-size:11px;padding:0 7px;outline:none}
+  .attrdrawer .head button.active,.xp-btn.active{background:linear-gradient(135deg,#00E5FF,#FACC15);border-color:transparent;color:#07111c;font-weight:900}
+  .attrdrawer .head button.edit-on{background:linear-gradient(135deg,var(--good),var(--brand-2));border-color:transparent;color:#07111c;font-weight:900}
+  .attrdrawer .head button.dirty::after{content:' •';color:#FACC15;font-size:15px;line-height:0}
+  table.grid tr.sel td{background:rgba(250,204,21,.38)!important;box-shadow:inset 0 1px 0 rgba(0,229,255,.72),inset 0 -1px 0 rgba(0,229,255,.72);color:var(--ink);font-weight:650}
+  table.grid tr.sel td:first-child{box-shadow:inset 4px 0 0 #00E5FF,inset 0 1px 0 rgba(0,229,255,.72),inset 0 -1px 0 rgba(0,229,255,.72)}
+  table.grid td.attr-editable{cursor:text;position:relative}
+  table.grid td.attr-editable:hover{outline:1px solid var(--brand-2);outline-offset:-1px;background:color-mix(in srgb,var(--brand-2) 12%,var(--panel))}
+  table.grid td.attr-editing{padding:2px 4px;background:var(--panel)!important}
+  table.grid td.attr-editing input{width:100%;min-width:110px;height:27px;border:2px solid var(--brand-2);border-radius:5px;background:var(--chip);color:var(--ink);padding:0 6px;font:inherit;outline:none}
+  .attr-empty-selected{padding:24px;text-align:center;color:var(--ink-dim);font-size:12px}
+  .selection-summary{border-left-color:#00E5FF;box-shadow:0 0 0 1px rgba(250,204,21,.28),var(--shadow)}
+  .selection-summary .ss-title{color:#FACC15}
+  .selection-summary .ss-layer{color:var(--brand-2);font-weight:800}
+  .attr-editor-card{width:min(760px,96vw);max-height:88vh}
+  .attr-editor-info{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--chip);color:var(--ink-dim);font-size:11.5px;line-height:1.5;margin-bottom:10px}
+  .attr-editor-grid{display:grid;grid-template-columns:minmax(140px,220px) minmax(220px,1fr) 72px;gap:6px 8px;align-items:center}
+  .attr-editor-grid .ae-head{font-size:10px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;color:var(--brand-2);padding:4px 6px;border-bottom:1px solid var(--line)}
+  .attr-editor-grid label{font-size:11px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .attr-editor-grid input[type=text]{width:100%;height:31px;border:1px solid var(--line);border-radius:7px;background:var(--chip);color:var(--ink);padding:0 8px;font-size:11.5px;outline:none}
+  .attr-editor-grid input[type=text]:focus{border-color:var(--brand-2)}
+  .attr-editor-grid input.mixed{font-style:italic;color:var(--ink-dim)}
+  .attr-editor-grid .ae-null{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--ink-dim)}
+  .attr-editor-actions{display:flex;gap:8px;margin-top:14px}
+  .attr-editor-actions .btn{margin:0}
+  .calc-builder{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
+  .calc-builder select,.calc-builder button{height:32px;border:1px solid var(--line);border-radius:8px;background:var(--chip);color:var(--ink);font-size:11px;padding:0 8px}
+  .calc-builder button{cursor:pointer;font-weight:800}
+  .calc-builder button:hover{border-color:var(--brand-2);color:var(--brand-2)}
+  #sbaCalcExpr{min-height:72px;resize:vertical;line-height:1.45}
+  .calc-help{font-size:10.5px;color:var(--ink-dim);line-height:1.55;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:9px}
+  .calc-help code{color:var(--brand-2)}
+  @media(max-width:980px){.attrdrawer{height:340px}.attrdrawer .head.attr-head-pro .attr-actions{justify-content:flex-start}.attr-layer-select{max-width:150px}}
+  @media(max-width:620px){.attr-editor-grid{grid-template-columns:1fr}.attr-editor-grid .ae-head{display:none}.attr-editor-grid .ae-null{justify-content:flex-start}.calc-builder{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body data-theme="graphite" class="login-locked">
@@ -737,8 +822,6 @@
     <select class="xp-mini-select" id="xpActiveLayer" title="Active operational layer"><option value="">No layer loaded</option></select>
   </div>
   <div class="xp-group" data-title="Map Navigation">
-    <button class="xp-btn" id="xpZoomIn" title="Zoom in">＋</button>
-    <button class="xp-btn" id="xpZoomOut" title="Zoom out">－</button>
     <button class="xp-btn" id="xpPrevExtent" title="Zoom to previous extent">↶ <span>Prev</span></button>
     <button class="xp-btn" id="xpNextExtent" title="Zoom to next extent">↷ <span>Next</span></button>
     <button class="xp-btn" id="xpZoomAll" title="Zoom to all layers">⛶ <span>All</span></button>
@@ -747,15 +830,12 @@
     <button class="xp-btn good" id="xpNorthToggle" title="Show / hide the north arrow">⬆ <span>North</span></button>
     <button class="xp-btn" id="xpRoute" title="Find a route (source → destination, like Google directions)">🚗 <span>Route</span></button>
   </div>
-  <div class="xp-group" data-title="Go to XY">
-    <input id="ribGotoX" class="xp-coord" type="text" placeholder="Lat / N" title="Latitude or Northing (in selected CRS)"/>
-    <input id="ribGotoY" class="xp-coord" type="text" placeholder="Lng / E" title="Longitude or Easting (in selected CRS)"/>
-    <button class="xp-btn primary" id="ribGotoBtn" title="Go to coordinates">→ <span>Go</span></button>
-  </div>
   <div class="xp-group" data-title="Select & Identify">
     <button class="xp-btn good" id="xpIdentify" title="Identify features">ⓘ <span>Identify</span></button>
-    <button class="xp-btn" id="xpSelectBox" title="Select by rectangle">▭ <span>Select</span></button>
-    <button class="xp-btn" id="xpClearSel" title="Clear selection">⊘ <span>Clear</span></button>
+    <button class="xp-btn" id="xpSelectBox" title="Select across visible feature classes. Shift adds; Ctrl toggles.">▭ <span>Select</span></button>
+    <button class="xp-btn" id="xpSwitchSel" title="Switch selection in the active feature class">⇄ <span>Switch</span></button>
+    <button class="xp-btn" id="xpShowSel" title="Open the active table and show selected records only">★ <span>Selected</span></button>
+    <button class="xp-btn" id="xpClearSel" title="Clear selection in all feature classes">⊘ <span>Clear</span></button>
   </div>
   <div class="xp-group" data-title="Editing">
     <button class="xp-btn primary" id="xpStartEdit" title="Start / stop editing">✎ <span>Edit</span></button>
@@ -766,13 +846,19 @@
     <button class="xp-btn" id="xpSplitFeat" title="Split selected line into two">⑂ <span>Split</span></button>
     <button class="xp-btn" id="xpRotateFeat" title="Rotate selected feature(s) by angle">⟳ <span>Rotate</span></button>
     <button class="xp-btn" id="xpTraceFeat" title="Trace selected feature outline into a new line">◇ <span>Trace</span></button>
-    <button class="xp-btn good" id="xpSaveEdit" title="Save edits in browser memory">✓ <span>Save</span></button>
+    <button class="xp-btn good" id="xpSaveEdit" title="Save becomes available after an attribute or geometry edit" disabled>✓ <span>Save</span></button>
+  </div>
+  <div class="xp-group" data-title="Go to XY">
+    <input id="ribGotoX" class="xp-coord" type="text" placeholder="Lat / N" title="Latitude or Northing (in selected CRS)"/>
+    <input id="ribGotoY" class="xp-coord" type="text" placeholder="Lng / E" title="Longitude or Easting (in selected CRS)"/>
+    <button class="xp-btn primary" id="ribGotoBtn" title="Go to coordinates">→ <span>Go</span></button>
   </div>
 </div>
 
 <div class="main">
   <div id="map"></div>
   <div class="maptitle" id="mapTitle"></div>
+  <div class="selection-summary" id="selectionSummary" aria-live="polite"></div>
 
   <div class="digibar" id="digibar">
     <span id="digibarText">Digitizing…</span>
@@ -929,15 +1015,40 @@
 
         <p class="stitle">Symbology</p>
         <div class="field"><label>Layer</label><select id="sLayer"></select></div>
-        <div class="row2">
+        <div class="field"><label>Symbology type</label>
+          <select id="sMode">
+            <option value="single">Single symbol</option>
+            <option value="graduated">Graduated color (numeric field)</option>
+            <option value="categorized">Categorized (unique values)</option>
+          </select></div>
+        <div class="row2" id="sSingleRow">
           <div class="field"><label>Color</label><input id="sColor" type="color" value="#3B82F6"/></div>
           <div class="field"><label>Point size</label><input id="sSize" type="number" min="1" max="20" value="6"/></div>
         </div>
         <div class="field"><label>Opacity <span id="sOpV">0.8</span></label>
           <input id="sOpacity" type="range" min="0" max="1" step="0.05" value="0.8" style="width:100%"/></div>
-        <div class="field"><label>Graduated color by numeric field</label>
+        <div class="field" id="sGradField"><label>Graduated color by numeric field</label>
           <select id="sField"><option value="">— none (single color) —</option></select></div>
+        <div class="field" id="sCatFieldWrap" style="display:none">
+          <label>Categorize by field</label>
+          <select id="sCatField"><option value="">— choose field —</option></select>
+          <div id="sCatList" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:220px;overflow:auto"></div>
+        </div>
         <button class="btn" id="sApply">✔ Apply symbology</button>
+        <div class="divider"></div>
+
+        <p class="stitle">Labels</p>
+        <div class="field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0">
+          <input type="checkbox" id="sLabelOn"/> <span style="font-weight:600">Show labels for this layer</span></label></div>
+        <div id="sLabelOpts" style="display:none">
+          <div class="field"><label>Label field</label><select id="sLabelField"></select></div>
+          <div class="row2">
+            <div class="field"><label>Size (px)</label><input id="sLabelSize" type="number" min="8" max="28" value="11"/></div>
+            <div class="field"><label>Text color</label><input id="sLabelColor" type="color" value="#ffffff"/></div>
+          </div>
+          <div class="field"><label>Halo color</label><input id="sLabelHalo" type="color" value="#000000"/></div>
+          <button class="btn" id="sLabelApply">✔ Apply labels</button>
+        </div>
         <div class="divider"></div>
 
         <p class="stitle">Measure</p>
@@ -1242,15 +1353,34 @@
 </div>
 
 <div class="attrdrawer" id="attrDrawer">
-  <div class="head">
-    <b id="attrTitle">Attributes</b>
-    <span id="attrCount" style="font-size:11px;color:var(--ink-dim)"></span>
-    <input id="attrFilter" type="text" placeholder="Filter rows…"/>
-    <span class="grow"></span>
-    <button id="attrZoomSel">Zoom to selected</button>
-    <button id="attrClose">✕ Close</button>
+  <div class="head attr-head-pro">
+    <div class="attr-primary">
+      <b id="attrTitle">Attributes</b>
+      <select id="attrLayerSelect" class="attr-layer-select" title="Switch attribute table"></select>
+      <span id="attrCount" style="font-size:11px;color:var(--ink-dim)"></span>
+      <span class="attr-edit-hint" title="Double-click any attribute value to edit it">✎ Double-click a value to edit</span>
+      <input id="attrFilter" type="text" placeholder="Filter rows…"/>
+    </div>
+    <div class="attr-actions">
+      <button id="attrSelectAll" title="Select all currently visible/filtered rows">All</button>
+      <button id="attrSwitchSel" title="Switch selection in this feature class">⇄ Switch</button>
+      <button id="attrShowSel" title="Show selected records only">★ Selected</button>
+      <button id="attrClearSel" title="Clear selection in this feature class">⊘ Clear</button>
+      <button id="attrSelByAttr">⌖ Select by Attribute</button>
+      <button id="attrZoomSel">⛶ Zoom</button>
+      <button id="attrFieldCalc">ƒ Field Calculator</button>
+      <button id="attrEditAttrs" style="display:none" aria-hidden="true" tabindex="-1">▦ Edit Attributes</button>
+      <button id="attrEditGeom">⬓ Edit Geometry</button>
+      <button id="attrSave" title="Save becomes available after an attribute or geometry edit" disabled>✓ Save</button>
+      <button id="attrClose">✕</button>
+    </div>
   </div>
   <div class="attrtable-wrap" id="attrTableWrap"></div>
+  <div class="attr-hscroll" id="attrHScroll">
+    <button id="attrScrollL" title="Scroll left">‹</button>
+    <div class="attr-hscroll-track" id="attrHScrollTrack"><div id="attrHScrollThumb"></div></div>
+    <button id="attrScrollR" title="Scroll right">›</button>
+  </div>
 </div>
 
 <div class="welcome" id="welcome">
@@ -1350,42 +1480,125 @@
   </div>
 </div>
 
-<div class="modal" id="sbaModal">
-  <div class="modal-card" style="max-width:520px">
-    <div class="modal-head">
-      <b>Select by Attribute — <span id="sbaLayerName"></span></b>
+<div id="sbaModal" class="sba-tool-window" role="dialog" aria-modal="false" aria-labelledby="sbaToolTitle">
+  <div class="sba-tool-card">
+    <div class="sba-tool-head" id="sbaDragHandle">
+      <b id="sbaToolTitle">Attribute Tools — <span id="sbaLayerName"></span></b>
       <span class="grow"></span>
+      <button class="sba-pin" id="sbaResetPosition" title="Reset window position and size">⌂</button>
       <button class="topbtn" id="sbaClose">✕ Close</button>
     </div>
-    <div class="modal-body" style="padding:16px">
-      <p class="hint">Build a query to select matching features. Numeric and text comparisons are auto-detected. Matches are highlighted in yellow on the map.</p>
-      <div class="field"><label>Field</label><select id="sbaField"></select></div>
-      <div class="row2">
-        <div class="field"><label>Operator</label>
-          <select id="sbaOp">
-            <option value="=">= equals</option>
-            <option value="!=">≠ not equal</option>
-            <option value=">">&gt; greater than</option>
-            <option value="<">&lt; less than</option>
-            <option value=">=">≥ greater or equal</option>
-            <option value="<=">≤ less or equal</option>
-            <option value="contains">contains text</option>
-            <option value="starts">starts with</option>
+    <div class="sba-tool-tabs" role="tablist">
+      <button id="sbaTabSelect" class="active" role="tab" aria-selected="true">⌖ Select By Attributes</button>
+      <button id="sbaTabCalc" role="tab" aria-selected="false">ƒ Field Calculator</button>
+    </div>
+    <div class="sba-tool-body">
+      <section id="sbaSelectPane" class="sba-tool-pane active">
+        <p class="hint">Build a query like ArcGIS Pro Select By Attributes. Choose the field, operator, value, and selection method, then apply the query.</p>
+        <div class="field"><label>Input Rows</label><div class="sba-readonly-layer" id="sbaInputLayer"></div></div>
+        <div class="field"><label>Selection type</label>
+          <select id="sbaMode">
+            <option value="new">New selection</option>
+            <option value="add">Add to current selection</option>
+            <option value="remove">Remove from current selection</option>
+            <option value="and">Select subset from current selection</option>
           </select>
         </div>
-        <div class="field"><label>Value</label><input id="sbaValue" type="text" placeholder="Type a value…"/></div>
-      </div>
-      <button class="btn accent" id="sbaRun">⌖ Run selection</button>
-      <div class="row2">
-        <button class="btn" id="sbaZoom">⛶ Zoom to selection</button>
-        <button class="btn" id="sbaExport">⬇ Export selected</button>
-      </div>
-      <div class="measure-out" id="sbaResult" style="margin-top:10px"></div>
+        <div class="field"><label>Expression</label></div>
+        <div class="sba-expression-row">
+          <select id="sbaField" title="Field"></select>
+          <select id="sbaOp" title="Operator">
+            <option value="=">=</option>
+            <option value="!=">≠</option>
+            <option value=">">&gt;</option>
+            <option value="<">&lt;</option>
+            <option value=">=">≥</option>
+            <option value="<=">≤</option>
+            <option value="contains">contains</option>
+            <option value="starts">starts with</option>
+          </select>
+          <input id="sbaValue" type="text" list="sbaUniqueValues" placeholder="Value…"/><datalist id="sbaUniqueValues"></datalist>
+        </div>
+        <div class="sba-expression-preview" id="sbaExpressionPreview"></div>
+        <div class="sba-clause-controls">
+          <select id="sbaLogic" title="How multiple clauses are combined"><option value="and">Match all clauses (AND)</option><option value="or">Match any clause (OR)</option></select>
+          <button class="btn" id="sbaAddClause">＋ Add Clause</button>
+          <button class="btn" id="sbaClearClauses">Clear Expression</button>
+        </div>
+        <div class="sba-clause-list" id="sbaClauseList"></div>
+        <div class="sba-tool-actions">
+          <button class="btn accent" id="sbaRun">Apply</button>
+          <button class="btn" id="sbaZoom">⛶ Zoom To Selection</button>
+          <button class="btn" id="sbaClear">Clear</button>
+        </div>
+        <div class="sba-tool-actions secondary">
+          <button class="btn" id="sbaExport">⬇ Export Selected</button>
+        </div>
+        <div class="measure-out" id="sbaResult"></div>
+      </section>
+
+      <section id="sbaCalcPane" class="sba-tool-pane">
+        <p class="hint">Calculate an existing or new field. Both <code>[FIELD]</code> and <code>!FIELD!</code> references are supported.</p>
+        <div class="field"><label>Input Table</label><div class="sba-readonly-layer" id="sbaCalcInputLayer"></div></div>
+        <div class="field"><label>Field name</label>
+          <input id="sbaCalcField" type="text" list="sbaFieldOptions" placeholder="Existing or new field name"/>
+          <datalist id="sbaFieldOptions"></datalist>
+        </div>
+        <div class="calc-builder">
+          <select id="sbaCalcInsertField" title="Choose a field to insert"><option value="">— Insert field —</option></select>
+          <button id="sbaCalcInsertBtn" type="button">＋ Insert [FIELD]</button>
+          <select id="sbaCalcHelper" title="Insert a common function">
+            <option value="">— Insert function / geometry —</option>
+            <option value="UPPER([FIELD])">UPPER(text)</option><option value="LOWER([FIELD])">LOWER(text)</option>
+            <option value="TRIM([FIELD])">TRIM(text)</option><option value="CONCAT([FIELD], &quot; &quot;, [FIELD2])">CONCAT(values)</option>
+            <option value="COALESCE([FIELD], 0)">COALESCE(value, fallback)</option><option value="ROUND([FIELD], 2)">ROUND(number, decimals)</option>
+            <option value="ABS([FIELD])">ABS(number)</option><option value="LENGTH">LENGTH (metres)</option>
+            <option value="AREA">AREA (m²)</option><option value="X">X / longitude</option><option value="Y">Y / latitude</option>
+            <option value="SHAPE_TYPE">SHAPE_TYPE</option><option value="NOW()">NOW()</option>
+          </select>
+          <button id="sbaCalcHelperBtn" type="button">＋ Insert helper</button>
+        </div>
+        <div class="field"><label>Expression</label><textarea id="sbaCalcExpr" placeholder="Examples: [PCI_RATING] * 20   |   UPPER(!STATUS!)   |   ROUND(LENGTH, 2)   |   Good"></textarea></div>
+        <div class="row2">
+          <div class="field"><label>Output type</label><select id="sbaCalcType"><option value="auto">Auto</option><option value="text">Text</option><option value="number">Decimal number</option><option value="integer">Integer</option><option value="boolean">Boolean</option><option value="date">Date / time</option></select></div>
+          <div class="field"><label>Apply to</label>
+            <select id="sbaCalcScope">
+              <option value="selected">Selected features</option>
+              <option value="filtered">Visible / filtered table rows</option>
+              <option value="all">All features in layer</option>
+            </select>
+          </div>
+        </div>
+        <div class="calc-help">Functions: <code>UPPER</code>, <code>LOWER</code>, <code>TRIM</code>, <code>CONCAT</code>, <code>COALESCE</code>, <code>ROUND</code>, <code>ABS</code>, <code>MIN</code>, <code>MAX</code>, <code>NOW</code>. Geometry variables: <code>LENGTH</code>, <code>AREA</code>, <code>X</code>, <code>Y</code>, <code>SHAPE_TYPE</code>.</div>
+        <div class="sba-tool-actions">
+          <button class="btn" id="sbaCalcPreview">◉ Preview</button>
+          <button class="btn accent" id="sbaCalcApply">Calculate</button>
+        </div>
+        <div class="measure-out" id="sbaCalcResult"></div>
+      </section>
     </div>
   </div>
 </div>
 
 
+
+<div class="modal" id="attrEditModal">
+  <div class="modal-card attr-editor-card">
+    <div class="modal-head">
+      <b>▦ Edit Attributes — <span id="attrEditLayerName"></span></b>
+      <span class="grow"></span>
+      <button class="topbtn" id="attrEditClose">✕ Close</button>
+    </div>
+    <div class="modal-body" style="padding:16px">
+      <div class="attr-editor-info" id="attrEditInfo"></div>
+      <div class="attr-editor-grid" id="attrEditGrid"></div>
+      <div class="attr-editor-actions">
+        <button class="btn" id="attrEditCancel">Cancel</button>
+        <button class="btn accent" id="attrEditApply">✓ Apply attribute changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="layout-designer" id="layoutDesigner">
   <div class="ld-toolbar">
@@ -1718,6 +1931,136 @@ function geoJsonLayer(gj,color){var s=styleVec(color);
   var lyr=L.geoJSON(gj,{style:s.style,pointToLayer:s.pointToLayer,onEachFeature:s.onEachFeature});
   lyr._src=gj; return lyr; }
 
+/* ================= CATEGORIZED / GRADUATED SYMBOLOGY + SELECTION ENGINE ================= */
+var __svFidSeq=0;
+function ensureFids(gj){ if(!gj||!gj.features)return; gj.features.forEach(function(f){ if(!f.properties)f.properties={}; if(!f.properties.__sv_fid) f.properties.__sv_fid='F'+(++__svFidSeq); }); }
+window.__svOpState=window.__svOpState||{selectedSets:{},editMode:false};
+window.__svSelectToolOn=window.__svSelectToolOn||false;
+function svSelSet(id){ return window.__svOpState.selectedSets[id]||(window.__svOpState.selectedSets[id]={}); }
+window.__svSelectedFids=window.__svSelectedFids||function(id){ return Object.keys(svSelSet(id)); };
+window.__svPendingCells=window.__svPendingCells||{};
+function svSetSaveButtons(dirty){
+  window.__svHasUnsavedEdits=!!dirty;
+  ['attrSave','xpSaveEdit'].forEach(function(id){var b=document.getElementById(id);if(!b)return;b.disabled=!dirty;b.classList.toggle('dirty',!!dirty);b.classList.toggle('save-ready',!!dirty);});
+}
+window.__svMarkDirty=function(){svSetSaveButtons(true);};
+var SV_CAT_PALETTE=['#3B82F6','#F59E0B','#34D399','#F472B6','#A78BFA','#FB7185','#22D3EE','#4ADE80','#FCD34D','#818CF8','#F87171','#2DD4BF'];
+var SV_PCI_PALETTE={'1':'#E60000','2':'#FF8000','3':'#FFFF00','4':'#A3E048','5':'#267300'};
+function isPciField(name){ return /pci[_\s]*rating|^pci$/i.test(String(name||'')); }
+function svFeatureRawColor(f){ var p=(f&&f.properties)||{}; return p.stroke||p['marker-color']||p.fill||null; }
+/* derive one color per unique value of `field`, preferring colors already embedded in the source data (KML/ArcGIS export),
+   falling back to a PCI-style ramp for PCI-ish fields, else a qualitative palette */
+function deriveCategoryColors(L0,field){
+  var feats=(L0.geojson&&L0.geojson.features)||[], tally={}, order=[];
+  feats.forEach(function(f){
+    var v=f.properties?f.properties[field]:null; if(v==null||v==='')return; var key=String(v);
+    if(!tally[key]){tally[key]={};order.push(key);}
+    var c=svFeatureRawColor(f); if(c){ c=String(c).toLowerCase(); tally[key][c]=(tally[key][c]||0)+1; }
+  });
+  order.sort(function(a,b){ var na=parseFloat(a),nb=parseFloat(b); if(!isNaN(na)&&!isNaN(nb))return na-nb; return a.localeCompare(b); });
+  var out={}, pciLike=isPciField(field), pi=0;
+  order.forEach(function(key){
+    var colors=tally[key], best=null,bestN=0;
+    Object.keys(colors).forEach(function(c){ if(colors[c]>bestN){bestN=colors[c];best=c;} });
+    if(best) out[key]=best;
+    else if(pciLike && SV_PCI_PALETTE[key]) out[key]=SV_PCI_PALETTE[key];
+    else out[key]=SV_CAT_PALETTE[pi%SV_CAT_PALETTE.length];
+    pi++;
+  });
+  return out;
+}
+/* color for one feature given a layer's symbology mode (single / graduated / categorized / native-from-source) */
+function svColorForFeature(L0,f){
+  var mode=L0.colorMode||(L0.uniqueField?'categorized':(L0.field?'graduated':'single'));
+  if(mode==='categorized'&&L0.uniqueField){
+    var v=f.properties?f.properties[L0.uniqueField]:null; var key=(v==null||v==='')?'':String(v);
+    if(L0.catColors&&L0.catColors[key])return L0.catColors[key];
+    return '#9AA4B2';
+  }
+  if(mode==='native'){ return svFeatureRawColor(f)||L0.color||'#3B82F6'; }
+  if(mode==='graduated'&&L0.field){
+    var val=parseFloat(f.properties?f.properties[L0.field]:NaN); if(isNaN(val))return '#888888';
+    var min=L0._gMin,max=L0._gMax; if(min==null||max==null)return L0.color||'#3B82F6';
+    var t=(max===min)?.5:(val-min)/(max-min); return ramp(Math.max(0,Math.min(1,t)));
+  }
+  return L0.color||'#3B82F6';
+}
+
+function svSelectedLayerIds(){
+  return Object.keys((window.__svOpState&&window.__svOpState.selectedSets)||{}).filter(function(id){return layers[id]&&Object.keys(svSelSet(id)).length;});
+}
+function svClearAllSelections(rebuild){
+  var changed={};
+  Object.keys((window.__svOpState&&window.__svOpState.selectedSets)||{}).forEach(function(id){
+    var set=svSelSet(id); if(Object.keys(set).length){changed[id]=true;window.__svOpState.selectedSets[id]={};}
+  });
+  if(rebuild!==false)Object.keys(changed).forEach(function(id){if(layers[id])svBuildLeafletLayer(layers[id]);});
+  return changed;
+}
+function svRefreshSelectionLayers(changed){
+  Object.keys(changed||{}).forEach(function(id){if(layers[id]&&layers[id].geojson)svBuildLeafletLayer(layers[id]);});
+  try{if(curTbl)renderTable();}catch(e){}
+  try{svUpdateSelectionSummary();}catch(e){}
+}
+function svSelectionModifier(evt){
+  evt=evt||{};return {add:!!evt.shiftKey,toggle:!!(evt.ctrlKey||evt.metaKey)};
+}
+/* the single canonical function that (re)draws a layer's Leaflet representation from its geojson + symbology + selection state.
+   Used by symbology apply, undo/redo, geometry edits, select-by-attribute, and the attribute table — so every one of those
+   stays in sync instead of quietly resetting a layer back to a flat color. */
+function svBuildLeafletLayer(L0){
+  if(!L0||!L0.geojson)return;
+  ensureFids(L0.geojson);
+  if((L0.colorMode||'')==='graduated'&&L0.field){
+    var vals=L0.geojson.features.map(function(f){return parseFloat(f.properties[L0.field]);}).filter(function(v){return !isNaN(v);});
+    L0._gMin=vals.length?Math.min.apply(null,vals):0; L0._gMax=vals.length?Math.max.apply(null,vals):1;
+  }
+  var size=L0.size||6, opacity=(L0.opacity!=null?L0.opacity:1), selSet=svSelSet(L0.id);
+  try{ if(L0.leaflet)map.removeLayer(L0.leaflet); }catch(e){}
+  var nl=L.geoJSON(L0.geojson,{
+    style:function(f){ var c=svColorForFeature(L0,f), fid=String((f.properties&&f.properties.__sv_fid)||''), sel=!!selSet[fid];
+      return sel?{color:'#00E5FF',weight:5,opacity:1,fillColor:'#FACC15',fillOpacity:.72,dashArray:'6,3'}:{color:c,weight:2.5,opacity:.95,fillColor:c,fillOpacity:opacity}; },
+    pointToLayer:function(f,ll){ var c=svColorForFeature(L0,f), fid=String((f.properties&&f.properties.__sv_fid)||''), sel=!!selSet[fid];
+      return L.circleMarker(ll, sel?{radius:size+3,color:'#00E5FF',weight:4,fillColor:'#FACC15',fillOpacity:.95}:{radius:size,color:c,weight:2,fillColor:c,fillOpacity:opacity}); },
+    onEachFeature:function(f,l){ l.bindPopup(popupFromProps(f.properties));
+      l.on('click',function(e){
+        if(!window.__svSelectToolOn)return;
+        if(e.originalEvent){ try{L.DomEvent.stopPropagation(e);}catch(e2){} }
+        var fid=String((f.properties&&f.properties.__sv_fid)||''); if(!fid)return;
+        var mod=svSelectionModifier(e.originalEvent),changed={};
+        if(!mod.add&&!mod.toggle)changed=svClearAllSelections(false);
+        var set=svSelSet(L0.id);
+        if(mod.toggle){if(set[fid])delete set[fid];else set[fid]=true;}else set[fid]=true;
+        changed[L0.id]=true;
+        svRefreshSelectionLayers(changed);
+        try{ if(typeof curTbl!=='undefined'&&curTbl&&curTbl.id===L0.id)renderTable(); }catch(e3){}
+      });
+    }
+  });
+  nl._src=L0.geojson; nl.addTo(map); L0.leaflet=nl;
+  try{ if(typeof svUpdateSelectionSummary==='function')svUpdateSelectionSummary(L0); }catch(e){}
+  return nl;
+}
+/* import a KML/KMZ/GeoJSON layer, auto-detecting embedded per-feature colors (from KML Style/StyleMap) and,
+   if a PCI-rating-like field is present, symbolizing by it automatically (matching ArcGIS categorized rendering) */
+function ingestVectorLayer(gj,nice,color,name){
+  var id=addLayer(geoJsonLayer(gj,color),nice,color);
+  var L0=layers[id]; if(!L0)return id;
+  ensureFids(L0.geojson);
+  var feats=L0.geojson.features||[], hasColor=feats.some(svFeatureRawColor), keys=feats.length?Object.keys(feats[0].properties||{}):[];
+  var ratingField=keys.filter(isPciField)[0]||null;
+  if(hasColor&&ratingField){
+    L0.uniqueField=ratingField; L0.colorMode='categorized'; L0.catColors=deriveCategoryColors(L0,ratingField);
+    svBuildLeafletLayer(L0); toast('Loaded '+feats.length+' feature(s) — symbolized by '+ratingField);
+  } else if(hasColor){
+    L0.colorMode='native'; svBuildLeafletLayer(L0); toast('Loaded '+feats.length+' feature(s) with original colors');
+  } else {
+    toast('Loaded '+feats.length+' feature(s) from '+name);
+  }
+  renderLegend(); refreshDropdowns();
+  return id;
+}
+
 var layerOrder=[]; // bottom -> top draw order of layer ids
 function addLayer(leaflet,name,color,opts){
   opts=opts||{}; var id='lyr_'+(++layerSeq); leaflet.addTo(map);
@@ -1771,7 +2114,9 @@ function duplicateLayer(id){
   var gj=L0.geojson?JSON.parse(JSON.stringify(L0.geojson)):(L0.leaflet.toGeoJSON&&L0.leaflet.toGeoJSON());
   if(!gj){ toast('Nothing to duplicate',true); return; }
   var c=nextColor();
-  addLayer(geoJsonLayer(gj,c), L0.name+' (copy)', c, {zoom:false});
+  var id2=addLayer(geoJsonLayer(gj,c), L0.name+' (copy)', c, {zoom:false});
+  var L2=layers[id2];
+  if(L2&&L0.colorMode){ L2.uniqueField=L0.uniqueField||''; L2.field=L0.field||''; L2.colorMode=L0.colorMode; L2.catColors=L0.catColors?Object.assign({},L0.catColors):null; L2.size=L0.size; L2.opacity=L0.opacity; svBuildLeafletLayer(L2); renderLegend(); }
   toast('Layer duplicated');
 }
 function renameLayer(id){
@@ -1830,12 +2175,45 @@ function renderLayers(){
   });
   renderLegend();
 }
+function svFmtLen(m){ if(!m||m<=0)return '0 m'; var meters=Math.round(m).toLocaleString('en-US')+' m'; return m>=1000?(meters+' ('+(m/1000).toFixed(2)+' km)'):meters; }
+function svLengthStats(L0,field){
+  var totals={},grand=0,hasLines=false;
+  (L0.geojson&&L0.geojson.features||[]).forEach(function(f){
+    var g=f.geometry;if(!g)return;
+    if(g.type==='LineString'||g.type==='MultiLineString'){
+      hasLines=true;var len=0;try{len=turf.length(f,{units:'kilometers'})*1000;}catch(e){}
+      var v=f.properties?f.properties[field]:null,key=(v==null||v==='')?'':String(v);
+      totals[key]=(totals[key]||0)+len;grand+=len;
+    }
+  });
+  return {totals:totals,grand:grand,hasLines:hasLines};
+}
 function renderLegend(){
   var ids=Object.keys(layers).filter(function(id){return layers[id].visible;});
   if(!ids.length){legendBody.innerHTML='<div class="hint" style="margin:0">No visible layers.</div>';return;}
   legendBody.innerHTML='';
-  ids.forEach(function(id){var L0=layers[id];var d=document.createElement('div');d.className='legitem';
-    d.innerHTML='<span class="sw" style="background:'+L0.color+'"></span>'+escapeHtml(L0.name);legendBody.appendChild(d);});
+  ids.forEach(function(id){var L0=layers[id];
+    if(L0.colorMode==='categorized'&&L0.catColors&&Object.keys(L0.catColors).length){
+      var head=document.createElement('div');head.className='legitem';head.style.fontWeight='700';
+      head.innerHTML=escapeHtml(L0.name)+' <span style="font-weight:400;color:var(--ink-dim)">('+escapeHtml(L0.uniqueField)+')</span>';
+      legendBody.appendChild(head);
+      var stats=svLengthStats(L0,L0.uniqueField);
+      var keys=Object.keys(L0.catColors).sort(function(a,b){var na=parseFloat(a),nb=parseFloat(b);if(!isNaN(na)&&!isNaN(nb))return na-nb;return a.localeCompare(b);});
+      keys.forEach(function(k){var d=document.createElement('div');d.className='legitem';d.style.cssText='padding-left:16px;justify-content:space-between;gap:10px';
+        var lenTxt=stats.hasLines?'<span style="color:var(--ink-dim);font-size:10px;font-family:var(--mono);white-space:nowrap">'+svFmtLen(stats.totals[k]||0)+'</span>':'';
+        d.innerHTML='<span style="display:flex;align-items:center;gap:8px;min-width:0"><span class="sw" style="background:'+L0.catColors[k]+'"></span><span style="overflow:hidden;text-overflow:ellipsis">'+escapeHtml(k||'(blank)')+'</span></span>'+lenTxt;
+        legendBody.appendChild(d);});
+      if(stats.hasLines){
+        var tot=document.createElement('div');tot.className='legitem';
+        tot.style.cssText='padding-left:16px;justify-content:space-between;gap:10px;border-top:1px dashed var(--line);margin-top:5px;padding-top:6px;font-weight:700';
+        tot.innerHTML='<span>Total</span><span style="font-family:var(--mono);font-size:10px;white-space:nowrap">'+svFmtLen(stats.grand)+'</span>';
+        legendBody.appendChild(tot);
+      }
+    } else {
+      var d=document.createElement('div');d.className='legitem';
+      d.innerHTML='<span class="sw" style="background:'+L0.color+'"></span>'+escapeHtml(L0.name);legendBody.appendChild(d);
+    }
+  });
 }
 map.on('layeradd',function(){try{currentBase.bringToBack();}catch(e){}});
 
@@ -1866,7 +2244,7 @@ function readFile(file){
       else if(ext==='csv'){ smartTableLoad(csvRows(r.result), nice, color); return; }
       else { toast('Unsupported browser format: .'+ext,true); return; }
       if(!gj||!gj.features||!gj.features.length){toast('No features in '+name,true);return;}
-      addLayer(geoJsonLayer(gj,color),nice,color); toast('Loaded '+gj.features.length+' feature(s) from '+name);
+      ingestVectorLayer(gj,nice,color,name);
     }catch(err){toast('Could not read '+name+': '+err.message,true);}
   };
   r.readAsText(file);
@@ -1930,7 +2308,7 @@ function readKmz(file,nice,color){
       if(!k)throw new Error('no .kml inside'); return k.async('string');})
     .then(function(t){var gj=toGeoJSON.kml(new DOMParser().parseFromString(t,'text/xml'));
       if(!gj||!gj.features||!gj.features.length)throw new Error('no features');
-      addLayer(geoJsonLayer(gj,color),nice,color);toast('Loaded '+gj.features.length+' feature(s)');})
+      ingestVectorLayer(gj,nice,color,file.name);})
     .catch(function(e){toast('KMZ error: '+e.message,true);});
   };
   r.readAsArrayBuffer(file);
@@ -1961,27 +2339,52 @@ window.__svReadGeoTiff=function(file,nice,color){
 };
 
 /* ================= SELECT BY ATTRIBUTE ================= */
-var sbaState={layerId:null, lastMatches:[]};
+var sbaState={layerId:null,lastMatches:[],clauses:[],logic:'and'};
 function sbaFields(L0){
   var set={}; if(L0&&L0.geojson&&L0.geojson.features){
     L0.geojson.features.forEach(function(f){ Object.keys(f.properties||{}).forEach(function(k){ if(k.indexOf('__sv')!==0)set[k]=1; }); });
   }
   return Object.keys(set);
 }
-function openSelectByAttr(layerId){
+function svShowSbaTab(tab){
+  var isCalc=tab==='calc',sb=document.getElementById('sbaTabSelect'),cb=document.getElementById('sbaTabCalc'),sp=document.getElementById('sbaSelectPane'),cp=document.getElementById('sbaCalcPane');
+  if(sb){sb.classList.toggle('active',!isCalc);sb.setAttribute('aria-selected',String(!isCalc));}
+  if(cb){cb.classList.toggle('active',isCalc);cb.setAttribute('aria-selected',String(isCalc));}
+  if(sp)sp.classList.toggle('active',!isCalc);if(cp)cp.classList.toggle('active',isCalc);
+}
+function svClauseText(c){var val=String(c.value==null?'':c.value);return c.field+' '+c.op+' '+(isNaN(Number(val))?'\''+val.replace(/'/g,"''")+'\'':val);}
+function svCurrentSbaClause(){var f=document.getElementById('sbaField'),o=document.getElementById('sbaOp'),v=document.getElementById('sbaValue');return {field:f&&f.value||'',op:o&&o.value||'=',value:v&&v.value||''};}
+function svRenderSbaClauses(){
+  var list=document.getElementById('sbaClauseList'),p=document.getElementById('sbaExpressionPreview'),logic=document.getElementById('sbaLogic');if(logic)sbaState.logic=logic.value||'and';
+  if(list){list.innerHTML=sbaState.clauses.map(function(c,i){return '<div class="sba-clause"><span class="join">'+(i?(sbaState.logic==='and'?'AND':'OR'):'WHERE')+'</span><span class="text">'+escapeHtml(svClauseText(c))+'</span><button data-i="'+i+'" title="Remove clause">✕</button></div>';}).join('');list.querySelectorAll('button').forEach(function(b){b.onclick=function(){sbaState.clauses.splice(+b.getAttribute('data-i'),1);svRenderSbaClauses();};});}
+  if(p){var current=svCurrentSbaClause();p.textContent=sbaState.clauses.length?sbaState.clauses.map(svClauseText).join(sbaState.logic==='and'?' AND ':' OR '):svClauseText(current);}
+}
+function svRefreshSbaUniqueValues(){
+  var L0=layers[sbaState.layerId],field=document.getElementById('sbaField')&&document.getElementById('sbaField').value,dl=document.getElementById('sbaUniqueValues');if(!L0||!field||!dl)return;var vals={},arr=[];(L0.geojson.features||[]).forEach(function(f){var v=(f.properties||{})[field];if(v===null||v===undefined||String(v)==='')return;var k=String(v);if(!vals[k]&&arr.length<500){vals[k]=1;arr.push(k);}});arr.sort(function(a,b){var na=Number(a),nb=Number(b);return isFinite(na)&&isFinite(nb)?na-nb:a.localeCompare(b);});dl.innerHTML=arr.map(function(v){return '<option value="'+escapeHtml(v)+'">';}).join('');
+}
+function svAddSbaClause(){var c=svCurrentSbaClause();if(!c.field){toast('Choose a field',true);return;}sbaState.clauses.push(c);svRenderSbaClauses();var v=document.getElementById('sbaValue');if(v){v.value='';v.focus();}}
+function svUpdateSbaExpressionPreview(){svRenderSbaClauses();}
+function svClampSbaWindow(){
+  var w=document.getElementById('sbaModal');if(!w||!w.classList.contains('open'))return;var r=w.getBoundingClientRect(),left=Math.max(4,Math.min(r.left,window.innerWidth-r.width-4)),top=Math.max(56,Math.min(r.top,window.innerHeight-r.height-4));w.style.left=left+'px';w.style.top=top+'px';
+}
+function openSelectByAttr(layerId,initialTab){
   var L0=layers[layerId];
   if(!L0){ toast('Layer not found',true); return; }
   if(L0.isRaster){ toast('Select by attribute works on vector layers only',true); return; }
   if(!L0.geojson||!L0.geojson.features||!L0.geojson.features.length){ toast('This layer has no attribute features',true); return; }
-  sbaState.layerId=layerId;
-  var modal=document.getElementById('sbaModal');
-  var fields=sbaFields(L0);
+  var changedLayer=sbaState.layerId!==layerId;sbaState.layerId=layerId;
+  var tool=document.getElementById('sbaModal'),fields=sbaFields(L0);
   if(!fields.length){ toast('No attribute fields on this layer',true); return; }
   document.getElementById('sbaLayerName').textContent=L0.name;
-  var fsel=document.getElementById('sbaField'); fsel.innerHTML=fields.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('');
-  document.getElementById('sbaValue').value='';
-  document.getElementById('sbaResult').textContent='';
-  modal.classList.add('open');
+  var il=document.getElementById('sbaInputLayer'),cil=document.getElementById('sbaCalcInputLayer');if(il)il.textContent=L0.name;if(cil)cil.textContent=L0.name;
+  var fsel=document.getElementById('sbaField');fsel.innerHTML=fields.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('');
+  var dl2=document.getElementById('sbaFieldOptions');if(dl2)dl2.innerHTML=fields.map(function(f){return '<option value="'+escapeHtml(f)+'">';}).join('');
+  var cf=document.getElementById('sbaCalcField');if(cf&&(changedLayer||!cf.value))cf.value=(L0.uniqueField||fields[0]||'');
+  var ins=document.getElementById('sbaCalcInsertField');if(ins)ins.innerHTML='<option value="">— Insert field —</option>'+fields.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('');
+  if(changedLayer){sbaState.clauses=[];var v=document.getElementById('sbaValue');if(v)v.value='';var mode=document.getElementById('sbaMode');if(mode)mode.value='new';var ce=document.getElementById('sbaCalcExpr');if(ce)ce.value='';}
+  var selN=Object.keys(svSelSet(layerId)).length,res=document.getElementById('sbaResult');if(res)res.textContent=selN?(selN+' feature(s) currently selected.'):'No features currently selected.';
+  var cr=document.getElementById('sbaCalcResult');if(cr&&changedLayer)cr.textContent='';
+  svRefreshSbaUniqueValues();svShowSbaTab(initialTab||'select');svUpdateSbaExpressionPreview();tool.classList.add('open');setTimeout(svClampSbaWindow,0);
 }
 function sbaCompare(a,op,b){
   var an=parseFloat(a), bn=parseFloat(b), numeric=!isNaN(an)&&!isNaN(bn)&&String(a).trim()!==''&&String(b).trim()!=='';
@@ -2002,19 +2405,31 @@ function runSelectByAttr(){
   var field=document.getElementById('sbaField').value;
   var op=document.getElementById('sbaOp').value;
   var val=document.getElementById('sbaValue').value;
-  var matches=[];
-  L0.leaflet.eachLayer(function(ly){
-    var f=ly.feature; if(!f)return; var props=f.properties||{};
-    if(sbaCompare(props[field], op, val)){ matches.push(ly); }
-  });
-  // highlight
-  L0.leaflet.eachLayer(function(ly){ if(ly.setStyle){ try{ly.setStyle({color:L0.color,weight:2.5,fillColor:L0.color});}catch(e){} } });
-  matches.forEach(function(ly){ if(ly.setStyle){ try{ly.setStyle({color:'#FACC15',weight:4,fillColor:'#FACC15',fillOpacity:.5});}catch(e){} if(ly.bringToFront)ly.bringToFront(); } });
+  var mode=document.getElementById('sbaMode')?document.getElementById('sbaMode').value:'new';
+  ensureFids(L0.geojson);
+  var clauses=sbaState.clauses.length?sbaState.clauses:[{field:field,op:op,value:val}],logic=(document.getElementById('sbaLogic')&&document.getElementById('sbaLogic').value)||sbaState.logic||'and';sbaState.logic=logic;
+  var matchedFeats=(L0.geojson.features||[]).filter(function(f){var p=f.properties||{},tests=clauses.map(function(c){return sbaCompare(p[c.field],c.op,c.value);});return logic==='or'?tests.some(Boolean):tests.every(Boolean);});
+  var set=svSelSet(L0.id);
+  if(mode==='new'){ Object.keys(set).forEach(function(k){delete set[k];}); matchedFeats.forEach(function(f){set[String(f.properties.__sv_fid)]=true;}); }
+  else if(mode==='add'){ matchedFeats.forEach(function(f){set[String(f.properties.__sv_fid)]=true;}); }
+  else if(mode==='remove'){ matchedFeats.forEach(function(f){delete set[String(f.properties.__sv_fid)];}); }
+  else if(mode==='and'){ var keep={}; matchedFeats.forEach(function(f){var k=String(f.properties.__sv_fid);if(set[k])keep[k]=true;}); window.__svOpState.selectedSets[L0.id]=keep; set=keep; }
+  svBuildLeafletLayer(L0);
+  var matches=[]; L0.leaflet.eachLayer(function(ly){ var f=ly.feature; if(f&&set[String(f.properties&&f.properties.__sv_fid)])matches.push(ly); });
   sbaState.lastMatches=matches;
-  document.getElementById('sbaResult').textContent=matches.length+' feature(s) selected out of '+sbaFields(L0).length+' fields scanned.';
-  document.getElementById('sbaResult').textContent=matches.length+' feature(s) matched “'+field+' '+op+' '+val+'”.';
-  toast(matches.length+' feature(s) selected by attribute');
+  document.getElementById('sbaResult').textContent=Object.keys(set).length+' feature(s) selected in layer (this query matched '+matchedFeats.length+').';
+  svUpdateSelectionSummary(L0);
+  toast(Object.keys(set).length+' feature(s) selected');
+  if(typeof curTbl!=='undefined'&&curTbl&&curTbl.id===L0.id)renderTable();
   return matches;
+}
+function clearSbaSelection(){
+  var L0=layers[sbaState.layerId]; if(!L0){toast('Pick a layer first',true);return;}
+  var set=svSelSet(L0.id); Object.keys(set).forEach(function(k){delete set[k];});
+  sbaState.lastMatches=[]; svBuildLeafletLayer(L0);
+  document.getElementById('sbaResult').textContent='Selection cleared.';
+  svUpdateSelectionSummary(L0);
+  if(typeof curTbl!=='undefined'&&curTbl&&curTbl.id===L0.id)renderTable();
 }
 function sbaZoomToSelection(){
   var ms=sbaState.lastMatches; if(!ms||!ms.length){ toast('Run a selection first',true); return; }
@@ -2031,14 +2446,103 @@ function sbaExportSelection(){
   dl(JSON.stringify(tagged,null,2),'selection_'+(exKey==='wgs84'?'wgs84':proj.crs.esri)+'.geojson','application/json');
   toast('Exported '+fc.features.length+' selected feature(s) in '+proj.crs.esri+' ('+proj.crs.code+')');
 }
-/* wire the Select-by-Attribute modal */
+/* Field Calculator — ESRI-style field references, helpers, geometry values, preview and scope. */
+function sbaExprTokens(expr){ return String(expr||'').match(/\[[^\]]+\]|![^!]+!/g)||[]; }
+function sbaGeomVars(feature){
+  var t=feature&&feature.geometry&&feature.geometry.type||'',length=0,area=0,x=null,y=null;
+  try{if(t==='LineString'||t==='MultiLineString')length=turf.length(feature,{units:'kilometers'})*1000;}catch(e){}
+  try{if(t==='Polygon'||t==='MultiPolygon')area=turf.area(feature);}catch(e){}
+  try{var c=turf.centroid(feature).geometry.coordinates;x=c[0];y=c[1];}catch(e){}
+  return {LENGTH:length,AREA:area,X:x,Y:y,SHAPE_TYPE:t};
+}
+function sbaEvalExpr(expr,props,feature,rowIndex){
+  var raw=String(expr==null?'':expr).trim();
+  if(!raw)return null;
+  if(/^NULL$/i.test(raw))return null;
+  var reserved=/^(LENGTH|AREA|X|Y|SHAPE_TYPE|ROW_NUMBER)$/i.test(raw);
+  if(!reserved&&!sbaExprTokens(raw).length&&!/[()+\-*\/%<>=,]/.test(raw)&&!/^[-+]?\d+(\.\d+)?$/.test(raw)&&!/^true$|^false$/i.test(raw)&&!/^['"].*['"]$/.test(raw))return raw;
+  var e=raw.replace(/\[([^\]]+)\]/g,function(_,n){return 'GET('+JSON.stringify(n)+')';}).replace(/!([^!]+)!/g,function(_,n){return 'GET('+JSON.stringify(n)+')';});
+  var g=sbaGeomVars(feature),GET=function(name){return props&&Object.prototype.hasOwnProperty.call(props,name)?props[name]:null;};
+  var UPPER=function(v){return v==null?'':String(v).toUpperCase();},LOWER=function(v){return v==null?'':String(v).toLowerCase();},TRIM=function(v){return v==null?'':String(v).trim();};
+  var CONCAT=function(){return Array.prototype.slice.call(arguments).map(function(v){return v==null?'':String(v);}).join('');};
+  var COALESCE=function(){for(var i=0;i<arguments.length;i++){var v=arguments[i];if(v!==null&&v!==undefined&&v!=='')return v;}return null;};
+  var ROUND=function(v,d){v=Number(v);d=Number(d||0);return isFinite(v)?Math.round(v*Math.pow(10,d))/Math.pow(10,d):null;};
+  var NOW=function(){return new Date().toISOString();};
+  try{
+    var fn=new Function('GET','UPPER','LOWER','TRIM','CONCAT','COALESCE','ROUND','ABS','MIN','MAX','SQRT','NOW','LENGTH','AREA','X','Y','SHAPE_TYPE','ROW_NUMBER','"use strict";return ('+e+');');
+    return fn(GET,UPPER,LOWER,TRIM,CONCAT,COALESCE,ROUND,Math.abs,Math.min,Math.max,Math.sqrt,NOW,g.LENGTH,g.AREA,g.X,g.Y,g.SHAPE_TYPE,(rowIndex||0)+1);
+  }catch(err){throw new Error(err.message||'Invalid expression');}
+}
+function sbaCoerceValue(v,type){
+  if(v===null||v===undefined)return null;
+  if(type==='text')return String(v);
+  if(type==='number'){var n=Number(v);if(!isFinite(n))throw new Error('Result is not a valid number');return n;}
+  if(type==='integer'){var i=Number(v);if(!isFinite(i))throw new Error('Result is not a valid integer');return Math.round(i);}
+  if(type==='boolean'){if(typeof v==='boolean')return v;var s=String(v).toLowerCase();if(['true','1','yes','y'].indexOf(s)>=0)return true;if(['false','0','no','n'].indexOf(s)>=0)return false;throw new Error('Result is not a valid Boolean');}
+  if(type==='date'){var d=new Date(v);if(isNaN(d.getTime()))throw new Error('Result is not a valid date');return d.toISOString();}
+  return v;
+}
+function sbaCalcTargets(L0,scope){
+  var set=svSelSet(L0.id);
+  if(scope==='selected')return (L0.geojson.features||[]).filter(function(f){return !!set[String(f.properties&&f.properties.__sv_fid)];});
+  if(scope==='filtered'&&curTbl&&curTbl.id===L0.id)return svCurrentTableFeatures();
+  return L0.geojson.features||[];
+}
+function previewFieldCalculator(){
+  var L0=layers[sbaState.layerId];if(!L0){toast('Pick a layer first',true);return;}
+  var expr=document.getElementById('sbaCalcExpr').value,scope=document.getElementById('sbaCalcScope').value,type=document.getElementById('sbaCalcType').value,targets=sbaCalcTargets(L0,scope);
+  if(!targets.length){toast('No features in the selected scope',true);return;}
+  var rows=[];
+  try{targets.slice(0,5).forEach(function(f,i){var v=sbaCoerceValue(sbaEvalExpr(expr,f.properties||{},f,i),type);rows.push((i+1)+'. '+(v===null?'NULL':String(v)));});}
+  catch(e){document.getElementById('sbaCalcResult').textContent='Expression error: '+e.message;toast('Expression error: '+e.message,true);return;}
+  document.getElementById('sbaCalcResult').textContent='Preview ('+Math.min(5,targets.length)+' of '+targets.length+'):\n'+rows.join('\n');
+}
+function runFieldCalculator(){
+  var L0=layers[sbaState.layerId]; if(!L0){toast('Pick a layer first',true);return;}
+  var field=(document.getElementById('sbaCalcField').value||'').trim(); if(!field){toast('Enter a field name to update',true);return;}
+  var expr=document.getElementById('sbaCalcExpr').value; if(expr==null||String(expr).trim()===''){toast('Enter a value or expression',true);return;}
+  var scope=document.getElementById('sbaCalcScope').value,type=document.getElementById('sbaCalcType').value,targetFeats=sbaCalcTargets(L0,scope);
+  if(scope==='selected'&&!targetFeats.length){toast('No features selected — select records or choose another scope',true);return;}
+  if(!targetFeats.length){toast('No features to update',true);return;}
+  try{if(window.__svAdvSnapshot)window.__svAdvSnapshot();}catch(e){}
+  var updated=0,errors=[];
+  targetFeats.forEach(function(f,i){
+    if(!f.properties)f.properties={};
+    try{var v=sbaCoerceValue(sbaEvalExpr(expr,f.properties,f,i),type);f.properties[field]=v;updated++;}catch(err){if(errors.length<5)errors.push('Row '+(i+1)+': '+err.message);}
+  });
+  if(L0.uniqueField===field)L0.catColors=deriveCategoryColors(L0,field);
+  try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}
+  svBuildLeafletLayer(L0);renderLegend();refreshDropdowns();
+  if(typeof curTbl!=='undefined'&&curTbl&&curTbl.id===L0.id)renderTable();
+  document.getElementById('sbaCalcResult').textContent='Updated “'+field+'” on '+updated+' feature(s).'+(errors.length?'\nSkipped errors:\n'+errors.join('\n'):'');
+  toast('Updated '+field+' on '+updated+' feature(s)'+(errors.length?' ('+errors.length+'+ errors)':''),!!errors.length);
+}
+function svInsertAtCursor(el,value){
+  if(!el)return;var s=el.selectionStart==null?el.value.length:el.selectionStart,e=el.selectionEnd==null?s:el.selectionEnd;
+  el.value=el.value.slice(0,s)+value+el.value.slice(e);el.focus();el.selectionStart=el.selectionEnd=s+value.length;
+}
+/* wire the movable Select-by-Attribute / Field Calculator tool window */
 (function(){
-  var c=document.getElementById('sbaClose'); if(c)c.onclick=function(){document.getElementById('sbaModal').classList.remove('open');};
-  var run=document.getElementById('sbaRun'); if(run)run.onclick=runSelectByAttr;
-  var z=document.getElementById('sbaZoom'); if(z)z.onclick=sbaZoomToSelection;
-  var ex=document.getElementById('sbaExport'); if(ex)ex.onclick=sbaExportSelection;
-  var v=document.getElementById('sbaValue'); if(v)v.addEventListener('keydown',function(e){if(e.key==='Enter')runSelectByAttr();});
-  var m=document.getElementById('sbaModal'); if(m)m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});
+  var tool=document.getElementById('sbaModal'),head=document.getElementById('sbaDragHandle');
+  var c=document.getElementById('sbaClose');if(c)c.onclick=function(){tool.classList.remove('open');};
+  var reset=document.getElementById('sbaResetPosition');if(reset)reset.onclick=function(e){e.stopPropagation();tool.style.left='64px';tool.style.top='92px';tool.style.width='540px';tool.style.height='min(690px, calc(100vh - 120px))';setTimeout(svClampSbaWindow,0);};
+  var add=document.getElementById('sbaAddClause');if(add)add.onclick=svAddSbaClause;var clearExpr=document.getElementById('sbaClearClauses');if(clearExpr)clearExpr.onclick=function(){sbaState.clauses=[];svRenderSbaClauses();};var logic=document.getElementById('sbaLogic');if(logic)logic.onchange=function(){sbaState.logic=logic.value;svRenderSbaClauses();};
+  var st=document.getElementById('sbaTabSelect');if(st)st.onclick=function(){svShowSbaTab('select');};
+  var ct=document.getElementById('sbaTabCalc');if(ct)ct.onclick=function(){svShowSbaTab('calc');};
+  var run=document.getElementById('sbaRun');if(run)run.onclick=runSelectByAttr;
+  var clr=document.getElementById('sbaClear');if(clr)clr.onclick=clearSbaSelection;
+  var z=document.getElementById('sbaZoom');if(z)z.onclick=sbaZoomToSelection;
+  var ex=document.getElementById('sbaExport');if(ex)ex.onclick=sbaExportSelection;
+  var calc=document.getElementById('sbaCalcApply');if(calc)calc.onclick=runFieldCalculator;
+  var prev=document.getElementById('sbaCalcPreview');if(prev)prev.onclick=previewFieldCalculator;
+  var ib=document.getElementById('sbaCalcInsertBtn');if(ib)ib.onclick=function(){var s=document.getElementById('sbaCalcInsertField');if(s&&s.value)svInsertAtCursor(document.getElementById('sbaCalcExpr'),'['+s.value+']');};
+  var hb=document.getElementById('sbaCalcHelperBtn');if(hb)hb.onclick=function(){var s=document.getElementById('sbaCalcHelper');if(s&&s.value)svInsertAtCursor(document.getElementById('sbaCalcExpr'),s.value);};
+  ['sbaField','sbaOp','sbaValue'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener(id==='sbaValue'?'input':'change',function(){if(id==='sbaField')svRefreshSbaUniqueValues();svUpdateSbaExpressionPreview();});});
+  var v=document.getElementById('sbaValue');if(v)v.addEventListener('keydown',function(e){if(e.key==='Enter')runSelectByAttr();});
+  var dragging=false,dx=0,dy=0;
+  if(head){head.addEventListener('pointerdown',function(e){if(e.button!==0||e.target.closest('button'))return;var r=tool.getBoundingClientRect();dragging=true;dx=e.clientX-r.left;dy=e.clientY-r.top;head.setPointerCapture&&head.setPointerCapture(e.pointerId);e.preventDefault();});}
+  document.addEventListener('pointermove',function(e){if(!dragging)return;var left=Math.max(4,Math.min(e.clientX-dx,window.innerWidth-tool.offsetWidth-4)),top=Math.max(56,Math.min(e.clientY-dy,window.innerHeight-tool.offsetHeight-4));tool.style.left=left+'px';tool.style.top=top+'px';});
+  document.addEventListener('pointerup',function(){dragging=false;});window.addEventListener('resize',svClampSbaWindow);
 })();
 /* ================= PER-TOOL HELP SYSTEM ================= */
 var TOOL_HELP={
@@ -2058,7 +2562,7 @@ var TOOL_HELP={
   select:{title:'Select & Identify',body:[
     ['What it does','Inspect features and choose which ones to work with.'],
     ['Identify','Click <b>ⓘ Identify</b>, then click anywhere on the map to list every feature at that point plus the nearest address.'],
-    ['Select','Click <b>▭ Select</b>, then drag a rectangle on the map to select all features inside it. Selected features turn yellow.'],
+    ['Select','Click <b>▭ Select</b>, then drag a rectangle on the map to select all features inside it. Selected features use a prominent cyan outline with yellow fill. Shift adds to selection and Ctrl toggles features across visible feature classes.'],
     ['Select by Attribute','In the Layers panel open a layer\'s ⋯ menu and choose <b>Select by attribute</b> to select by a field value (e.g. POP &gt; 1000).'],
     ['Clear','<b>⊘ Clear</b> removes the current selection.']
   ]},
@@ -4201,45 +4705,469 @@ function refreshDropdowns(){var vs=vectorLayers();
   syncS();}
 /* attribute table */
 var drawer=document.getElementById('attrDrawer'),attrWrap=document.getElementById('attrTableWrap'),curTbl=null,sortc={key:null,dir:1};
-function openTable(id){var L0=layers[id];if(!L0||!L0.geojson){toast('No attribute data',true);return;}
-  curTbl=L0;sortc={key:null,dir:1};document.getElementById('attrTitle').textContent=L0.name;
-  document.getElementById('attrCount').textContent=L0.geojson.features.length+' rows';document.getElementById('attrFilter').value='';
-  renderTable();drawer.classList.add('open');}
-function renderTable(){if(!curTbl)return;var feats=curTbl.geojson.features.slice();
-  var filt=document.getElementById('attrFilter').value.trim().toLowerCase();var cols=fieldsOf(curTbl);
-  if(filt)feats=feats.filter(function(f){return cols.some(function(c){var v=f.properties[c];return v!=null&&String(v).toLowerCase().indexOf(filt)>=0;});});
-  if(sortc.key)feats.sort(function(a,b){var x=a.properties[sortc.key],y=b.properties[sortc.key];var nx=parseFloat(x),ny=parseFloat(y);
-    if(!isNaN(nx)&&!isNaN(ny))return (nx-ny)*sortc.dir;return String(x).localeCompare(String(y))*sortc.dir;});
-  var html='<table class="grid"><thead><tr>';cols.forEach(function(c){html+='<th data-k="'+escapeHtml(c)+'">'+escapeHtml(c)+(sortc.key===c?(sortc.dir>0?' \u25B2':' \u25BC'):'')+'</th>';});
-  html+='</tr></thead><tbody>';feats.slice(0,2000).forEach(function(f,i){html+='<tr data-i="'+i+'">';cols.forEach(function(c){var v=f.properties[c];html+='<td>'+(v==null?'':escapeHtml(v))+'</td>';});html+='</tr>';});
-  html+='</tbody></table>';attrWrap.innerHTML=html;
-  attrWrap.querySelectorAll('th').forEach(function(th){th.onclick=function(){var k=th.getAttribute('data-k');sortc.dir=(sortc.key===k)?-sortc.dir:1;sortc.key=k;renderTable();};});
-  attrWrap.querySelectorAll('tbody tr').forEach(function(tr){tr.onclick=function(){attrWrap.querySelectorAll('tr.sel').forEach(function(x){x.classList.remove('sel');});tr.classList.add('sel');
-    var f=feats[+tr.getAttribute('data-i')];try{var l=L.geoJSON(f);var b=l.getBounds();if(b.isValid())map.fitBounds(b.pad(.3));}catch(e){}};});
+var SV_SHAPE_FIELD='__sv_virtual_shape__';
+
+function svTableColumns(L0){
+  var cols=fieldsOf(L0).filter(function(c){return !/^shape$/i.test(String(c));});
+  return [SV_SHAPE_FIELD].concat(cols);
 }
+function svTableFieldLabel(field){return field===SV_SHAPE_FIELD?'SHAPE':field;}
+function svTableFieldValue(feature,field){
+  if(field===SV_SHAPE_FIELD)return feature&&feature.geometry?feature.geometry.type:'';
+  return feature&&feature.properties?feature.properties[field]:null;
+}
+function svFormatNumber(value,decimals){
+  var n=Number(value); if(!isFinite(n))return '0';
+  return n.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:decimals==null?2:decimals});
+}
+function svFormatLengthDual(m){return svFormatNumber(m,2)+' m / '+svFormatNumber(m/1000,3)+' km';}
+function svFormatAreaDual(m2){return svFormatNumber(m2,2)+' m² / '+svFormatNumber(m2/1000000,6)+' km²';}
+function svSelectedFeatures(L0){
+  if(!L0||!L0.geojson)return [];
+  var set=svSelSet(L0.id);
+  return (L0.geojson.features||[]).filter(function(f){return !!set[String(f.properties&&f.properties.__sv_fid)];});
+}
+function svSelectionMetrics(L0){
+  var feats=svSelectedFeatures(L0),m={count:feats.length,points:0,lines:0,polygons:0,other:0,lengthM:0,areaM2:0};
+  feats.forEach(function(f){
+    var g=f&&f.geometry,t=g&&g.type||'';
+    if(!g){m.other++;return;}
+    if(t==='Point'||t==='MultiPoint')m.points++;
+    else if(t==='LineString'||t==='MultiLineString'){
+      m.lines++;
+      try{if(typeof turf!=='undefined')m.lengthM+=turf.length(f,{units:'kilometers'})*1000;}catch(e){}
+    }else if(t==='Polygon'||t==='MultiPolygon'){
+      m.polygons++;
+      try{if(typeof turf!=='undefined')m.areaM2+=turf.area(f);}catch(e){}
+    }else m.other++;
+  });
+  return m;
+}
+function svSelectionText(L0){
+  var m=svSelectionMetrics(L0); if(!m.count)return '';
+  var p=[m.count+' selected'];
+  if(m.points)p.push('Points: '+m.points);
+  if(m.lines)p.push('Lines: '+m.lines+' · Length: '+svFormatLengthDual(m.lengthM));
+  if(m.polygons)p.push('Polygons: '+m.polygons+' · Area: '+svFormatAreaDual(m.areaM2));
+  if(m.other)p.push('Other: '+m.other);
+  return p.join(' · ');
+}
+function svSelectionMetricsAll(){
+  var total={count:0,points:0,lines:0,polygons:0,other:0,lengthM:0,areaM2:0,layers:[]};
+  Object.keys(layers||{}).forEach(function(id){
+    var L0=layers[id],m=svSelectionMetrics(L0);if(!m.count)return;
+    total.count+=m.count;total.points+=m.points;total.lines+=m.lines;total.polygons+=m.polygons;total.other+=m.other;total.lengthM+=m.lengthM;total.areaM2+=m.areaM2;
+    total.layers.push({id:id,name:L0.name,count:m.count});
+  });
+  return total;
+}
+function svFindSelectionLayer(preferred){
+  if(preferred&&svSelectedFeatures(preferred).length)return preferred;
+  if(curTbl&&svSelectedFeatures(curTbl).length)return curTbl;
+  var ids=svSelectedLayerIds();return ids.length?layers[ids[0]]:null;
+}
+function svUpdateSelectionSummary(){
+  var box=document.getElementById('selectionSummary'); if(!box)return;
+  var m=svSelectionMetricsAll();
+  if(!m.count){box.classList.remove('show');box.innerHTML='';return;}
+  var html='<span class="ss-title">Selected · '+m.layers.length+' feature class'+(m.layers.length===1?'':'es')+'</span>';
+  html+='<span class="ss-item">Count <b>'+m.count+'</b></span>';
+  if(m.points)html+='<span class="ss-item">Points <b>'+m.points+'</b></span>';
+  if(m.lines){html+='<span class="ss-item">Lines <b>'+m.lines+'</b></span>';html+='<span class="ss-item">Length <b>'+escapeHtml(svFormatLengthDual(m.lengthM))+'</b></span>';}
+  if(m.polygons){html+='<span class="ss-item">Polygons <b>'+m.polygons+'</b></span>';html+='<span class="ss-item">Area <b>'+escapeHtml(svFormatAreaDual(m.areaM2))+'</b></span>';}
+  if(m.other)html+='<span class="ss-item">Other <b>'+m.other+'</b></span>';
+  html+='<span class="ss-layer">'+m.layers.map(function(x){return escapeHtml(x.name)+' ('+x.count+')';}).join(' · ')+'</span>';
+  box.innerHTML=html;box.classList.add('show');
+}
+function svSetAttrCount(visibleCount){
+  if(!curTbl)return;
+  var t=visibleCount+' row'+(visibleCount===1?'':'s'),s=svSelectionText(curTbl);
+  document.getElementById('attrCount').textContent=t+(s?(' · '+s):'');
+}
+var svTableSelectedOnly=false,svTableEditMode=true,svTableAnchorFid=null;
+function svCurrentTableFeatures(){
+  if(!curTbl)return [];
+  var feats=(curTbl.geojson.features||[]).slice(),filt=document.getElementById('attrFilter').value.trim().toLowerCase(),cols=svTableColumns(curTbl),set=svSelSet(curTbl.id);
+  if(filt)feats=feats.filter(function(f){return cols.some(function(c){var v=svTableFieldValue(f,c);return v!=null&&String(v).toLowerCase().indexOf(filt)>=0;});});
+  if(svTableSelectedOnly)feats=feats.filter(function(f){return !!set[String(f.properties&&f.properties.__sv_fid)];});
+  return feats;
+}
+function svStatsSource(){
+  var selected=svSelectedFeatures(curTbl);
+  if(selected.length)return {features:selected,label:selected.length+' selected feature'+(selected.length===1?'':'s')};
+  var visible=svCurrentTableFeatures();
+  return {features:visible,label:visible.length+' visible/filtered row'+(visible.length===1?'':'s')};
+}
+function svFreqRows(values,limit){
+  var freq={};values.forEach(function(v){var k=String(v);freq[k]=(freq[k]||0)+1;});
+  return Object.keys(freq).sort(function(a,b){return freq[b]-freq[a]||a.localeCompare(b);}).slice(0,limit||10).map(function(k){return escapeHtml(k)+' ('+freq[k]+')';}).join('<br>')||'—';
+}
+function svStatRow(name,value){return '<tr><th>'+escapeHtml(name)+'</th><td>'+value+'</td></tr>';}
+function svEnsureStatsOverlay(){
+  var o=document.getElementById('attrStatsOverlay');if(o)return o;
+  o=document.createElement('div');o.id='attrStatsOverlay';o.className='attr-stats-overlay';
+  o.innerHTML='<div class="attr-stats-card"><div class="attr-stats-head"><b id="attrStatsTitle">Field Statistics</b><span></span><button id="attrStatsClose">✕ Close</button></div><div class="attr-stats-body" id="attrStatsBody"></div></div>';
+  document.body.appendChild(o);
+  document.getElementById('attrStatsClose').onclick=function(){o.classList.remove('open');};
+  o.onclick=function(e){if(e.target===o)o.classList.remove('open');};
+  return o;
+}
+function svShowFieldStats(field){
+  if(!curTbl)return;
+  var src=svStatsSource(),feats=src.features,label=svTableFieldLabel(field),rows='';
+  if(field===SV_SHAPE_FIELD){
+    var counts={},nullGeom=0,totalLength=0,totalArea=0;
+    feats.forEach(function(f){var t=f&&f.geometry&&f.geometry.type;if(!t){nullGeom++;return;}counts[t]=(counts[t]||0)+1;
+      try{if(typeof turf!=='undefined'&&(t==='LineString'||t==='MultiLineString'))totalLength+=turf.length(f,{units:'kilometers'})*1000;}catch(e){}
+      try{if(typeof turf!=='undefined'&&(t==='Polygon'||t==='MultiPolygon'))totalArea+=turf.area(f);}catch(e){}
+    });
+    rows+=svStatRow('Feature count',svFormatNumber(feats.length,0));
+    rows+=svStatRow('Null geometry',svFormatNumber(nullGeom,0));
+    rows+=svStatRow('Geometry types',Object.keys(counts).sort().map(function(k){return escapeHtml(k)+': '+counts[k];}).join('<br>')||'—');
+    rows+=svStatRow('Total line length',svFormatLengthDual(totalLength));
+    rows+=svStatRow('Total polygon area',svFormatAreaDual(totalArea));
+  }else{
+    var raw=feats.map(function(f){return svTableFieldValue(f,field);}),nonEmpty=raw.filter(function(v){return v!==null&&v!==undefined&&String(v).trim()!=='';}),nulls=raw.length-nonEmpty.length;
+    var nums=nonEmpty.map(function(v){return Number(v);}).filter(function(v){return isFinite(v);}),numeric=nonEmpty.length>0&&nums.length===nonEmpty.length;
+    var unique={};nonEmpty.forEach(function(v){unique[String(v)]=1;});
+    rows+=svStatRow('Record count',svFormatNumber(raw.length,0));
+    rows+=svStatRow('Non-null count',svFormatNumber(nonEmpty.length,0));
+    rows+=svStatRow('Null / empty',svFormatNumber(nulls,0));
+    rows+=svStatRow('Unique values',svFormatNumber(Object.keys(unique).length,0));
+    if(numeric){
+      nums.sort(function(a,b){return a-b;});
+      var sum=nums.reduce(function(a,b){return a+b;},0),mean=nums.length?sum/nums.length:0,mid=Math.floor(nums.length/2),median=nums.length%2?nums[mid]:(nums[mid-1]+nums[mid])/2;
+      var variance=nums.length?nums.reduce(function(a,b){return a+Math.pow(b-mean,2);},0)/nums.length:0;
+      rows+=svStatRow('Minimum',svFormatNumber(nums[0],6));
+      rows+=svStatRow('Maximum',svFormatNumber(nums[nums.length-1],6));
+      rows+=svStatRow('Sum',svFormatNumber(sum,6));
+      rows+=svStatRow('Mean',svFormatNumber(mean,6));
+      rows+=svStatRow('Median',svFormatNumber(median,6));
+      rows+=svStatRow('Std. deviation',svFormatNumber(Math.sqrt(variance),6));
+    }else{
+      rows+=svStatRow('Most frequent values',svFreqRows(nonEmpty,10));
+    }
+  }
+  var o=svEnsureStatsOverlay();
+  document.getElementById('attrStatsTitle').textContent='Statistics — '+label;
+  document.getElementById('attrStatsBody').innerHTML='<div class="attr-stats-scope">Scope: '+escapeHtml(src.label)+'</div><table class="attr-stats-grid">'+rows+'</table><div class="attr-stats-note">Statistics use selected records when a selection exists; otherwise they use the currently visible/filtered table rows.</div>';
+  o.classList.add('open');
+}
+function svOpenFieldCalculator(field){
+  if(!curTbl)return;
+  if(field===SV_SHAPE_FIELD){svCalculateGeometry();return;}
+  openSelectByAttr(curTbl.id,'calc');
+  var fld=document.getElementById('sbaCalcField'),scope=document.getElementById('sbaCalcScope'),expr=document.getElementById('sbaCalcExpr');
+  if(fld)fld.value=field;
+  if(scope)scope.value=svSelectedFeatures(curTbl).length?'selected':(document.getElementById('attrFilter').value?'filtered':'all');
+  setTimeout(function(){if(expr)expr.focus();},50);
+}
+function svCalculateGeometry(){
+  if(!curTbl)return;
+  var op=prompt('Calculate Geometry operation:\nTYPE = geometry type\nLENGTH_M = line length in metres\nLENGTH_KM = line length in kilometres\nAREA_M2 = polygon area in square metres\nAREA_KM2 = polygon area in square kilometres\nPERIMETER_M = polygon perimeter in metres','LENGTH_M');
+  if(!op)return;op=String(op).trim().toUpperCase();
+  var defaults={TYPE:'Shape_Type',LENGTH_M:'Shape_Length',LENGTH_KM:'Length_km',AREA_M2:'Shape_Area',AREA_KM2:'Area_km2',PERIMETER_M:'Perimeter_m'};
+  if(!defaults[op]){toast('Unsupported geometry calculation',true);return;}
+  var field=prompt('Output field name:',defaults[op]);if(!field)return;
+  var selected=svSelectedFeatures(curTbl),targets=selected.length?selected:(curTbl.geojson.features||[]),updated=0;
+  targets.forEach(function(f){var g=f.geometry,t=g&&g.type||'',v=null;
+    try{
+      if(op==='TYPE')v=t;
+      else if((op==='LENGTH_M'||op==='LENGTH_KM')&&(t==='LineString'||t==='MultiLineString')){v=turf.length(f,{units:'kilometers'});if(op==='LENGTH_M')v*=1000;}
+      else if((op==='AREA_M2'||op==='AREA_KM2')&&(t==='Polygon'||t==='MultiPolygon')){v=turf.area(f);if(op==='AREA_KM2')v/=1000000;}
+      else if(op==='PERIMETER_M'&&(t==='Polygon'||t==='MultiPolygon')){v=turf.length(turf.polygonToLine(f),{units:'kilometers'})*1000;}
+    }catch(e){v=null;}
+    if(v!==null&&v!==undefined){if(!f.properties)f.properties={};f.properties[field]=typeof v==='number'?Math.round(v*1000000)/1000000:v;updated++;}
+  });
+  try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}
+  svBuildLeafletLayer(curTbl);refreshDropdowns();renderTable();
+  toast('Calculated '+field+' for '+updated+' feature(s)'+(selected.length?' (selected only)':''));
+}
+function svEnsureFieldMenu(){
+  var m=document.getElementById('attrFieldMenu');if(m)return m;
+  m=document.createElement('div');m.id='attrFieldMenu';m.className='attr-field-menu';
+  m.innerHTML='<div class="afm-title" id="afmTitle">Field</div>'+
+    '<button data-a="asc">▲ Sort Ascending</button><button data-a="desc">▼ Sort Descending</button><button data-a="clear">↕ Clear Sort</button><div class="afm-sep"></div>'+
+    '<button data-a="stats">Σ Statistics / Summarize</button><button data-a="calc">ƒ Calculate Field / Geometry…</button><div class="afm-sep"></div><button data-a="selectall">✓ Select All Visible Rows</button><button data-a="switch">⇄ Switch Selection</button><button data-a="selected">★ Show Selected Only</button>';
+  document.body.appendChild(m);
+  document.addEventListener('click',function(){m.classList.remove('open');document.querySelectorAll('table.grid th.field-menu-active').forEach(function(th){th.classList.remove('field-menu-active');});});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){m.classList.remove('open');var o=document.getElementById('attrStatsOverlay');if(o)o.classList.remove('open');}});
+  return m;
+}
+function svOpenFieldMenu(e,field,th){
+  e.preventDefault();e.stopPropagation();
+  var m=svEnsureFieldMenu(),label=svTableFieldLabel(field);
+  document.getElementById('afmTitle').textContent=label;
+  document.querySelectorAll('table.grid th.field-menu-active').forEach(function(x){x.classList.remove('field-menu-active');});th.classList.add('field-menu-active');
+  m.querySelector('[data-a="calc"]').textContent=field===SV_SHAPE_FIELD?'⌗ Calculate Geometry…':'ƒ Calculate Field…';
+  m.querySelectorAll('button').forEach(function(b){b.onclick=function(ev){ev.stopPropagation();var a=b.getAttribute('data-a');m.classList.remove('open');th.classList.remove('field-menu-active');
+    if(a==='asc'){sortc.key=field;sortc.dir=1;renderTable();}
+    else if(a==='desc'){sortc.key=field;sortc.dir=-1;renderTable();}
+    else if(a==='clear'){sortc={key:null,dir:1};renderTable();}
+    else if(a==='stats')svShowFieldStats(field);
+    else if(a==='calc')svOpenFieldCalculator(field);
+    else if(a==='selectall')svSelectAllVisibleRows();
+    else if(a==='switch')svSwitchSelection(curTbl.id);
+    else if(a==='selected')svToggleSelectedOnly();
+  };});
+  m.classList.add('open');
+  var r=m.getBoundingClientRect(),x=Math.min(e.clientX,window.innerWidth-r.width-8),y=Math.min(e.clientY,window.innerHeight-r.height-8);
+  m.style.left=Math.max(8,x)+'px';m.style.top=Math.max(8,y)+'px';
+}
+
+function svFillTableLayerSelect(){
+  var sel=document.getElementById('attrLayerSelect');if(!sel)return;var prev=curTbl&&curTbl.id||sel.value;
+  sel.innerHTML=Object.keys(layers||{}).filter(function(id){return layers[id]&&layers[id].geojson;}).map(function(id){return '<option value="'+escapeHtml(id)+'">'+escapeHtml(layers[id].name)+'</option>';}).join('');
+  if(prev&&layers[prev])sel.value=prev;
+}
+function svSelectAllVisibleRows(){
+  if(!curTbl)return;var set=svSelSet(curTbl.id),feats=svCurrentTableFeatures();Object.keys(set).forEach(function(k){delete set[k];});
+  feats.forEach(function(f){set[String(f.properties&&f.properties.__sv_fid)]=true;});svBuildLeafletLayer(curTbl);renderTable();toast(feats.length+' visible row(s) selected');
+}
+function svSwitchSelection(layerId){
+  var L0=layers[layerId]||curTbl;if(!L0||!L0.geojson)return;ensureFids(L0.geojson);var set=svSelSet(L0.id),next={};
+  (L0.geojson.features||[]).forEach(function(f){var fid=String(f.properties&&f.properties.__sv_fid);if(!set[fid])next[fid]=true;});window.__svOpState.selectedSets[L0.id]=next;
+  svBuildLeafletLayer(L0);if(curTbl&&curTbl.id===L0.id)renderTable();toast(Object.keys(next).length+' feature(s) selected after switch');
+}
+function svClearLayerSelection(layerId){
+  var L0=layers[layerId]||curTbl;if(!L0)return;window.__svOpState.selectedSets[L0.id]={};svBuildLeafletLayer(L0);if(curTbl&&curTbl.id===L0.id)renderTable();svUpdateSelectionSummary();
+}
+function svToggleSelectedOnly(force){
+  svTableSelectedOnly=typeof force==='boolean'?force:!svTableSelectedOnly;var b=document.getElementById('attrShowSel');if(b)b.classList.toggle('active',svTableSelectedOnly);
+  var xb=document.getElementById('xpShowSel');if(xb)xb.classList.toggle('active',svTableSelectedOnly);if(curTbl)renderTable();
+}
+function svSyncRenderedTableSelection(){
+  if(!curTbl||!attrWrap)return;var set=svSelSet(curTbl.id),visible=0;
+  Array.prototype.forEach.call(attrWrap.querySelectorAll('tbody tr[data-fid]'),function(r){
+    var selected=!!set[r.getAttribute('data-fid')];r.classList.toggle('sel',selected);
+    r.style.display=(svTableSelectedOnly&&!selected)?'none':'';if(r.style.display!=='none')visible++;
+  });
+  svSetAttrCount(visible);try{svUpdateSelectionSummary();}catch(e){}
+}
+function svSetTableEditMode(){svTableEditMode=true;if(curTbl)renderTable();toast('Double-click any attribute value in the table to edit it');}
+function svParseCellValue(raw,old){
+  if(raw===null||raw===undefined||raw==='NULL')return null;if(typeof old==='number'){var n=Number(raw);return isFinite(n)?n:raw;}if(typeof old==='boolean'){return /^(true|1|yes)$/i.test(raw);}return raw;
+}
+function svValuesEqual(a,b){if(a===b)return true;if((a===null||a===undefined||a==='')&&(b===null||b===undefined||b===''))return true;if(typeof a==='number'||typeof b==='number'){var na=Number(a),nb=Number(b);if(isFinite(na)&&isFinite(nb))return na===nb;}return String(a)===String(b);}
+function svPendingCellKey(layerId,feature,field){return String(layerId)+'|'+String(feature&&feature.properties&&feature.properties.__sv_fid||'')+'|'+String(field);}
+function svBeginCellEdit(td,feature,field){
+  if(field===SV_SHAPE_FIELD||td.classList.contains('attr-editing'))return;var old=svTableFieldValue(feature,field),input=document.createElement('input');input.type='text';input.value=old==null?'':String(old);
+  td.classList.add('attr-editing');td.innerHTML='';td.appendChild(input);input.focus();input.select();var done=false;
+  function finish(save){if(done)return;done=true;var shown=old,changed=false;if(save){var next=svParseCellValue(input.value,old);shown=next;if(!svValuesEqual(next,old)){changed=true;try{if(window.__svAdvSnapshot)window.__svAdvSnapshot();}catch(e){}if(!feature.properties)feature.properties={};feature.properties[field]=next;window.__svPendingCells[svPendingCellKey(curTbl.id,feature,field)]=true;try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}if(curTbl.uniqueField===field)curTbl.catColors=deriveCategoryColors(curTbl,field);svBuildLeafletLayer(curTbl);toast(field+' updated — click Save to commit');}}
+    td.classList.remove('attr-editing');if(changed||window.__svPendingCells[svPendingCellKey(curTbl.id,feature,field)])td.classList.add('attr-pending');td.textContent=shown==null?'':String(shown);
+  }
+  input.onkeydown=function(e){e.stopPropagation();if(e.key==='Enter'){e.preventDefault();finish(true);}else if(e.key==='Escape'){e.preventDefault();finish(false);}};input.onblur=function(){finish(true);};input.onclick=function(e){e.stopPropagation();};
+}
+function svOpenAttributeEditor(){
+  if(!curTbl){toast('Open an attribute table first',true);return;}var feats=svSelectedFeatures(curTbl);if(!feats.length){toast('Select one or more records first',true);return;}
+  var fields=fieldsOf(curTbl).filter(function(f){return String(f).indexOf('__sv')!==0&&f!==SV_SHAPE_FIELD;}),grid=document.getElementById('attrEditGrid');
+  document.getElementById('attrEditLayerName').textContent=curTbl.name;document.getElementById('attrEditInfo').textContent=feats.length+' selected feature(s). For multiple records, only fields you change will be applied to all selected records.';
+  var html='<div class="ae-head">Field</div><div class="ae-head">Value</div><div class="ae-head">Set NULL</div>';
+  fields.forEach(function(field){var first=(feats[0].properties||{})[field],same=feats.every(function(f){return String((f.properties||{})[field])===String(first);});
+    html+='<label title="'+escapeHtml(field)+'">'+escapeHtml(field)+'</label><input type="text" data-field="'+escapeHtml(field)+'" data-changed="0" class="'+(!same?'mixed':'')+'" value="'+(same&&first!=null?escapeHtml(first):'')+'" placeholder="'+(!same?'&lt;multiple values&gt;':'')+'"/><label class="ae-null"><input type="checkbox" data-null="'+escapeHtml(field)+'"/> NULL</label>';});
+  grid.innerHTML=html;grid.querySelectorAll('input[type=text]').forEach(function(inp){inp.oninput=function(){inp.setAttribute('data-changed','1');inp.classList.remove('mixed');};});
+  grid.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.onchange=function(){var inp=grid.querySelector('input[data-field="'+CSS.escape(cb.getAttribute('data-null'))+'"]');if(inp){inp.setAttribute('data-changed','1');inp.disabled=cb.checked;}};});
+  document.getElementById('attrEditModal').classList.add('open');
+}
+function svApplyAttributeEditor(){
+  if(!curTbl)return;var feats=svSelectedFeatures(curTbl),grid=document.getElementById('attrEditGrid'),changes=[];
+  grid.querySelectorAll('input[data-field]').forEach(function(inp){if(inp.getAttribute('data-changed')!=='1')return;var field=inp.getAttribute('data-field'),cb=grid.querySelector('input[data-null="'+CSS.escape(field)+'"]');changes.push({field:field,value:cb&&cb.checked?null:inp.value});});
+  if(!changes.length){toast('No attribute changes entered',true);return;}try{if(window.__svAdvSnapshot)window.__svAdvSnapshot();}catch(e){}
+  feats.forEach(function(f){if(!f.properties)f.properties={};changes.forEach(function(ch){f.properties[ch.field]=svParseCellValue(ch.value,f.properties[ch.field]);});});
+  try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}changes.forEach(function(ch){if(curTbl.uniqueField===ch.field)curTbl.catColors=deriveCategoryColors(curTbl,ch.field);});
+  svBuildLeafletLayer(curTbl);renderTable();document.getElementById('attrEditModal').classList.remove('open');toast('Updated '+changes.length+' field(s) on '+feats.length+' selected feature(s)');
+}
+function svSetActiveTableLayer(){
+  if(!curTbl)return;var xp=document.getElementById('xpActiveLayer');if(xp){xp.value=curTbl.id;xp.dispatchEvent(new Event('change'));}
+}
+function svEditGeometryFromTable(){
+  if(!curTbl)return;var n=svSelectedFeatures(curTbl).length;if(n!==1){toast('Select exactly one feature to edit its geometry',true);return;}svSetActiveTableLayer();
+  if(!window.__svOpState.editMode){var e=document.getElementById('xpStartEdit');if(e)e.click();}var b=document.getElementById('xpEditShape');if(b)b.click();
+}
+function svCommitActiveGeometryEdit(){
+  var target=window.__svEditingLayer;if(!target)return false;try{target.editing.disable();}catch(e){}window.__svEditingLayer=null;
+  try{var gj=target.toGeoJSON();if(target.feature)target.feature.geometry=gj.geometry;}catch(e){}try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}
+  var fid=String(target.feature&&target.feature.properties&&target.feature.properties.__sv_fid||''),owner=null;
+  Object.keys(layers||{}).some(function(id){var L0=layers[id];if(!L0||!L0.geojson)return false;var hit=(L0.geojson.features||[]).some(function(f){return String(f.properties&&f.properties.__sv_fid||'')===fid;});if(hit){owner=L0;return true;}return false;});
+  if(owner)svBuildLeafletLayer(owner);else if(curTbl)svBuildLeafletLayer(curTbl);return true;
+}
+function svSaveTableEdits(){
+  if(!window.__svHasUnsavedEdits&&!window.__svEditingLayer){toast('No unsaved edits');return;}
+  svCommitActiveGeometryEdit();try{var pack=window.__svPackageProject?window.__svPackageProject():null;if(!pack){toast('Save not available',true);return;}localStorage.setItem('SpatialViewUltimateProject',JSON.stringify(pack));window.__svPendingCells={};svSetSaveButtons(false);if(curTbl)renderTable();toast('Edits saved to browser memory');}catch(e){toast('Could not save: '+e.message,true);}
+}
+function svOpenCalculatorForCurrent(){
+  if(!curTbl)return;openSelectByAttr(curTbl.id,'calc');var scope=document.getElementById('sbaCalcScope');if(scope)scope.value=svSelectedFeatures(curTbl).length?'selected':(document.getElementById('attrFilter').value?'filtered':'all');
+  setTimeout(function(){var el=document.getElementById('sbaCalcField');if(el)el.focus();},40);
+}
+function openTable(id){var L0=layers[id];if(!L0||!L0.geojson){toast('No attribute data',true);return;}
+  ensureFids(L0.geojson);curTbl=L0;sortc={key:null,dir:1};svTableAnchorFid=null;document.getElementById('attrTitle').textContent=L0.name;
+  document.getElementById('attrFilter').value='';svFillTableLayerSelect();renderTable();drawer.classList.add('open');svUpdateSelectionSummary();
+  setTimeout(function(){if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();},30);}
+function renderTable(){if(!curTbl)return;var feats=svCurrentTableFeatures(),cols=svTableColumns(curTbl);
+  if(sortc.key)feats.sort(function(a,b){var x=svTableFieldValue(a,sortc.key),y=svTableFieldValue(b,sortc.key),nx=parseFloat(x),ny=parseFloat(y);if(!isNaN(nx)&&!isNaN(ny))return (nx-ny)*sortc.dir;return String(x==null?'':x).localeCompare(String(y==null?'':y))*sortc.dir;});
+  var selSet=svSelSet(curTbl.id);svSetAttrCount(feats.length);var showBtn=document.getElementById('attrShowSel');if(showBtn)showBtn.classList.toggle('active',svTableSelectedOnly);
+  if(svTableSelectedOnly&&!feats.length){attrWrap.innerHTML='<div class="attr-empty-selected">No selected records in this feature class.</div>';if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();return;}
+  var html='<table class="grid"><thead><tr>';cols.forEach(function(c){var label=svTableFieldLabel(c);html+='<th data-k="'+escapeHtml(c)+'" title="Left-click to sort · Right-click for field tools">'+escapeHtml(label)+(sortc.key===c?(sortc.dir>0?' ▲':' ▼'):'')+'</th>';});
+  html+='</tr></thead><tbody>';feats.slice(0,2000).forEach(function(f,i){var fid=String((f.properties&&f.properties.__sv_fid)||'');html+='<tr data-i="'+i+'" data-fid="'+escapeHtml(fid)+'" class="'+(selSet[fid]?'sel':'')+'">';
+    cols.forEach(function(c){var v=svTableFieldValue(f,c),editable=c!==SV_SHAPE_FIELD,pending=editable&&window.__svPendingCells[svPendingCellKey(curTbl.id,f,c)];html+='<td data-k="'+escapeHtml(c)+'" title="'+(editable?'Double-click to edit':'Use Edit Geometry for SHAPE')+'" class="'+(editable?'attr-editable ':'')+(pending?'attr-pending':'')+'">'+(v==null?'':escapeHtml(v))+'</td>';});html+='</tr>';});
+  html+='</tbody></table>';attrWrap.innerHTML=html;
+  attrWrap.querySelectorAll('th').forEach(function(th){th.onclick=function(){var k=th.getAttribute('data-k');sortc.dir=(sortc.key===k)?-sortc.dir:1;sortc.key=k;renderTable();};th.oncontextmenu=function(e){svOpenFieldMenu(e,th.getAttribute('data-k'),th);};});
+  var rows=Array.prototype.slice.call(attrWrap.querySelectorAll('tbody tr'));
+  rows.forEach(function(tr,idx){var feature=feats[idx];
+    tr.onclick=function(e){
+      if((e.target&&e.target.tagName==='INPUT')||e.detail>1)return;
+      var fid=tr.getAttribute('data-fid'),mod=svSelectionModifier(e),changed={};
+      if(e.shiftKey&&svTableAnchorFid){var anchor=rows.findIndex(function(r){return r.getAttribute('data-fid')===svTableAnchorFid;});if(anchor<0)anchor=idx;var lo=Math.min(anchor,idx),hi=Math.max(anchor,idx);for(var k=lo;k<=hi;k++)selSet[rows[k].getAttribute('data-fid')]=true;}
+      else if(mod.toggle){if(selSet[fid])delete selSet[fid];else selSet[fid]=true;}
+      else{changed=svClearAllSelections(false);selSet=svSelSet(curTbl.id);selSet[fid]=true;try{var l=L.geoJSON(feature),b=l.getBounds();if(b.isValid())map.fitBounds(b.pad(.3));}catch(e2){}}
+      changed[curTbl.id]=true;svTableAnchorFid=fid;
+      Object.keys(changed).forEach(function(id){if(layers[id]&&layers[id].geojson)svBuildLeafletLayer(layers[id]);});
+      svSyncRenderedTableSelection();
+    };
+  });
+  svUpdateSelectionSummary();if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();
+}
+attrWrap.addEventListener('dblclick',function(e){
+  var td=e.target&&e.target.closest?e.target.closest('td.attr-editable'):null;if(!td||!attrWrap.contains(td)||!curTbl)return;
+  var tr=td.closest('tr[data-fid]');if(!tr)return;e.preventDefault();e.stopPropagation();
+  var fid=tr.getAttribute('data-fid'),feature=(curTbl.geojson.features||[]).find(function(f){return String(f.properties&&f.properties.__sv_fid||'')===fid;});
+  if(feature)svBeginCellEdit(td,feature,td.getAttribute('data-k'));
+});
 document.getElementById('attrFilter').oninput=renderTable;
 document.getElementById('attrClose').onclick=function(){drawer.classList.remove('open');};
-document.getElementById('attrZoomSel').onclick=function(){var s=attrWrap.querySelector('tr.sel');if(s)s.click();};
+document.getElementById('attrLayerSelect').onchange=function(){if(this.value)openTable(this.value);};
+document.getElementById('attrSelectAll').onclick=svSelectAllVisibleRows;
+document.getElementById('attrSwitchSel').onclick=function(){if(curTbl)svSwitchSelection(curTbl.id);};
+document.getElementById('attrShowSel').onclick=function(){svToggleSelectedOnly();};
+document.getElementById('attrClearSel').onclick=function(){if(curTbl)svClearLayerSelection(curTbl.id);};
+document.getElementById('attrSelByAttr').onclick=function(){if(curTbl)openSelectByAttr(curTbl.id,'select');else toast('Open a table first',true);};
+document.getElementById('attrFieldCalc').onclick=svOpenCalculatorForCurrent;
+document.getElementById('attrEditAttrs').onclick=function(){svSetTableEditMode(true);};
+document.getElementById('attrEditGeom').onclick=svEditGeometryFromTable;
+document.getElementById('attrSave').onclick=svSaveTableEdits;
+document.getElementById('attrZoomSel').onclick=function(){
+  if(!curTbl)return;var selSet=svSelSet(curTbl.id),fids=Object.keys(selSet);if(!fids.length){toast('No rows selected',true);return;}var feats=(curTbl.geojson.features||[]).filter(function(f){return selSet[String(f.properties&&f.properties.__sv_fid)];});
+  try{var l=L.geoJSON({type:'FeatureCollection',features:feats}),b=l.getBounds();if(b.isValid())map.fitBounds(b.pad(.2));}catch(e){toast('Cannot zoom to this selection',true);}
+};
+(function(){
+  var modal=document.getElementById('attrEditModal');if(!modal)return;var close=function(){modal.classList.remove('open');};var c=document.getElementById('attrEditClose'),x=document.getElementById('attrEditCancel'),a=document.getElementById('attrEditApply');if(c)c.onclick=close;if(x)x.onclick=close;if(a)a.onclick=svApplyAttributeEditor;modal.onclick=function(e){if(e.target===modal)close();};
+})();
+svSetSaveButtons(false);
+/* persistent bottom horizontal scrollbar for the attribute table — lets you page left/right across wide tables (e.g. KML style columns) */
+(function(){
+  var wrap=document.getElementById('attrTableWrap'),track=document.getElementById('attrHScrollTrack'),thumb=document.getElementById('attrHScrollThumb'),
+      lBtn=document.getElementById('attrScrollL'),rBtn=document.getElementById('attrScrollR');
+  if(!wrap||!track||!thumb)return;
+  function syncThumb(){
+    var sw=wrap.scrollWidth,cw=wrap.clientWidth;
+    if(sw<=cw){thumb.style.width='100%';thumb.style.left='0';return;}
+    var tw=track.clientWidth,ratio=cw/sw,thumbW=Math.max(30,tw*ratio),maxLeft=tw-thumbW;
+    var pos=maxLeft*(wrap.scrollLeft/(sw-cw));
+    thumb.style.width=thumbW+'px';thumb.style.left=pos+'px';
+  }
+  wrap.addEventListener('scroll',syncThumb);
+  window.addEventListener('resize',syncThumb);
+  var dragging=false,dragX=0,dragLeft=0;
+  thumb.addEventListener('mousedown',function(e){dragging=true;dragX=e.clientX;dragLeft=wrap.scrollLeft;e.preventDefault();});
+  document.addEventListener('mousemove',function(e){if(!dragging)return;
+    var sw=wrap.scrollWidth,cw=wrap.clientWidth,tw=track.clientWidth,thumbW=Math.max(30,tw*(cw/sw)),span=Math.max(1,tw-thumbW);
+    wrap.scrollLeft=dragLeft+(e.clientX-dragX)*((sw-cw)/span);});
+  document.addEventListener('mouseup',function(){dragging=false;});
+  track.addEventListener('click',function(e){if(e.target===thumb)return;var r=track.getBoundingClientRect(),pct=(e.clientX-r.left)/r.width;wrap.scrollLeft=(wrap.scrollWidth-wrap.clientWidth)*pct;});
+  if(lBtn)lBtn.onclick=function(){wrap.scrollLeft-=160;};
+  if(rBtn)rBtn.onclick=function(){wrap.scrollLeft+=160;};
+  window.__svSyncAttrScroll=syncThumb;
+})();
 /* symbology */
-function syncS(){var L0=layers[document.getElementById('sLayer').value];var f=document.getElementById('sField');
-  if(L0&&L0.geojson){fillSel(f,numericFields(L0),function(x){return x;},function(x){return x;},'\u2014 none (single color) \u2014');
-    if(L0.color&&L0.color[0]==='#')document.getElementById('sColor').value=L0.color;document.getElementById('sSize').value=L0.size||6;
-    document.getElementById('sOpacity').value=L0.opacity||.8;document.getElementById('sOpV').textContent=(L0.opacity||.8).toFixed(2);}}
-document.getElementById('sLayer').onchange=syncS;
-document.getElementById('sOpacity').oninput=function(){document.getElementById('sOpV').textContent=(+this.value).toFixed(2);};
 function ramp(t){var a=[59,130,246],b=[34,211,238];return 'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')';}
-document.getElementById('sApply').onclick=function(){var L0=layers[document.getElementById('sLayer').value];if(!L0||!L0.geojson){toast('Pick a layer',true);return;}
-  var color=document.getElementById('sColor').value,size=+document.getElementById('sSize').value||6,opacity=+document.getElementById('sOpacity').value,field=document.getElementById('sField').value;
-  L0.color=color;L0.size=size;L0.opacity=opacity;L0.field=field;var min,max;
-  if(field){var vals=L0.geojson.features.map(function(f){return parseFloat(f.properties[field]);}).filter(function(v){return !isNaN(v);});
+function syncSMode(){
+  var m=document.getElementById('sMode').value;
+  document.getElementById('sSingleRow').style.display=(m==='single')?'flex':'none';
+  document.getElementById('sGradField').style.display=(m==='graduated')?'block':'none';
+  document.getElementById('sCatFieldWrap').style.display=(m==='categorized')?'block':'none';
+}
+function renderCatList(L0,field){
+  var colors=(L0.uniqueField===field&&L0.catColors)?L0.catColors:deriveCategoryColors(L0,field);
+  var keys=Object.keys(colors).sort(function(a,b){var na=parseFloat(a),nb=parseFloat(b);if(!isNaN(na)&&!isNaN(nb))return na-nb;return a.localeCompare(b);});
+  var host=document.getElementById('sCatList');host.innerHTML='';
+  keys.forEach(function(k){
+    var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;font-size:12px';
+    row.innerHTML='<input type="color" value="'+colors[k]+'" data-k="'+escapeHtml(k)+'" style="width:30px;height:26px;border:1px solid var(--line);border-radius:6px;background:transparent;padding:0;cursor:pointer"/><span style="flex:1">'+escapeHtml(k)+'</span>';
+    host.appendChild(row);
+  });
+  host.dataset.field=field;
+}
+function syncS(){var L0=layers[document.getElementById('sLayer').value];var f=document.getElementById('sField'),cf=document.getElementById('sCatField');
+  if(L0&&L0.geojson){
+    fillSel(f,numericFields(L0),function(x){return x;},function(x){return x;},'\u2014 none (single color) \u2014');
+    fillSel(cf,fieldsOf(L0),function(x){return x;},function(x){return x;},'\u2014 choose field \u2014');
+    if(L0.color&&L0.color[0]==='#')document.getElementById('sColor').value=L0.color;
+    document.getElementById('sSize').value=L0.size||6;
+    var op=(L0.opacity!=null?L0.opacity:.8);
+    document.getElementById('sOpacity').value=op;document.getElementById('sOpV').textContent=(+op).toFixed(2);
+    var mode=L0.colorMode||(L0.uniqueField?'categorized':(L0.field?'graduated':'single'));
+    document.getElementById('sMode').value=mode;
+    if(L0.field)f.value=L0.field;
+    if(L0.uniqueField)cf.value=L0.uniqueField;
+    syncSMode();
+    if(mode==='categorized'&&L0.uniqueField)renderCatList(L0,L0.uniqueField); else document.getElementById('sCatList').innerHTML='';
+    /* labels state for this layer */
+    var lf=document.getElementById('sLabelField');
+    fillSel(lf,fieldsOf(L0).filter(function(k){return k.indexOf('__sv')!==0;}),function(x){return x;},function(x){return x;},'\u2014 choose field \u2014');
+    var ls=L0.advLabelStyle||null;
+    document.getElementById('sLabelOn').checked=!!(ls&&ls.field);
+    document.getElementById('sLabelOpts').style.display=(ls&&ls.field)?'block':'none';
+    if(ls){ if(ls.field)lf.value=ls.field; document.getElementById('sLabelSize').value=ls.size||11;
+      document.getElementById('sLabelColor').value=(ls.color&&ls.color[0]==='#')?ls.color:'#ffffff';
+      document.getElementById('sLabelHalo').value=(ls.halo&&ls.halo[0]==='#')?ls.halo:'#000000'; }
+  }}
+document.getElementById('sLayer').onchange=syncS;
+document.getElementById('sLabelOn').onchange=function(){
+  var L0=layers[document.getElementById('sLayer').value];
+  document.getElementById('sLabelOpts').style.display=this.checked?'block':'none';
+  if(!this.checked&&L0){
+    if(window.__svClearLabels)window.__svClearLabels(L0);
+    toast('Labels off for '+L0.name);
+  } else if(this.checked&&L0){
+    var lf=document.getElementById('sLabelField');
+    if(!lf.value&&lf.options.length>1)lf.value=lf.options[1].value;
+  }
+};
+document.getElementById('sLabelApply').onclick=function(){
+  var L0=layers[document.getElementById('sLayer').value]; if(!L0||!L0.geojson){toast('Pick a layer',true);return;}
+  var field=document.getElementById('sLabelField').value; if(!field){toast('Choose a label field',true);return;}
+  L0.advLabelStyle={field:field,size:parseFloat(document.getElementById('sLabelSize').value)||11,
+    color:document.getElementById('sLabelColor').value||'#FFFFFF',halo:document.getElementById('sLabelHalo').value||'#000000'};
+  if(window.__svApplyLabels)window.__svApplyLabels(L0);
+  toast('Labels on: '+field);
+};
+document.getElementById('sMode').onchange=function(){
+  syncSMode();
+  var L0=layers[document.getElementById('sLayer').value],m=document.getElementById('sMode').value,cf=document.getElementById('sCatField');
+  if(L0&&m==='categorized'){ if(!cf.value&&cf.options[1])cf.value=cf.options[1].value; if(cf.value)renderCatList(L0,cf.value); }
+};
+document.getElementById('sCatField').onchange=function(){var L0=layers[document.getElementById('sLayer').value];if(L0&&this.value)renderCatList(L0,this.value);else document.getElementById('sCatList').innerHTML='';};
+document.getElementById('sOpacity').oninput=function(){document.getElementById('sOpV').textContent=(+this.value).toFixed(2);};
+document.getElementById('sApply').onclick=function(){
+  var L0=layers[document.getElementById('sLayer').value];if(!L0||!L0.geojson){toast('Pick a layer',true);return;}
+  var mode=document.getElementById('sMode').value;
+  var color=document.getElementById('sColor').value,size=+document.getElementById('sSize').value||6,opacity=+document.getElementById('sOpacity').value;
+  L0.color=color;L0.size=size;L0.opacity=opacity;
+  if(mode==='single'){ L0.colorMode='single'; L0.field=''; L0.uniqueField=''; }
+  else if(mode==='graduated'){
+    var field=document.getElementById('sField').value; if(!field){toast('Choose a numeric field',true);return;}
+    var vals=L0.geojson.features.map(function(f){return parseFloat(f.properties[field]);}).filter(function(v){return !isNaN(v);});
     if(!vals.length){toast('Selected field has no numeric values',true);return;}
-    min=Math.min.apply(null,vals);max=Math.max.apply(null,vals);}
-  function cf(f){if(!field)return color;var v=parseFloat(f.properties[field]);if(isNaN(v))return '#888';var t=(max===min)?.5:(v-min)/(max-min);return ramp(t);}
-  map.removeLayer(L0.leaflet);
-  var nl=L.geoJSON(L0.geojson,{style:function(f){var c=cf(f);return{color:c,weight:2.5,fillColor:c,fillOpacity:opacity};},
-    pointToLayer:function(f,ll){var c=cf(f);return L.circleMarker(ll,{radius:size,color:c,weight:2,fillColor:c,fillOpacity:opacity});},
-    onEachFeature:function(f,l){l.bindPopup(popupFromProps(f.properties));}});
-  nl._src=L0.geojson;nl.addTo(map);L0.leaflet=nl;renderLayers();toast('Symbology applied'+(field?(' (by '+field+')'):''));};
+    L0.colorMode='graduated';L0.field=field;L0.uniqueField='';
+  } else if(mode==='categorized'){
+    var cfield=document.getElementById('sCatField').value; if(!cfield){toast('Choose a category field',true);return;}
+    var colors={};document.querySelectorAll('#sCatList input[type=color]').forEach(function(inp){colors[inp.getAttribute('data-k')]=inp.value;});
+    if(!Object.keys(colors).length)colors=deriveCategoryColors(L0,cfield);
+    L0.colorMode='categorized';L0.uniqueField=cfield;L0.field='';L0.catColors=colors;
+  }
+  svBuildLeafletLayer(L0);renderLayers();renderLegend();
+  toast('Symbology applied'+(mode==='graduated'?(' (by '+L0.field+')'):(mode==='categorized'?(' (by '+L0.uniqueField+')'):'')));
+};
 /* identify */
 var identifyOn=false;
 document.getElementById('identifyToggle').onclick=function(){identifyOn=!identifyOn;
@@ -4303,6 +5231,36 @@ document.getElementById('layTitle').oninput=function(){
   mapTitleEl.style.display=this.value.trim()?'':'none';
 };
 document.getElementById('legendToggle').onclick=function(){document.getElementById('legendBox').classList.toggle('collapsed');this.textContent=document.getElementById('legendBox').classList.contains('collapsed')?'▸':'▾';};
+/* free-drag the legend anywhere over the map view */
+(function(){
+  var box=document.getElementById('legendBox'); if(!box)return;
+  var head=box.querySelector('.lh'); if(!head)return;
+  var drag=null;
+  function host(){ return box.offsetParent||document.body; }
+  head.addEventListener('mousedown',function(e){
+    if(e.target.tagName==='BUTTON')return;
+    var hr=host().getBoundingClientRect(), br=box.getBoundingClientRect();
+    drag={dx:e.clientX-br.left,dy:e.clientY-br.top};
+    box.style.left=(br.left-hr.left)+'px'; box.style.top=(br.top-hr.top)+'px';
+    box.style.right='auto'; box.style.bottom='auto';
+    box.classList.add('dragging');
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!drag)return; var hr=host().getBoundingClientRect();
+    var x=e.clientX-hr.left-drag.dx, y=e.clientY-hr.top-drag.dy;
+    x=Math.max(2,Math.min(hr.width-46,x)); y=Math.max(2,Math.min(hr.height-30,y));
+    box.style.left=x+'px'; box.style.top=y+'px';
+  });
+  document.addEventListener('mouseup',function(){
+    if(!drag)return; drag=null; box.classList.remove('dragging');
+    try{localStorage.setItem('svLegendPos',JSON.stringify({left:box.style.left,top:box.style.top}));}catch(e){}
+  });
+  try{
+    var saved=localStorage.getItem('svLegendPos');
+    if(saved){var p=JSON.parse(saved); if(p&&p.left&&p.top){box.style.left=p.left;box.style.top=p.top;box.style.right='auto';box.style.bottom='auto';}}
+  }catch(e){}
+})();
 document.getElementById('showLegend').onchange=function(){document.getElementById('legendBox').style.display=this.checked?'':'none';};
 
 /* populate zoom-override dropdown */
@@ -4334,28 +5292,33 @@ function buildLayoutCanvas(cb){
     // temporarily remove the live-location marker so it isn't baked into the layout
     var hadYAH = youAreHere && map.hasLayer(youAreHere);
     if(hadYAH){ map.removeLayer(youAreHere); }
-    function restore(){ hidden.forEach(function(h){ h[0].style.display=h[1]; }); if(hadYAH){ youAreHere.addTo(map); } }
+    // temporarily remove DOM label groups — labels are redrawn as crisp vector text at export resolution in doRender
+    var labelGroups=[], lg=(window.__svAdvLabelGroups?window.__svAdvLabelGroups():{});
+    Object.keys(lg||{}).forEach(function(id){ var fg=lg[id]; if(fg&&map.hasLayer(fg)){ labelGroups.push(fg); map.removeLayer(fg); } });
+    function restore(){ hidden.forEach(function(h){ h[0].style.display=h[1]; }); if(hadYAH){ youAreHere.addTo(map); } labelGroups.forEach(function(fg){ try{fg.addTo(map);}catch(e){} }); }
     var done=false;
     function finishCb(cv){ if(done)return; done=true; restore(); cb(cv); }
-    function fallback(reason){
+    function liFallback(reason){
       if(done)return;
-      if(typeof html2canvas==='undefined'){ done=true; restore(); toast('Export failed: '+reason+' (no fallback available)',true); if(zoomOverride)map.setZoom(prevZoom); return; }
+      if(typeof leafletImage==='undefined'){ done=true; restore(); toast('Export failed: '+reason+' (no fallback available)',true); if(zoomOverride)map.setZoom(prevZoom); return; }
       toast('Using fallback capture…');
-      html2canvas(document.getElementById('map'),{useCORS:true,allowTaint:false,logging:false,backgroundColor:null,ignoreElements:function(el){return el.classList&&(el.classList.contains('leaflet-control-container')||el.classList.contains('leaflet-control-attribution'));}})
-        .then(function(cv){ finishCb(cv); })
-        .catch(function(e){ done=true; restore(); toast('Export failed: '+e.message,true); if(zoomOverride)map.setZoom(prevZoom); });
-    }
-    if(typeof leafletImage!=='undefined'){
       try{
         leafletImage(map,function(err,canvas){
           if(done)return;
-          if(err||!canvas){ fallback(err?err.message:'no canvas'); return; }
+          if(err||!canvas){ done=true; restore(); toast('Export failed: '+(err?err.message:'no canvas'),true); if(zoomOverride)map.setZoom(prevZoom); return; }
           try{ canvas.getContext('2d').getImageData(0,0,1,1); finishCb(canvas); }
-          catch(taint){ fallback('cross-origin tiles'); }
+          catch(taint){ done=true; restore(); toast('Export failed: cross-origin tiles',true); if(zoomOverride)map.setZoom(prevZoom); }
         });
-        setTimeout(function(){ if(!done) fallback('timeout'); },6000);
-      }catch(e){ fallback(e.message); }
-    }else{ fallback('leaflet-image not loaded'); }
+        setTimeout(function(){ if(!done){ done=true; restore(); toast('Export failed: timeout',true); if(zoomOverride)map.setZoom(prevZoom); } },8000);
+      }catch(e){ done=true; restore(); toast('Export failed: '+e.message,true); if(zoomOverride)map.setZoom(prevZoom); }
+    }
+    // Primary: html2canvas — captures the full map DOM (raster tiles, vector overlays, markers) exactly as displayed
+    if(typeof html2canvas!=='undefined'){
+      html2canvas(document.getElementById('map'),{useCORS:true,allowTaint:false,logging:false,backgroundColor:null,ignoreElements:function(el){return el.classList&&(el.classList.contains('leaflet-control-container')||el.classList.contains('leaflet-control-attribution'));}})
+        .then(function(cv){ try{ cv.getContext('2d').getImageData(0,0,1,1); finishCb(cv); }catch(taint){ liFallback('cross-origin tiles'); } })
+        .catch(function(e){ liFallback(e&&e.message||'capture error'); });
+      setTimeout(function(){ if(!done) liFallback('timeout'); },9000);
+    } else { liFallback('html2canvas not loaded'); }
   }
   function doRender(){
     toast('Rendering layout…');
@@ -4412,6 +5375,25 @@ function buildLayoutCanvas(cb){
           ['polygon','line','point'].forEach(function(k){ drawn[k].forEach(function(rec){ try{ drawGeom(rec.layer.toGeoJSON().geometry, rec.style); }catch(e){} }); });
           if(typeof ptItems!=='undefined'){ ptItems.forEach(function(it){ try{ var ll=it.marker.getLatLng(); drawGeom({type:'Point',coordinates:[ll.lng,ll.lat]},{fill:it.color,ptSize:6}); if(it.labelOn&&it.text){var p=toXY(ll.lng,ll.lat);ctx.fillStyle=C.ink;ctx.font=(11*(dw/size.x))+'px Inter,Arial';ctx.fillText(it.text,p[0]+8,p[1]-6);} }catch(e){} }); }
         }catch(e){}
+        // ---- layer labels (advLabelStyle) drawn as vector text: crisp at any export resolution ----
+        try{
+          Object.keys(layers).forEach(function(id){
+            var L0=layers[id]; if(!L0||!L0.visible||!L0.advLabelStyle||!L0.advLabelStyle.field||!L0.geojson)return;
+            var st=L0.advLabelStyle, fpx=Math.max(Number(st.size||11)*(dw/size.x),6);
+            ctx.font='800 '+fpx+'px Inter,Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            (L0.geojson.features||[]).forEach(function(f){
+              var v=(f.properties||{})[st.field]; if(v==null||v==='')return;
+              try{
+                var c=turf.centerOfMass(f).geometry.coordinates, p=toXY(c[0],c[1]);
+                if(p[0]<dx-20||p[0]>dx+dw+20||p[1]<dy-20||p[1]>dy+dh+20)return;
+                ctx.lineWidth=Math.max(fpx*.28,2); ctx.strokeStyle=st.halo||'#000';
+                ctx.strokeText(String(v),p[0],p[1]);
+                ctx.fillStyle=st.color||'#fff'; ctx.fillText(String(v),p[0],p[1]);
+              }catch(e){}
+            });
+          });
+          ctx.textAlign='start'; ctx.textBaseline='alphabetic';
+        }catch(e){}
       })();
       var S=res; // scale fonts/boxes with resolution for crispness
       // Title
@@ -4438,9 +5420,24 @@ function buildLayoutCanvas(cb){
         var legBorder = isLight ? '#6B7280' : '#3a4d6b';
         var legInk = isLight ? '#1B1B1B' : '#E8EEF6';
         var legDim = isLight ? '#4B5563' : '#94A6BE';
-        var rowH=22*S, padX=12*S, headH=30*S;
-        var lw=205*S, lh=headH+8*S+Math.max(items.length,1)*rowH+8*S;
+        // build flat row list: {kind:'layer'|'class'|'total', ...}
+        var rows=[];
+        items.forEach(function(L0){
+          if(L0.colorMode==='categorized'&&L0.catColors&&Object.keys(L0.catColors).length){
+            rows.push({kind:'layer',text:String(L0.name).slice(0,24)+' ('+String(L0.uniqueField).slice(0,14)+')'});
+            var stats=svLengthStats(L0,L0.uniqueField);
+            var keys=Object.keys(L0.catColors).sort(function(a,b){var na=parseFloat(a),nb=parseFloat(b);if(!isNaN(na)&&!isNaN(nb))return na-nb;return a.localeCompare(b);});
+            keys.forEach(function(k){ rows.push({kind:'class',color:L0.catColors[k],gt:(L0.geomType||geomTypeOf(L0.geojson)||''),text:(k||'(blank)'),len:stats.hasLines?svFmtLen(stats.totals[k]||0):''}); });
+            if(stats.hasLines) rows.push({kind:'total',text:'Total',len:svFmtLen(stats.grand)});
+          } else {
+            rows.push({kind:'class',color:L0.color,gt:L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||''),text:String(L0.name).slice(0,24),len:''});
+          }
+        });
+        var rowH=20*S, padX=12*S, headH=30*S;
+        var hasLen=rows.some(function(r){return r.len;});
+        var lw=(hasLen?265:205)*S, lh=headH+8*S+Math.max(rows.length,1)*rowH+8*S;
         var lx=(page!=='current'?frameX:0)+14*S, ly=(page!=='current'?(frameY+frameH):th)-18*S-lh;
+        if(ly<(page!=='current'?frameY:0)+10*S) ly=(page!=='current'?frameY:0)+10*S;
         // box
         ctx.fillStyle=legBg; ctx.strokeStyle=legBorder; ctx.lineWidth=Math.max(1*S,1);
         roundRect(ctx,lx,ly,lw,lh,3*S); ctx.fill(); ctx.stroke();
@@ -4451,17 +5448,32 @@ function buildLayoutCanvas(cb){
         ctx.strokeStyle=legBorder; ctx.lineWidth=Math.max(.8*S,.8);
         ctx.beginPath(); ctx.moveTo(lx+padX,ly+headH-2*S); ctx.lineTo(lx+lw-padX,ly+headH-2*S); ctx.stroke();
         // rows
-        ctx.font=(12*S)+'px Inter,Arial';
-        if(!items.length){ ctx.fillStyle=legDim; ctx.fillText('No visible layers',lx+padX,ly+headH+14*S); }
-        items.forEach(function(L0,i){
+        if(!rows.length){ ctx.fillStyle=legDim; ctx.font=(12*S)+'px Inter,Arial'; ctx.fillText('No visible layers',lx+padX,ly+headH+14*S); }
+        rows.forEach(function(r,i){
           var yy=ly+headH+8*S+i*rowH+rowH*0.5;
-          var symX=lx+padX, symMid=yy, gt=L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||'');
-          ctx.fillStyle=L0.color; ctx.strokeStyle=L0.color;
-          if(gt==='LineString'){ ctx.lineWidth=2.5*S; ctx.beginPath(); ctx.moveTo(symX,symMid); ctx.lineTo(symX+16*S,symMid); ctx.stroke(); }
-          else if(gt==='Point'){ ctx.beginPath(); ctx.arc(symX+8*S,symMid,5*S,0,6.283); ctx.fill(); ctx.lineWidth=1*S; ctx.strokeStyle='#fff'; ctx.stroke(); }
-          else { ctx.fillStyle=hexA2(L0.color,.55); ctx.fillRect(symX,symMid-6*S,16*S,12*S); ctx.strokeStyle=L0.color; ctx.lineWidth=1.2*S; ctx.strokeRect(symX,symMid-6*S,16*S,12*S); }
-          ctx.fillStyle=legInk; ctx.font=(12*S)+'px Inter,Arial';
-          ctx.fillText(String(L0.name).slice(0,24),symX+24*S,symMid+4*S);
+          if(r.kind==='layer'){
+            ctx.fillStyle=legInk; ctx.font='700 '+(11.5*S)+'px Inter,Arial';
+            ctx.fillText(r.text,lx+padX,yy+4*S);
+            return;
+          }
+          if(r.kind==='total'){
+            ctx.strokeStyle=legBorder; ctx.lineWidth=Math.max(.6*S,.6); ctx.setLineDash([3*S,3*S]);
+            ctx.beginPath(); ctx.moveTo(lx+padX+16*S,yy-rowH*0.5+2*S); ctx.lineTo(lx+lw-padX,yy-rowH*0.5+2*S); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle=legInk; ctx.font='700 '+(11*S)+'px Inter,Arial';
+            ctx.fillText(r.text,lx+padX+24*S,yy+4*S);
+            ctx.font='700 '+(9.5*S)+'px JetBrains Mono,monospace'; ctx.textAlign='right';
+            ctx.fillText(r.len,lx+lw-padX,yy+4*S); ctx.textAlign='start';
+            return;
+          }
+          var symX=lx+padX+(r.gt==='Raster'?0:8*S), symMid=yy;
+          ctx.fillStyle=r.color; ctx.strokeStyle=r.color;
+          if(r.gt==='LineString'||r.gt==='MultiLineString'){ ctx.lineWidth=2.5*S; ctx.beginPath(); ctx.moveTo(symX,symMid); ctx.lineTo(symX+16*S,symMid); ctx.stroke(); }
+          else if(r.gt==='Point'||r.gt==='MultiPoint'){ ctx.beginPath(); ctx.arc(symX+8*S,symMid,5*S,0,6.283); ctx.fill(); ctx.lineWidth=1*S; ctx.strokeStyle='#fff'; ctx.stroke(); }
+          else { ctx.fillStyle=hexA2(r.color,.55); ctx.fillRect(symX,symMid-6*S,16*S,12*S); ctx.strokeStyle=r.color; ctx.lineWidth=1.2*S; ctx.strokeRect(symX,symMid-6*S,16*S,12*S); }
+          ctx.fillStyle=legInk; ctx.font=(11.5*S)+'px Inter,Arial';
+          ctx.fillText(r.text,symX+24*S,symMid+4*S);
+          if(r.len){ ctx.fillStyle=legDim; ctx.font=(9.5*S)+'px JetBrains Mono,monospace'; ctx.textAlign='right';
+            ctx.fillText(r.len,lx+lw-padX,symMid+4*S); ctx.textAlign='start'; }
         });
       }
       // CRS stamp
@@ -4942,7 +5954,7 @@ document.getElementById('exportPDF').onclick=function(){
   function $(id){return document.getElementById(id);}
   var designer=$('layoutDesigner'), stage=$('ldStage'), pageEl=$('ldPageEl');
 
-  /* ---- capture the current map to a canvas (reuse leaflet-image with fallback) ---- */
+  /* ---- capture the current map to a canvas (html2canvas first: captures labels/markers/raster as displayed) ---- */
   function captureMap(cb){
     var hidden=[];
     document.querySelectorAll('#map .leaflet-control-container').forEach(function(el){ hidden.push([el,el.style.display]); el.style.display='none'; });
@@ -4951,37 +5963,50 @@ document.getElementById('exportPDF').onclick=function(){
     function restore(){ hidden.forEach(function(h){h[0].style.display=h[1];}); if(hadYAH){youAreHere.addTo(map);} }
     var done=false;
     function finish(cv){ if(done)return; done=true; restore(); cb(cv); }
-    if(typeof leafletImage!=='undefined'){
+    function fb(){
+      if(done)return;
+      if(typeof leafletImage==='undefined'){ done=true; restore(); cb(null); return; }
       try{
         leafletImage(map,function(err,canvas){
           if(done)return;
-          if(err||!canvas){ fb(); return; }
-          try{ canvas.getContext('2d').getImageData(0,0,1,1); finish(canvas); }catch(e){ fb(); }
+          if(err||!canvas){ done=true; restore(); cb(null); return; }
+          try{ canvas.getContext('2d').getImageData(0,0,1,1); finish(canvas); }catch(e){ done=true; restore(); cb(null); }
         });
-        setTimeout(function(){ if(!done) fb(); },6000);
-      }catch(e){ fb(); }
-    } else fb();
-    function fb(){
-      if(done)return;
-      if(typeof html2canvas==='undefined'){ done=true; restore(); cb(null); return; }
+        setTimeout(function(){ if(!done){ done=true; restore(); cb(null); } },8000);
+      }catch(e){ done=true; restore(); cb(null); }
+    }
+    if(typeof html2canvas!=='undefined'){
       html2canvas(document.getElementById('map'),{useCORS:true,logging:false,backgroundColor:null,
         ignoreElements:function(el){return el.classList&&el.classList.contains('leaflet-control-container');}})
-        .then(function(cv){ finish(cv); }).catch(function(){ done=true; restore(); cb(null); });
-    }
+        .then(function(cv){ try{ cv.getContext('2d').getImageData(0,0,1,1); finish(cv); }catch(e){ fb(); } })
+        .catch(function(){ fb(); });
+      setTimeout(function(){ if(!done) fb(); },9000);
+    } else fb();
   }
 
-  /* ---- ESRI legend HTML from visible layers ---- */
+  /* ---- ESRI legend HTML from visible layers (categorized classes + lengths) ---- */
   function buildLegendHTML(){
     var items=Object.keys(layers).map(function(id){return layers[id];}).filter(function(L0){return L0.visible;});
     var h='<div class="lh">Legend</div>';
     if(!items.length){ h+='<div style="color:#666">No visible layers</div>'; return h; }
     items.forEach(function(L0){
       var gt=L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||'');
-      var sym;
-      if(gt==='LineString') sym='<span class="sw" style="height:0;border:none;border-top:3px solid '+L0.color+';width:16px"></span>';
-      else if(gt==='Point') sym='<span class="sw" style="border-radius:50%;background:'+L0.color+';width:12px;height:12px"></span>';
-      else sym='<span class="sw" style="background:'+hexA2(L0.color,.55)+';border-color:'+L0.color+'"></span>';
-      h+='<div class="li">'+sym+'<span>'+escapeHtml(String(L0.name).slice(0,26))+'</span></div>';
+      function sym(color){
+        if(gt==='LineString'||gt==='MultiLineString') return '<span class="sw" style="height:0;border:none;border-top:3px solid '+color+';width:16px"></span>';
+        if(gt==='Point'||gt==='MultiPoint') return '<span class="sw" style="border-radius:50%;background:'+color+';width:12px;height:12px"></span>';
+        return '<span class="sw" style="background:'+hexA2(color,.55)+';border-color:'+color+'"></span>';
+      }
+      if(L0.colorMode==='categorized'&&L0.catColors&&Object.keys(L0.catColors).length){
+        h+='<div class="li" style="font-weight:700">'+escapeHtml(String(L0.name).slice(0,24))+' <span style="font-weight:400;opacity:.7">('+escapeHtml(String(L0.uniqueField).slice(0,14))+')</span></div>';
+        var stats=svLengthStats(L0,L0.uniqueField);
+        var keys=Object.keys(L0.catColors).sort(function(a,b){var na=parseFloat(a),nb=parseFloat(b);if(!isNaN(na)&&!isNaN(nb))return na-nb;return a.localeCompare(b);});
+        keys.forEach(function(k){
+          h+='<div class="li" style="padding-left:10px;justify-content:space-between;gap:8px"><span style="display:inline-flex;align-items:center;gap:6px">'+sym(L0.catColors[k])+'<span>'+escapeHtml(String(k||'(blank)').slice(0,18))+'</span></span>'+(stats.hasLines?'<span style="opacity:.7;font-size:9px;font-family:monospace;white-space:nowrap">'+svFmtLen(stats.totals[k]||0)+'</span>':'')+'</div>';
+        });
+        if(stats.hasLines) h+='<div class="li" style="padding-left:10px;justify-content:space-between;gap:8px;font-weight:700;border-top:1px dashed rgba(128,128,128,.5);margin-top:3px;padding-top:3px"><span>Total</span><span style="font-family:monospace;font-size:9px;white-space:nowrap">'+svFmtLen(stats.grand)+'</span></div>';
+      } else {
+        h+='<div class="li">'+sym(L0.color)+'<span>'+escapeHtml(String(L0.name).slice(0,26))+'</span></div>';
+      }
     });
     return h;
   }
@@ -5482,7 +6507,7 @@ var MANUAL=[
  ['Selecting & identifying',
   '<b>Identify:</b> click the Identify button, then click the map to list the features at that point plus the nearest address.<br>'+
   '<b>Select:</b> drag a rectangle to select features in the active layer.<br>'+
-  '<b>Clear:</b> clears the current selection.'],
+  '<b>Clear:</b> clears selections from all feature classes. The attribute table also provides Select All, Switch Selection, Show Selected Only, direct cell editing by double-click, field calculation, geometry editing, and a Save button that activates only after a real edit.'],
  ['Editing features',
   'The <b>Editing</b> ribbon group provides a full editing workflow:<br>'+
   '<b>Edit:</b> start/stop an editing session on the active layer.<br>'+
@@ -5951,7 +6976,10 @@ function saveProjectBrowser(){localStorage.setItem('SpatialViewUltimateProject',
 function restoreProject(p){
   if(!p||!p.view){proLog('Invalid project file.');return;}
   Object.keys(layers).forEach(function(id){try{map.removeLayer(layers[id].leaflet);}catch(e){} delete layers[id];});renderLayers();refreshDropdowns();
-  (p.layers||[]).forEach(function(x){try{var color=x.color||nextColor();var id=addLayer(geoJsonLayer(x.geojson,color),x.name||'Project layer',color,{zoom:false,geojson:x.geojson});if(x.visible===false){layers[id].visible=false;map.removeLayer(layers[id].leaflet);}}catch(e){}});
+  (p.layers||[]).forEach(function(x){try{var color=x.color||nextColor();var id=addLayer(geoJsonLayer(x.geojson,color),x.name||'Project layer',color,{zoom:false,geojson:x.geojson});
+    var L0=layers[id]; if(L0){ L0.uniqueField=x.uniqueField||''; L0.field=x.field||''; L0.colorMode=x.colorMode||''; L0.catColors=x.catColors||null; L0.size=x.size||6; if(x.opacity!=null)L0.opacity=x.opacity;
+      if(L0.colorMode==='categorized'||L0.colorMode==='graduated'||L0.colorMode==='native') svBuildLeafletLayer(L0); }
+    if(x.visible===false){layers[id].visible=false;map.removeLayer(layers[id].leaflet);}}catch(e){}});
   if(p.theme){try{document.body.setAttribute('data-theme',p.theme);}catch(e){}}
   if(p.view)map.setView([p.view.lat,p.view.lng],p.view.zoom||map.getZoom());
   renderLayers();refreshDropdowns();updateProStats();proLog('Project restored. Drawn features are included in export file but imported as data layers when needed.');
@@ -6212,8 +7240,12 @@ document.getElementById('refreshBtn').onclick=function(){
   function selectedFids(id){ if(window.__svSelectedFids) return window.__svSelectedFids(id)||[]; return []; }
   function selectedFeatures(L0){var ids=selectedFids(L0.id); return (L0.geojson.features||[]).filter(function(f){return ids.indexOf(String(f.properties&&f.properties.__sv_fid))>=0;});}
   function targetFeatures(L0){var s=selectedFeatures(L0); return s.length?s:(L0.geojson.features||[]);}
-  function rebuild(L0){ if(window.__svRebuildLayer) window.__svRebuildLayer(L0,true); else {try{map.removeLayer(L0.leaflet);}catch(e){} L0.leaflet=geoJsonLayer(L0.geojson,L0.color||'#3B82F6').addTo(map);} applyAdvancedLabels(L0); decorateLayerRows(); attachFeatureContext(L0); refreshAllAdvSelects(); }
+  function rebuild(L0){ svBuildLeafletLayer(L0); applyAdvancedLabels(L0); decorateLayerRows(); attachFeatureContext(L0); refreshAllAdvSelects(); }
+  function rebuildLayer(L0,keepView){ svBuildLeafletLayer(L0); }
+  window.__svRebuildLayer=rebuildLayer;
   function mark(){ if(window.__svMarkDirty) window.__svMarkDirty(); }
+  function updateOpStatus(){ updateAdvStatus(); }
+  window.__svUpdateOpStatus=updateOpStatus;
 
   function currentAdvLayer(){var sel=document.getElementById('advLayerSelect'); return getLayer(sel&&sel.value) || curTbl || vectorLayers()[0];}
   function refreshAllAdvSelects(){['advLayerSelect','advUniqueLayer','advLabelLayer','advServiceAnchor'].forEach(function(id){fillSelect(document.getElementById(id));}); refreshAdvFieldSelects(); }
@@ -6226,7 +7258,7 @@ document.getElementById('refreshBtn').onclick=function(){
 
   function snapshot(){
     try{
-      var pack={layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',labelField:L0.labelField||'',advLabelStyle:L0.advLabelStyle||null};})};
+      var pack={layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',colorMode:L0.colorMode||'',catColors:L0.catColors||null,labelField:L0.labelField||'',advLabelStyle:L0.advLabelStyle||null};})};
       var s=JSON.stringify(pack); if(advState.history[advState.history.length-1]!==s){advState.history.push(s); if(advState.history.length>40)advState.history.shift(); advState.redo=[];}
     }catch(e){}
   }
@@ -6234,7 +7266,7 @@ document.getElementById('refreshBtn').onclick=function(){
   snapshot();
 
   function restoreSnapshot(s){
-    try{var pack=JSON.parse(s); pack.layers.forEach(function(x){var L0=layers[x.id]; if(L0){L0.name=x.name;L0.color=x.color;L0.visible=x.visible;L0.geojson=x.geojson;L0.uniqueField=x.uniqueField;L0.field=x.field;L0.labelField=x.labelField;L0.advLabelStyle=x.advLabelStyle; rebuild(L0);}}); renderLayers(); refreshDropdowns(); updateAdvStatus();}
+    try{var pack=JSON.parse(s); pack.layers.forEach(function(x){var L0=layers[x.id]; if(L0){L0.name=x.name;L0.color=x.color;L0.visible=x.visible;L0.geojson=x.geojson;L0.uniqueField=x.uniqueField;L0.field=x.field;L0.colorMode=x.colorMode||'';L0.catColors=x.catColors||null;L0.labelField=x.labelField;L0.advLabelStyle=x.advLabelStyle; rebuild(L0);}}); renderLayers(); refreshDropdowns(); updateAdvStatus();}
     catch(e){toast('Could not restore snapshot: '+e.message,true);}
   }
   function undo(){ if(advState.history.length<2){toast('Nothing to undo',true);return;} var cur=advState.history.pop(); advState.redo.push(cur); restoreSnapshot(advState.history[advState.history.length-1]); toast('Undo completed'); }
@@ -6257,7 +7289,9 @@ document.getElementById('refreshBtn').onclick=function(){
   }
 
   function uniqueSymbology(id){
-    var L0=getLayer(id)||currentAdvLayer(); if(!L0){toast('Select a layer',true);return;} var fs=fields(L0); var f=prompt('Unique value field:\n'+fs.join(', '), L0.uniqueField||fs[0]||'STATUS'); if(!f)return; L0.uniqueField=f; L0.field=''; snapshot(); rebuild(L0); renderLegend(); toast('Unique value symbology applied: '+f);
+    var L0=getLayer(id)||currentAdvLayer(); if(!L0){toast('Select a layer',true);return;} var fs=fields(L0); var f=prompt('Unique value field:\n'+fs.join(', '), L0.uniqueField||fs[0]||'STATUS'); if(!f)return;
+    L0.uniqueField=f; L0.field=''; L0.colorMode='categorized'; L0.catColors=deriveCategoryColors(L0,f);
+    snapshot(); rebuild(L0); renderLegend(); toast('Unique value symbology applied: '+f);
   }
 
   function applyAdvancedLabels(L0){
@@ -6271,6 +7305,9 @@ document.getElementById('refreshBtn').onclick=function(){
     var L0=currentAdvLayer(); if(!L0){toast('Select a layer',true);return;} var fs=fields(L0); var field=prompt('Label field:\n'+fs.join(', '),(L0.advLabelStyle&&L0.advLabelStyle.field)||fs[0]||'UNITID'); if(!field)return; var size=prompt('Label size in px:',(L0.advLabelStyle&&L0.advLabelStyle.size)||11); if(size===null)return; var color=prompt('Label color:',(L0.advLabelStyle&&L0.advLabelStyle.color)||'#FFFFFF'); if(color===null)return; var halo=prompt('Halo color:',(L0.advLabelStyle&&L0.advLabelStyle.halo)||'#000000'); if(halo===null)return; L0.advLabelStyle={field:field,size:parseFloat(size)||11,color:color||'#FFFFFF',halo:halo||'#000000'}; L0.labelField=''; applyAdvancedLabels(L0); toast('Advanced labels applied');
   }
   function clearAdvancedLabels(){var L0=currentAdvLayer(); if(!L0)return; if(advState.labels[L0.id]){map.removeLayer(advState.labels[L0.id]);delete advState.labels[L0.id];} delete L0.advLabelStyle; toast('Advanced labels cleared');}
+  window.__svApplyLabels=function(L0){ if(L0)applyAdvancedLabels(L0); };
+  window.__svClearLabels=function(L0){ if(!L0)return; if(advState.labels[L0.id]){try{map.removeLayer(advState.labels[L0.id]);}catch(e){} delete advState.labels[L0.id];} delete L0.advLabelStyle; };
+  window.__svAdvLabelGroups=function(){ return advState.labels; };
 
   function validateGeometry(){
     var L0=currentAdvLayer(); if(!L0){toast('Select a layer first',true);return;} advState.qa=[];
@@ -6383,9 +7420,10 @@ document.getElementById('refreshBtn').onclick=function(){
   };
 
   function packageProject(){
-    var c=map.getCenter(); return {app:'Spatial Itqan',version:'Full Restored Operational',saved:new Date().toISOString(),view:{lat:c.lat,lng:c.lng,zoom:map.getZoom()},theme:document.body.getAttribute('data-theme'),layerOrder:Object.keys(layers),layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',size:L0.size||6,opacity:L0.opacity,advLabelStyle:L0.advLabelStyle||null,labelField:L0.labelField||'',service:advState.services.find(function(s){return s.name===L0.name;})||null};}),services:advState.services,bookmarks:bookmarks||[],drawn:(typeof collectFeatures==='function'?collectFeatures():{type:'FeatureCollection',features:[]})};
+    var c=map.getCenter(); return {app:'Spatial Itqan',version:'Full Restored Operational',saved:new Date().toISOString(),view:{lat:c.lat,lng:c.lng,zoom:map.getZoom()},theme:document.body.getAttribute('data-theme'),layerOrder:Object.keys(layers),layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',colorMode:L0.colorMode||'',catColors:L0.catColors||null,size:L0.size||6,opacity:L0.opacity,advLabelStyle:L0.advLabelStyle||null,labelField:L0.labelField||'',service:advState.services.find(function(s){return s.name===L0.name;})||null};}),services:advState.services,bookmarks:bookmarks||[],drawn:(typeof collectFeatures==='function'?collectFeatures():{type:'FeatureCollection',features:[]})};
   }
   if(typeof exportProjectObject==='function') exportProjectObject=packageProject;
+  window.__svPackageProject=packageProject;
 
   function updateAdvStatus(){var el=document.getElementById('advStatus'); if(!el)return; var L0=currentAdvLayer(); if(!L0){el.textContent='No layer selected.';return;} el.innerHTML='<b>Advanced layer:</b> '+escapeHtml(L0.name)+'\n<b>Features:</b> '+((L0.geojson&&L0.geojson.features&&L0.geojson.features.length)||0)+'\n<b>Selected:</b> '+selectedFids(L0.id).length+'\n<b>History:</b> '+advState.history.length+' snapshot(s)';}
 
@@ -6454,7 +7492,114 @@ document.getElementById('refreshBtn').onclick=function(){
     var id=activeLayerId(), chip=$('xpModeChip');
     if(chip) chip.innerHTML='Layer: <b>'+escapeHtml(id&&layers[id]?layers[id].name:'None')+'</b>'+(window.__svOpState&&window.__svOpState.editMode?' · <b>EDITING</b>':'');
     var b=$('xpStartEdit'); if(b&&window.__svOpState){b.classList.toggle('good',!!window.__svOpState.editMode);}
+    var sb=$('xpSelectBox'); if(sb){sb.classList.toggle('good',!!window.__svSelectToolOn);}
+    var ss=$('xpShowSel');if(ss)ss.classList.toggle('active',!!svTableSelectedOnly);
   }
+  /* ===== Select tool: click a feature to select it, or drag a box to select several ===== */
+  var svSelectDrag=null, svSelectRectLayer=null;
+  function toggleSelectTool(){
+    window.__svSelectToolOn=!window.__svSelectToolOn;
+    switchTab('tools'); setActiveLayer(activeLayerId());
+    if(!window.__svSelectToolOn){
+      try{map.dragging.enable();}catch(e){}
+      if(svSelectRectLayer){try{map.removeLayer(svSelectRectLayer);}catch(e){} svSelectRectLayer=null;}
+      svSelectDrag=null;
+    }
+    try{map.getContainer().style.cursor=window.__svSelectToolOn?'crosshair':'';}catch(e){}
+    updateRibbonState();
+    safeToast(window.__svSelectToolOn?'Select tool on — visible feature classes are selectable · Shift adds · Ctrl toggles':'Select tool off');
+  }
+  map.on('mousedown',function(e){
+    if(!window.__svSelectToolOn)return;
+    if(e.originalEvent&&e.originalEvent.button!==0)return;
+    try{map.dragging.disable();}catch(err){}
+    svSelectDrag={start:e.latlng,mod:svSelectionModifier(e.originalEvent)};
+    svSelectRectLayer=L.rectangle([e.latlng,e.latlng],{color:'#00E5FF',weight:2,dashArray:'4 4',fillOpacity:.06}).addTo(map);
+  });
+  map.on('mousemove',function(e){
+    if(!window.__svSelectToolOn||!svSelectDrag||!svSelectRectLayer)return;
+    svSelectRectLayer.setBounds(L.latLngBounds(svSelectDrag.start,e.latlng));
+  });
+  map.on('mouseup',function(e){
+    if(!window.__svSelectToolOn||!svSelectDrag)return;
+    var b=L.latLngBounds(svSelectDrag.start,e.latlng), start=svSelectDrag.start,mod=svSelectDrag.mod||{};
+    try{map.dragging.enable();}catch(err){}
+    svSelectDrag=null;
+    if(svSelectRectLayer){try{map.removeLayer(svSelectRectLayer);}catch(err){} svSelectRectLayer=null;}
+    var pxSpan=map.latLngToContainerPoint(start).distanceTo(map.latLngToContainerPoint(e.latlng));
+    if(pxSpan<8)return; // treat as a plain click — the feature's own click handler (if any) already ran
+    svBoxSelect(b,mod);
+  });
+  function svBoxSelect(bounds,mod){
+    mod=mod||{};var ids=visibleVectorLayerIds().filter(function(id){return layers[id]&&layers[id].visible!==false;}),changed={},total=0,hitLayers=0;
+    if(!ids.length){safeToast('No visible vector feature classes',true);return;}
+    if(!mod.add&&!mod.toggle)changed=svClearAllSelections(false);
+    ids.forEach(function(id){var L0=layers[id],set=svSelSet(id),hits=[];ensureFids(L0.geojson);
+      (L0.geojson.features||[]).forEach(function(f){try{var lyr=L.geoJSON(f),fb=lyr.getBounds();if(fb.isValid()&&bounds.intersects(fb))hits.push(String(f.properties.__sv_fid));}catch(e){}});
+      if(hits.length){hitLayers++;changed[id]=true;hits.forEach(function(fid){if(mod.toggle){if(set[fid])delete set[fid];else set[fid]=true;}else set[fid]=true;});total+=hits.length;}
+    });
+    svRefreshSelectionLayers(changed);safeToast(total+' feature(s) matched across '+hitLayers+' feature class'+(hitLayers===1?'':'es')+(mod.add?' (added)':mod.toggle?' (toggled)':''));
+  }
+  /* ===== Edit session, Add Feature, Edit Shape, Save ===== */
+  function toggleEditSession(){
+    var id=activeLayerId(); if(!id||!layers[id]){safeToast('Open a vector layer first',true);return;}
+    window.__svOpState.editMode=!window.__svOpState.editMode;
+    updateRibbonState();
+    safeToast(window.__svOpState.editMode?('Editing started on '+layers[id].name):'Editing stopped');
+  }
+  function addFeatureToActiveLayer(){
+    var id=activeLayerId(), L0=layers[id]; if(!L0||!L0.geojson){safeToast('Open a vector layer first',true);return;}
+    if(!window.__svOpState.editMode){safeToast('Click ✎ Edit to start an edit session first',true);return;}
+    if(typeof L.Draw==='undefined'){safeToast('Draw library not loaded',true);return;}
+    var gt=String(L0.geomType||geomTypeOf(L0.geojson)||'').toLowerCase();
+    var Handler=gt.indexOf('point')>=0?L.Draw.Marker:(gt.indexOf('polygon')>=0?L.Draw.Polygon:L.Draw.Polyline);
+    try{ if(window.__svActiveDrawHandler)window.__svActiveDrawHandler.disable(); }catch(e){}
+    var h=new Handler(map,{shapeOptions:{color:L0.color||'#3B82F6',weight:3}});
+    window.__svActiveDrawHandler=h; h.enable();
+    safeToast('Draw the new feature on the map'+(gt.indexOf('point')>=0?' (click to place)':' (click points, double-click to finish, Esc to cancel)'));
+    map.once(L.Draw.Event.CREATED,function(e){
+      window.__svActiveDrawHandler=null;
+      var gj=e.layer.toGeoJSON();
+      var nf={type:'Feature',properties:{__sv_fid:'NEW'+Date.now()},geometry:gj.geometry};
+      if(L0.uniqueField)nf.properties[L0.uniqueField]='';
+      if(window.__svAdvSnapshot)window.__svAdvSnapshot();
+      L0.geojson.features.push(nf);
+      if(window.__svMarkDirty)window.__svMarkDirty();
+      svBuildLeafletLayer(L0); try{if(typeof curTbl!=='undefined'&&curTbl&&curTbl.id===L0.id)renderTable();}catch(err){}
+      safeToast('Feature added to '+L0.name+' — fill in its attributes from the table');
+    });
+  }
+  function editSelectedShape(){
+    var id=activeLayerId(), L0=layers[id]; if(!L0||!L0.geojson){safeToast('Open a vector layer first',true);return;}
+    if(!window.__svOpState.editMode){safeToast('Click ✎ Edit to start an edit session first',true);return;}
+    var fids=Object.keys(svSelSet(id));
+    if(window.__svEditingLayer){
+      // second click = finish editing whatever shape is currently being edited
+      var target=window.__svEditingLayer;
+      try{target.editing.disable();}catch(e){}
+      window.__svEditingLayer=null;
+      var gj=target.toGeoJSON();
+      if(target.feature){ if(window.__svAdvSnapshot)window.__svAdvSnapshot(); target.feature.geometry=gj.geometry; if(window.__svMarkDirty)window.__svMarkDirty(); }
+      svBuildLeafletLayer(L0); try{if(typeof curTbl!=='undefined'&&curTbl&&curTbl.id===L0.id)renderTable();}catch(err){}
+      safeToast('Shape updated');
+      return;
+    }
+    if(fids.length!==1){safeToast('Select exactly one feature to edit its shape',true);return;}
+    var fid=fids[0], target=null;
+    L0.leaflet.eachLayer(function(ly){ var f=ly.feature; if(f&&String(f.properties&&f.properties.__sv_fid)===fid) target=ly; });
+    if(!target||!target.editing){safeToast('This geometry type can\u2019t be vertex-edited here',true);return;}
+    target.editing.enable(); window.__svEditingLayer=target;
+    safeToast('Drag the vertices, then click \u25ad Shape again to finish');
+  }
+  function saveEditsToLocal(){
+    try{
+      var pack=window.__svPackageProject?window.__svPackageProject():null;
+      if(!pack){safeToast('Save not available',true);return;}
+      localStorage.setItem('SpatialViewUltimateProject',JSON.stringify(pack));
+      safeToast('Edits saved to browser memory');
+    }catch(e){ safeToast('Could not save: '+e.message,true); }
+  }
+  window.__svEditSelectedShape=editSelectedShape;window.__svSaveEdits=saveEditsToLocal;window.__svSetActiveLayer=setActiveLayer;
   function zoomAllVisible(){
     var fg=L.featureGroup(); var added=false;
     Object.keys(layers||{}).forEach(function(id){var L0=layers[id]; if(L0&&L0.visible!==false&&L0.leaflet){try{fg.addLayer(L0.leaflet);added=true;}catch(e){}}});
@@ -6465,9 +7610,7 @@ document.getElementById('refreshBtn').onclick=function(){
   }
   function openActiveTable(){var id=activeLayerId(); if(id){setActiveLayer(id); openTable(id); switchTab('tools');} else {switchTab('data'); safeToast('Add a layer first',true);} }
   function clearSelection(){
-    var id=activeLayerId();
-    try{ if(window.__svOpState&&id&&window.__svOpState.selectedSets){window.__svOpState.selectedSets[id]={}; if(layers[id]){rebuildLayer(layers[id],true);} if(curTbl&&curTbl.id===id)renderTable(); updateOpStatus(); safeToast('Selection cleared'); return;} }catch(e){}
-    safeToast('No active selection to clear');
+    var changed=svClearAllSelections(false);if(!Object.keys(changed).length){safeToast('No active selection to clear');return;}svRefreshSelectionLayers(changed);if(window.__svUpdateOpStatus)window.__svUpdateOpStatus();safeToast('Selection cleared from all feature classes');
   }
 
   // Previous/next extent history like desktop GIS.
@@ -6489,8 +7632,6 @@ document.getElementById('refreshBtn').onclick=function(){
     $('xpAddLayer').onclick=function(){switchTab('data'); click('fileBtn')||click('importBtn');};
     $('xpOpenTable').onclick=openActiveTable;
     $('xpLayerPanel').onclick=function(){switchTab('layers');};
-    $('xpZoomIn').onclick=function(){map.zoomIn();};
-    $('xpZoomOut').onclick=function(){map.zoomOut();};
     $('xpPrevExtent').onclick=function(){goHist(-1);};
     $('xpNextExtent').onclick=function(){goHist(1);};
     $('xpZoomAll').onclick=zoomAllVisible;
@@ -6504,12 +7645,14 @@ document.getElementById('refreshBtn').onclick=function(){
       var cb=document.querySelector('.map-el[data-el="north"]'); if(cb)cb.checked=!willHide;
     };
     $('xpIdentify').onclick=function(){switchTab('tools');click('identifyToggle');};
-    $('xpSelectBox').onclick=function(){switchTab('tools');setActiveLayer(activeLayerId());click('opSelectRect')||safeToast('Select tool will be available after adding a vector layer',true);};
+    $('xpSelectBox').onclick=toggleSelectTool;
+    $('xpSwitchSel').onclick=function(){var id=activeLayerId();if(id)svSwitchSelection(id);};
+    $('xpShowSel').onclick=function(){openActiveTable();svToggleSelectedOnly(true);};
     $('xpClearSel').onclick=clearSelection;
-    $('xpStartEdit').onclick=function(){switchTab('tools');setActiveLayer(activeLayerId());click('opEditToggle')||safeToast('Open a vector layer first',true);setTimeout(updateRibbonState,100);};
-    $('xpAddFeature').onclick=function(){switchTab('tools');setActiveLayer(activeLayerId());click('opAddFeature')||safeToast('Start Editing and select a layer first',true);};
-    $('xpEditShape').onclick=function(){switchTab('tools');setActiveLayer(activeLayerId());click('opEditGeom')||safeToast('Select a feature first, then edit geometry',true);};
-    $('xpSaveEdit').onclick=function(){click('opSaveEdits')||safeToast('Edits saved in browser memory');setTimeout(updateRibbonState,100);};
+    $('xpStartEdit').onclick=toggleEditSession;
+    $('xpAddFeature').onclick=addFeatureToActiveLayer;
+    $('xpEditShape').onclick=editSelectedShape;
+    $('xpSaveEdit').onclick=svSaveTableEdits;
     var _cp=$('xpCopyFeat'); if(_cp)_cp.onclick=function(){setActiveLayer(activeLayerId()); if(window.__svCopy)window.__svCopy(); else safeToast('Copy not available',true);};
     var _pa=$('xpPasteFeat'); if(_pa)_pa.onclick=function(){setActiveLayer(activeLayerId()); if(window.__svPaste)window.__svPaste(); else safeToast('Paste not available',true);};
     var _sp=$('xpSplitFeat'); if(_sp)_sp.onclick=function(){setActiveLayer(activeLayerId()); if(window.__svSplit)window.__svSplit(); else safeToast('Split not available',true);};
@@ -6541,6 +7684,8 @@ document.getElementById('refreshBtn').onclick=function(){
     if(e.altKey&&e.key==='2'){e.preventDefault();click('xpOpenTable');}
     if(e.altKey&&e.key==='3'){e.preventDefault();click('xpSelectBox');}
     if(e.altKey&&e.key==='4'){e.preventDefault();click('xpRunQA');}
+    if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='s'){e.preventDefault();svSaveTableEdits();}
+    if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='a'&&drawer&&drawer.classList.contains('open')&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();svSelectAllVisibleRows();}
   });
   bindRibbon(); refreshRibbonLayers(); setInterval(updateRibbonState,1500);
   safeToast('Advanced experience ribbon ready — high-frequency GIS tools are grouped at the top');
@@ -6839,6 +7984,60 @@ body.login-locked{
 #helpModal.open{display:flex!important}
 #welcome.hide{display:none!important}
 .modal:not(.open){display:none!important}
+
+/* ===== Direct table editing + ESRI-style floating attribute tools ===== */
+.attr-edit-hint{font-size:10.5px;color:var(--brand-2);white-space:nowrap;padding:3px 7px;border:1px dashed color-mix(in srgb,var(--brand-2) 55%,var(--line));border-radius:6px;background:color-mix(in srgb,var(--brand-2) 7%,transparent)}
+.attrdrawer .head button:disabled,.xp-btn:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.65);box-shadow:none!important;transform:none!important}
+.attrdrawer .head button.save-ready,.xp-btn.save-ready{opacity:1;cursor:pointer;filter:none;background:linear-gradient(135deg,var(--good),var(--brand-2));border-color:transparent;color:#06121f;font-weight:900;box-shadow:0 0 0 2px color-mix(in srgb,var(--good) 24%,transparent)}
+.attrdrawer .head button.dirty::after,.xp-btn.dirty::after{content:' •';color:#FACC15;font-size:16px;line-height:0}
+table.grid td.attr-editable{cursor:text;position:relative}
+table.grid td.attr-editable:hover{outline:1px solid var(--brand-2);outline-offset:-1px;background:color-mix(in srgb,var(--brand-2) 12%,var(--panel))}
+table.grid td.attr-pending{background:color-mix(in srgb,#FACC15 24%,var(--panel))!important;box-shadow:inset 0 -2px 0 #FACC15}
+table.grid td.attr-pending::after{content:'●';position:absolute;right:3px;top:1px;color:#FACC15;font-size:7px}
+table.grid td.attr-editing{padding:2px 4px;background:var(--panel)!important;outline:2px solid var(--brand-2);outline-offset:-2px}
+table.grid td.attr-editing input{width:100%;min-width:120px;height:28px;border:1px solid var(--brand-2);border-radius:4px;background:var(--chip);color:var(--ink);padding:0 7px;font:inherit;outline:none}
+table.grid td.attr-editable::before{content:'✎';position:absolute;right:4px;bottom:1px;font-size:8px;color:var(--brand-2);opacity:0;pointer-events:none}
+table.grid td.attr-editable:hover::before{opacity:.85}
+table.grid td.attr-editing input{position:relative;z-index:3}
+
+.sba-tool-window{position:fixed;left:64px;top:92px;width:540px;height:min(690px,calc(100vh - 120px));min-width:430px;min-height:330px;max-width:calc(100vw - 24px);max-height:calc(100vh - 56px);z-index:5350;display:none;resize:both;overflow:hidden;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.58)}
+.sba-tool-window.open{display:block}
+.sba-tool-card{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.sba-tool-head{height:46px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px 0 14px;background:var(--bg-2);border-bottom:1px solid var(--line);cursor:move;user-select:none;touch-action:none}
+.sba-tool-head b{font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sba-tool-head .topbtn{height:30px;padding:0 9px}
+.sba-tool-head button{cursor:pointer}
+.sba-pin{height:30px;min-width:30px;border:1px solid var(--line);border-radius:7px;background:var(--chip);color:var(--ink);font-size:13px}
+.sba-pin:hover{border-color:var(--brand-2);color:var(--brand-2)}
+.sba-tool-tabs{display:flex;flex:none;background:var(--bg-2);border-bottom:1px solid var(--line)}
+.sba-tool-tabs button{flex:1;height:39px;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--ink-dim);font-size:11.5px;font-weight:800;cursor:pointer}
+.sba-tool-tabs button.active{color:var(--brand-2);border-bottom-color:var(--brand-2);background:color-mix(in srgb,var(--brand-2) 7%,transparent)}
+.sba-tool-body{flex:1;min-height:0;overflow:auto;padding:14px}
+.sba-tool-pane{display:none}
+.sba-tool-pane.active{display:block}
+.sba-readonly-layer{min-height:34px;display:flex;align-items:center;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg-2);color:var(--ink);font-size:12px;font-weight:700}
+.sba-expression-row{display:grid;grid-template-columns:minmax(130px,1fr) 110px minmax(130px,1fr);gap:7px;margin-bottom:7px}
+.sba-expression-row select,.sba-expression-row input{height:34px;border:1px solid var(--line);border-radius:8px;background:var(--chip);color:var(--ink);font-size:12px;padding:0 8px;outline:none}
+.sba-expression-row select:focus,.sba-expression-row input:focus{border-color:var(--brand-2)}
+.sba-expression-preview{min-height:34px;margin-bottom:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg-2);color:var(--brand-2);font-family:var(--mono);font-size:11px;word-break:break-word}
+.sba-tool-actions{display:flex;gap:7px;align-items:center;margin-top:8px}
+.sba-tool-actions .btn{width:auto;flex:1;margin:0;height:35px}
+.sba-tool-actions.secondary{margin-top:7px}
+.sba-tool-window .measure-out{margin-top:10px;min-height:42px;max-height:120px;overflow:auto}
+.sba-tool-window code{color:var(--brand-2)}
+@media(max-width:680px){.sba-tool-window{left:8px!important;top:64px!important;width:calc(100vw - 16px)!important;height:calc(100vh - 76px)!important;min-width:0;max-width:none;resize:none}.sba-expression-row{grid-template-columns:1fr}.attr-edit-hint{display:none}}
+
+
+.sba-clause-controls{display:grid;grid-template-columns:minmax(170px,1fr) auto auto;gap:7px;margin-bottom:8px}
+.sba-clause-controls select{height:34px;border:1px solid var(--line);border-radius:8px;background:var(--chip);color:var(--ink);font-size:11.5px;padding:0 8px}
+.sba-clause-controls .btn{width:auto;height:34px;margin:0;padding:0 10px}
+.sba-clause-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.sba-clause{display:flex;align-items:center;gap:7px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg-2);font-family:var(--mono);font-size:10.5px;color:var(--ink)}
+.sba-clause .join{font-weight:900;color:var(--brand-2);min-width:28px}
+.sba-clause .text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sba-clause button{width:24px;height:24px;border:1px solid var(--line);border-radius:6px;background:var(--chip);color:var(--bad);cursor:pointer}
+@media(max-width:680px){.sba-clause-controls{grid-template-columns:1fr}.sba-clause-controls .btn{width:100%}}
+
 </style>
 
 </body>
