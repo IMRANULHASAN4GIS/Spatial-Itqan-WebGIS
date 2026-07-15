@@ -1030,6 +1030,16 @@
           <div class="field"><label>Color</label><input id="sColor" type="color" value="#3B82F6"/></div>
           <div class="field"><label>Point size</label><input id="sSize" type="number" min="1" max="20" value="6"/></div>
         </div>
+        <div class="row2" id="sGeomRow" style="display:none">
+          <div class="field" id="sWidthWrap"><label id="sWidthLabel">Line width (px)</label><input id="sWidth" type="number" min="0.5" max="12" step="0.5" value="2.5"/></div>
+          <div class="field" id="sFillStyleWrap" style="display:none"><label>Fill style</label>
+            <select id="sFillStyle"><option value="solid">Solid fill</option><option value="hollow">Hollow (no fill)</option></select></div>
+        </div>
+        <div class="field" id="sOutlineWrap" style="display:none">
+          <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;cursor:pointer">
+            <input type="checkbox" id="sOutlineUse"/> <span>Custom outline color</span></label>
+          <input id="sOutlineColor" type="color" value="#000000" style="display:none;margin-top:6px"/>
+        </div>
         <div class="field"><label>Opacity <span id="sOpV">0.8</span></label>
           <input id="sOpacity" type="range" min="0" max="1" step="0.05" value="0.8" style="width:100%"/></div>
         <div class="field" id="sGradField"><label>Graduated color by numeric field</label>
@@ -1263,16 +1273,34 @@
           <label style="font-size:12px;display:flex;align-items:center;gap:7px"><input type="checkbox" id="exScale" checked/> Scale bar</label>
         </div>
         <label style="font-size:12px;display:flex;align-items:center;gap:7px;margin-top:8px"><input type="checkbox" id="exCrs" checked/> CRS stamp</label>
+        <div class="row2" style="margin-top:8px">
+          <label style="font-size:12px;display:flex;align-items:center;gap:7px"><input type="checkbox" id="exScaleTxt"/> Scale text (1:N)</label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:7px"><input type="checkbox" id="exNeat" checked/> Neatline</label>
+        </div>
+        <div class="row2" style="margin-top:8px">
+          <label style="font-size:12px;display:flex;align-items:center;gap:7px"><input type="checkbox" id="exAuthorOn"/> Author</label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:7px"><input type="checkbox" id="exDate"/> Date stamp</label>
+        </div>
+        <div class="field" id="exAuthorWrap" style="display:none;margin-top:6px"><label>Author / organisation</label>
+          <input id="exAuthor" type="text" placeholder="e.g. GIS Section, Al Ain Municipality"/></div>
+        <div class="field" style="margin-top:6px"><label>Notes / description (optional, printed on layout)</label>
+          <input id="exNotes" type="text" placeholder="e.g. Pavement condition survey — Q2 2026"/></div>
+        <div class="row2" style="margin-top:6px">
+          <div class="field"><label>Legend position</label>
+            <select id="exLegendPos"><option value="bl" selected>Bottom left</option><option value="tl">Top left</option><option value="tr">Top right</option><option value="br">Bottom right</option></select></div>
+          <div class="field"><label>Logo (optional)</label>
+            <input id="exLogoFile" type="file" accept="image/*" style="font-size:11px"/></div>
+        </div>
 
         <div class="row2" style="margin-top:11px">
           <div class="field"><label>Page size</label>
-            <select id="exPage"><option value="a4">A4</option><option value="a3">A3</option><option value="letter">Letter</option><option value="current">Current view</option></select></div>
+            <select id="exPage"><option value="a4">A4</option><option value="a3">A3</option><option value="a2">A2</option><option value="a1">A1</option><option value="a0">A0</option><option value="letter">Letter</option><option value="tabloid">Tabloid 11×17</option><option value="current">Current view</option></select></div>
           <div class="field"><label>Orientation</label>
             <select id="exOrient"><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select></div>
         </div>
         <div class="row2">
           <div class="field"><label>Resolution</label>
-            <select id="exRes"><option value="1">1× (screen)</option><option value="2" selected>2× (sharp)</option><option value="3">3× (print)</option></select></div>
+            <select id="exRes"><option value="1">1× (screen)</option><option value="2" selected>2× (sharp)</option><option value="3">3× (print)</option><option value="4">4× (300 DPI press)</option></select></div>
           <div class="field"><label>Page style</label>
             <select id="exStyle"><option value="light" selected>Light (ArcGIS page)</option><option value="dark">Dark</option></select></div>
         </div>
@@ -2021,10 +2049,13 @@ function svBuildLeafletLayer(L0){
     L0._gMin=vals.length?Math.min.apply(null,vals):0; L0._gMax=vals.length?Math.max.apply(null,vals):1;
   }
   var size=L0.size||6, opacity=(L0.opacity!=null?L0.opacity:1), selSet=svSelSet(L0.id);
+  var w=(L0.weight!=null?+L0.weight:2.5), hollow=!!L0.hollow;
+  var gIsPoly=/Polygon/.test(String(L0.geomType||geomTypeOf(L0.geojson)||''));
+  var ocol=(gIsPoly&&L0.outlineColor&&L0.outlineColor[0]==='#')?L0.outlineColor:'';
   try{ if(L0.leaflet)map.removeLayer(L0.leaflet); }catch(e){}
   var nl=L.geoJSON(L0.geojson,{
     style:function(f){ var c=svColorForFeature(L0,f), fid=String((f.properties&&f.properties.__sv_fid)||''), sel=!!selSet[fid];
-      return sel?{color:'#00E5FF',weight:5,opacity:1,fillColor:'#FACC15',fillOpacity:.72,dashArray:'6,3'}:{color:c,weight:2.5,opacity:.95,fillColor:c,fillOpacity:opacity}; },
+      return sel?{color:'#00E5FF',weight:Math.max(w+2.5,5),opacity:1,fillColor:'#FACC15',fillOpacity:(hollow?0:.72),dashArray:'6,3'}:{color:(ocol||c),weight:w,opacity:.95,fillColor:c,fillOpacity:(hollow?0:opacity)}; },
     pointToLayer:function(f,ll){ var c=svColorForFeature(L0,f), fid=String((f.properties&&f.properties.__sv_fid)||''), sel=!!selSet[fid];
       return L.circleMarker(ll, sel?{radius:size+3,color:'#00E5FF',weight:4,fillColor:'#FACC15',fillOpacity:.95}:{radius:size,color:c,weight:2,fillColor:c,fillOpacity:opacity}); },
     onEachFeature:function(f,l){ l.bindPopup(popupFromProps(f.properties));
@@ -2121,7 +2152,7 @@ function duplicateLayer(id){
   var c=nextColor();
   var id2=addLayer(geoJsonLayer(gj,c), L0.name+' (copy)', c, {zoom:false});
   var L2=layers[id2];
-  if(L2&&L0.colorMode){ L2.uniqueField=L0.uniqueField||''; L2.field=L0.field||''; L2.colorMode=L0.colorMode; L2.catColors=L0.catColors?Object.assign({},L0.catColors):null; L2.size=L0.size; L2.opacity=L0.opacity; svBuildLeafletLayer(L2); renderLegend(); }
+  if(L2&&L0.colorMode){ L2.uniqueField=L0.uniqueField||''; L2.field=L0.field||''; L2.colorMode=L0.colorMode; L2.catColors=L0.catColors?Object.assign({},L0.catColors):null; L2.weight=L0.weight; L2.hollow=L0.hollow; L2.outlineColor=L0.outlineColor||''; L2.size=L0.size; L2.opacity=L0.opacity; svBuildLeafletLayer(L2); renderLegend(); }
   toast('Layer duplicated');
 }
 function renameLayer(id){
@@ -2206,7 +2237,8 @@ function renderLegend(){
       var keys=Object.keys(L0.catColors).sort(function(a,b){var na=parseFloat(a),nb=parseFloat(b);if(!isNaN(na)&&!isNaN(nb))return na-nb;return a.localeCompare(b);});
       keys.forEach(function(k){var d=document.createElement('div');d.className='legitem';d.style.cssText='padding-left:16px;justify-content:space-between;gap:10px';
         var lenTxt=stats.hasLines?'<span style="color:var(--ink-dim);font-size:10px;font-family:var(--mono);white-space:nowrap">'+svFmtLen(stats.totals[k]||0)+'</span>':'';
-        d.innerHTML='<span style="display:flex;align-items:center;gap:8px;min-width:0"><span class="sw" style="background:'+L0.catColors[k]+'"></span><span style="overflow:hidden;text-overflow:ellipsis">'+escapeHtml(k||'(blank)')+'</span></span>'+lenTxt;
+        var swSty=L0.hollow?('background:transparent;border:2px solid '+L0.catColors[k]):('background:'+L0.catColors[k]);
+        d.innerHTML='<span style="display:flex;align-items:center;gap:8px;min-width:0"><span class="sw" style="'+swSty+'"></span><span style="overflow:hidden;text-overflow:ellipsis">'+escapeHtml(k||'(blank)')+'</span></span>'+lenTxt;
         legendBody.appendChild(d);});
       if(stats.hasLines){
         var tot=document.createElement('div');tot.className='legitem';
@@ -2216,7 +2248,8 @@ function renderLegend(){
       }
     } else {
       var d=document.createElement('div');d.className='legitem';
-      d.innerHTML='<span class="sw" style="background:'+L0.color+'"></span>'+escapeHtml(L0.name);legendBody.appendChild(d);
+      var swS=L0.hollow?('background:transparent;border:2px solid '+L0.color):('background:'+L0.color);
+      d.innerHTML='<span class="sw" style="'+swS+'"></span>'+escapeHtml(L0.name);legendBody.appendChild(d);
     }
   });
 }
@@ -5116,6 +5149,19 @@ function syncS(){var L0=layers[document.getElementById('sLayer').value];var f=do
     if(L0.uniqueField)cf.value=L0.uniqueField;
     syncSMode();
     if(mode==='categorized'&&L0.uniqueField)renderCatList(L0,L0.uniqueField); else document.getElementById('sCatList').innerHTML='';
+    /* geometry-aware stroke/fill controls (ESRI-style) */
+    var gt=String(L0.geomType||geomTypeOf(L0.geojson)||'');
+    var isLine=/LineString/.test(gt), isPoly=/Polygon/.test(gt);
+    document.getElementById('sGeomRow').style.display=(isLine||isPoly)?'flex':'none';
+    document.getElementById('sWidthLabel').textContent=isPoly?'Outline width (px)':'Line width (px)';
+    document.getElementById('sFillStyleWrap').style.display=isPoly?'block':'none';
+    document.getElementById('sOutlineWrap').style.display=isPoly?'block':'none';
+    document.getElementById('sWidth').value=(L0.weight!=null?L0.weight:2.5);
+    document.getElementById('sFillStyle').value=L0.hollow?'hollow':'solid';
+    var hasOC=!!(L0.outlineColor&&L0.outlineColor[0]==='#');
+    document.getElementById('sOutlineUse').checked=hasOC;
+    document.getElementById('sOutlineColor').style.display=hasOC?'block':'none';
+    if(hasOC)document.getElementById('sOutlineColor').value=L0.outlineColor;
     /* labels state for this layer */
     var lf=document.getElementById('sLabelField');
     fillSel(lf,fieldsOf(L0).filter(function(k){return k.indexOf('__sv')!==0;}),function(x){return x;},function(x){return x;},'\u2014 choose field \u2014');
@@ -5153,11 +5199,21 @@ document.getElementById('sMode').onchange=function(){
 };
 document.getElementById('sCatField').onchange=function(){var L0=layers[document.getElementById('sLayer').value];if(L0&&this.value)renderCatList(L0,this.value);else document.getElementById('sCatList').innerHTML='';};
 document.getElementById('sOpacity').oninput=function(){document.getElementById('sOpV').textContent=(+this.value).toFixed(2);};
+document.getElementById('sOutlineUse').onchange=function(){document.getElementById('sOutlineColor').style.display=this.checked?'block':'none';};
 document.getElementById('sApply').onclick=function(){
   var L0=layers[document.getElementById('sLayer').value];if(!L0||!L0.geojson){toast('Pick a layer',true);return;}
   var mode=document.getElementById('sMode').value;
   var color=document.getElementById('sColor').value,size=+document.getElementById('sSize').value||6,opacity=+document.getElementById('sOpacity').value;
   L0.color=color;L0.size=size;L0.opacity=opacity;
+  /* stroke width / polygon fill style / outline color (apply in every symbology mode) */
+  var gt2=String(L0.geomType||geomTypeOf(L0.geojson)||'');
+  if(/LineString|Polygon/.test(gt2)){
+    L0.weight=Math.max(.5,Math.min(12,parseFloat(document.getElementById('sWidth').value)||2.5));
+    if(/Polygon/.test(gt2)){
+      L0.hollow=(document.getElementById('sFillStyle').value==='hollow');
+      L0.outlineColor=document.getElementById('sOutlineUse').checked?document.getElementById('sOutlineColor').value:'';
+    }
+  }
   if(mode==='single'){ L0.colorMode='single'; L0.field=''; L0.uniqueField=''; }
   else if(mode==='graduated'){
     var field=document.getElementById('sField').value; if(!field){toast('Choose a numeric field',true);return;}
@@ -5272,7 +5328,7 @@ document.getElementById('showLegend').onchange=function(){document.getElementByI
 (function(){var z=document.getElementById('exZoom');for(var i=3;i<=19;i++){var o=document.createElement('option');o.value=i;o.textContent='Zoom '+i;z.appendChild(o);}})();
 
 /* page sizes at 96 dpi base (px) — scaled by resolution */
-var PAGES={a4:{l:[1123,794],p:[794,1123]},a3:{l:[1587,1123],p:[1123,1587]},letter:{l:[1056,816],p:[816,1056]}};
+var PAGES={a4:{l:[1123,794],p:[794,1123]},a3:{l:[1587,1123],p:[1123,1587]},a2:{l:[2245,1587],p:[1587,2245]},a1:{l:[3179,2245],p:[2245,3179]},a0:{l:[4494,3179],p:[3179,4494]},letter:{l:[1056,816],p:[816,1056]},tabloid:{l:[1632,1056],p:[1056,1632]}};
 
 function styleColors(style){
   return style==='light'
@@ -5294,7 +5350,8 @@ function svPaintOverlaysOnMapCanvas(canvas){
       return 'rgba('+parseInt(m[1],16)+','+parseInt(m[2],16)+','+parseInt(m[3],16)+','+a+')'; }
     Object.keys(layers).forEach(function(id){
       var L0=layers[id]; if(!L0||!L0.visible||L0.isRaster||!L0.geojson||!L0.geojson.features)return;
-      var op=(L0.opacity!=null?L0.opacity:1), pt=(L0.size||6)*sx, lw=2.5*sx;
+      var op=(L0.opacity!=null?L0.opacity:1), pt=(L0.size||6)*sx, lw=(L0.weight!=null?+L0.weight:2.5)*sx;
+      var hollow=!!L0.hollow, ocol=(L0.outlineColor&&L0.outlineColor[0]==='#')?L0.outlineColor:'';
       L0.geojson.features.forEach(function(f){
         var g=f.geometry; if(!g)return;
         var c=svColorForFeature(L0,f);
@@ -5306,8 +5363,12 @@ function svPaintOverlaysOnMapCanvas(canvas){
             ctx.beginPath();ctx.arc(p[0],p[1],pt,0,6.2832);ctx.fillStyle=hexA(c,Math.max(op,.85));ctx.fill();ctx.lineWidth=1.5*sx;ctx.strokeStyle='#ffffff';ctx.stroke(); }); }
           else if(g.type==='LineString'){ ctx.beginPath();ring(g.coordinates);ctx.stroke(); }
           else if(g.type==='MultiLineString'){ g.coordinates.forEach(function(ls){ ctx.beginPath();ring(ls);ctx.stroke(); }); }
-          else if(g.type==='Polygon'){ ctx.beginPath();g.coordinates.forEach(ring);ctx.closePath();ctx.fillStyle=hexA(c,Math.min(op,.55));ctx.fill('evenodd');ctx.stroke(); }
-          else if(g.type==='MultiPolygon'){ g.coordinates.forEach(function(poly){ ctx.beginPath();poly.forEach(ring);ctx.closePath();ctx.fillStyle=hexA(c,Math.min(op,.55));ctx.fill('evenodd');ctx.stroke(); }); }
+          else if(g.type==='Polygon'){ ctx.beginPath();g.coordinates.forEach(ring);ctx.closePath();
+            if(!hollow){ctx.fillStyle=hexA(c,Math.min(op,.55));ctx.fill('evenodd');}
+            ctx.strokeStyle=ocol||c;ctx.stroke(); }
+          else if(g.type==='MultiPolygon'){ g.coordinates.forEach(function(poly){ ctx.beginPath();poly.forEach(ring);ctx.closePath();
+            if(!hollow){ctx.fillStyle=hexA(c,Math.min(op,.55));ctx.fill('evenodd');}
+            ctx.strokeStyle=ocol||c;ctx.stroke(); }); }
         }catch(e){}
       });
     });
@@ -5405,6 +5466,14 @@ function buildLayoutCanvas(cb){
         ctx.strokeStyle=frameLine; ctx.lineWidth=Math.max(1.2*res,1.5);
         ctx.strokeRect(dx+0.5,dy+0.5,dw-1,dh-1);
       }
+      // ESRI neatline: heavy outer border + fine inner border around the page
+      if(page!=='current' && document.getElementById('exNeat') && document.getElementById('exNeat').checked){
+        var nOff=Math.round(margin*0.42);
+        ctx.strokeStyle=frameLine; ctx.lineWidth=Math.max(2.2*res,2.5);
+        ctx.strokeRect(nOff+0.5,nOff+0.5,tw-nOff*2-1,th-nOff*2-1);
+        ctx.lineWidth=Math.max(0.8*res,1);
+        ctx.strokeRect(nOff+5*res+0.5,nOff+5*res+0.5,tw-(nOff+5*res)*2-1,th-(nOff+5*res)*2-1);
+      }
       // ---- draw digitized features + marked points directly (guaranteed in export) ----
       (function(){
         var size=map.getSize(); // capture canvas matches map size (before page scaling)
@@ -5466,17 +5535,21 @@ function buildLayoutCanvas(cb){
             rows.push({kind:'layer',text:String(L0.name).slice(0,24)+' ('+String(L0.uniqueField).slice(0,14)+')'});
             var stats=svLengthStats(L0,L0.uniqueField);
             var keys=Object.keys(L0.catColors).sort(function(a,b){var na=parseFloat(a),nb=parseFloat(b);if(!isNaN(na)&&!isNaN(nb))return na-nb;return a.localeCompare(b);});
-            keys.forEach(function(k){ rows.push({kind:'class',color:L0.catColors[k],gt:(L0.geomType||geomTypeOf(L0.geojson)||''),text:(k||'(blank)'),len:stats.hasLines?svFmtLen(stats.totals[k]||0):''}); });
+            keys.forEach(function(k){ rows.push({kind:'class',color:L0.catColors[k],gt:(L0.geomType||geomTypeOf(L0.geojson)||''),hollow:!!L0.hollow,text:(k||'(blank)'),len:stats.hasLines?svFmtLen(stats.totals[k]||0):''}); });
             if(stats.hasLines) rows.push({kind:'total',text:'Total',len:svFmtLen(stats.grand)});
           } else {
-            rows.push({kind:'class',color:L0.color,gt:L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||''),text:String(L0.name).slice(0,24),len:''});
+            rows.push({kind:'class',color:L0.color,gt:L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||''),hollow:!!L0.hollow,text:String(L0.name).slice(0,24),len:''});
           }
         });
         var rowH=20*S, padX=12*S, headH=30*S;
         var hasLen=rows.some(function(r){return r.len;});
         var lw=(hasLen?265:205)*S, lh=headH+8*S+Math.max(rows.length,1)*rowH+8*S;
-        var lx=(page!=='current'?frameX:0)+14*S, ly=(page!=='current'?(frameY+frameH):th)-18*S-lh;
-        if(ly<(page!=='current'?frameY:0)+10*S) ly=(page!=='current'?frameY:0)+10*S;
+        var _pos=(document.getElementById('exLegendPos')?document.getElementById('exLegendPos').value:'bl');
+        var _fx=(page!=='current'?frameX:0), _fy=(page!=='current'?frameY:0);
+        var _fw=(page!=='current'?frameW:tw), _fh=(page!=='current'?frameH:th);
+        var lx=(_pos==='tr'||_pos==='br')?(_fx+_fw-14*S-lw):(_fx+14*S);
+        var ly=(_pos==='tl'||_pos==='tr')?(_fy+14*S):(_fy+_fh-18*S-lh);
+        if(ly<_fy+10*S) ly=_fy+10*S;
         // box
         ctx.fillStyle=legBg; ctx.strokeStyle=legBorder; ctx.lineWidth=Math.max(1*S,1);
         roundRect(ctx,lx,ly,lw,lh,3*S); ctx.fill(); ctx.stroke();
@@ -5508,7 +5581,7 @@ function buildLayoutCanvas(cb){
           ctx.fillStyle=r.color; ctx.strokeStyle=r.color;
           if(r.gt==='LineString'||r.gt==='MultiLineString'){ ctx.lineWidth=2.5*S; ctx.beginPath(); ctx.moveTo(symX,symMid); ctx.lineTo(symX+16*S,symMid); ctx.stroke(); }
           else if(r.gt==='Point'||r.gt==='MultiPoint'){ ctx.beginPath(); ctx.arc(symX+8*S,symMid,5*S,0,6.283); ctx.fill(); ctx.lineWidth=1*S; ctx.strokeStyle='#fff'; ctx.stroke(); }
-          else { ctx.fillStyle=hexA2(r.color,.55); ctx.fillRect(symX,symMid-6*S,16*S,12*S); ctx.strokeStyle=r.color; ctx.lineWidth=1.2*S; ctx.strokeRect(symX,symMid-6*S,16*S,12*S); }
+          else { if(!r.hollow){ctx.fillStyle=hexA2(r.color,.55); ctx.fillRect(symX,symMid-6*S,16*S,12*S);} ctx.strokeStyle=r.color; ctx.lineWidth=(r.hollow?2:1.2)*S; ctx.strokeRect(symX,symMid-6*S,16*S,12*S); }
           ctx.fillStyle=legInk; ctx.font=(11.5*S)+'px Inter,Arial';
           ctx.fillText(r.text,symX+24*S,symMid+4*S);
           if(r.len){ ctx.fillStyle=legDim; ctx.font=(9.5*S)+'px JetBrains Mono,monospace'; ctx.textAlign='right';
@@ -5521,6 +5594,59 @@ function buildLayoutCanvas(cb){
         var _ek=effectiveCrsKey(); var crsTxt='CRS: '+CRS[_ek].esri+' ('+CRS[_ek].code+')';
         var cw=ctx.measureText(crsTxt).width; ctx.fillStyle=C.panel; roundRect(ctx,tw-cw-28*S,th-32*S,cw+16*S,22*S,6*S); ctx.fill();
         ctx.fillStyle=C.accent; ctx.fillText(crsTxt,tw-cw-20*S,th-17*S);
+      }
+      // Scale text (1:N) — computed from the map view and how it was fitted onto the page
+      if(document.getElementById('exScaleTxt')&&document.getElementById('exScaleTxt').checked){
+        try{
+          var _ctr=map.getCenter(), _z=map.getZoom();
+          var mPerPx=156543.03392*Math.cos(_ctr.lat*Math.PI/180)/Math.pow(2,_z);
+          var mPerPagePx=mPerPx*(canvas.width/dw); // account for map image scaling into the frame
+          var denom=Math.round(mPerPagePx/0.000264583); // 96 dpi page pixel = 0.264583 mm
+          var mag=Math.pow(10,Math.max(0,String(denom).length-2)); denom=Math.round(denom/mag)*mag;
+          var stTxt='Scale 1:'+denom.toLocaleString('en-US');
+          ctx.font='700 '+(11*S)+'px Inter,Arial';
+          var stw=ctx.measureText(stTxt).width;
+          ctx.fillStyle=C.panel; roundRect(ctx,24*S,th-70*S,stw+16*S,22*S,6*S); ctx.fill();
+          ctx.fillStyle=C.ink; ctx.fillText(stTxt,32*S,th-55*S);
+        }catch(e){}
+      }
+      // Author / date line (bottom centre, ESRI marginalia style)
+      (function(){
+        var parts=[];
+        if(document.getElementById('exAuthorOn')&&document.getElementById('exAuthorOn').checked){
+          var a=(document.getElementById('exAuthor').value||'').trim(); if(a)parts.push('Author: '+a);
+        }
+        if(document.getElementById('exDate')&&document.getElementById('exDate').checked){
+          parts.push('Date: '+new Date().toISOString().slice(0,10));
+        }
+        if(!parts.length)return;
+        var txt=parts.join('   \u2022   ');
+        ctx.font=(10*S)+'px Inter,Arial';
+        var w2=ctx.measureText(txt).width;
+        ctx.fillStyle=C.panel; roundRect(ctx,(tw-w2)/2-10*S,th-30*S,w2+20*S,20*S,5*S); ctx.fill();
+        ctx.fillStyle=C.ink; ctx.fillText(txt,(tw-w2)/2,th-16*S);
+      })();
+      // Notes / description block (top-left inside the frame, under any logo)
+      (function(){
+        var n=(document.getElementById('exNotes')?document.getElementById('exNotes').value:'').trim(); if(!n)return;
+        ctx.font='italic '+(10.5*S)+'px Inter,Arial';
+        var maxW=tw*0.42, words=n.split(/\s+/), lines=[], cur='';
+        words.forEach(function(w3){ var t=(cur?cur+' ':'')+w3; if(ctx.measureText(t).width>maxW&&cur){lines.push(cur);cur=w3;} else cur=t; });
+        if(cur)lines.push(cur);
+        var lh2=15*S, bw=Math.min(maxW,Math.max.apply(null,lines.map(function(l){return ctx.measureText(l).width;})))+20*S;
+        var bx=(page!=='current'?frameX:0)+14*S, by=(page!=='current'?frameY:0)+14*S+(window.__svExLogoImg?64*S:0);
+        ctx.fillStyle=C.panel; roundRect(ctx,bx,by,bw,lines.length*lh2+14*S,6*S); ctx.fill();
+        ctx.fillStyle=C.ink;
+        lines.forEach(function(l,i){ ctx.fillText(l,bx+10*S,by+16*S+i*lh2); });
+      })();
+      // Logo (top-left inside the frame)
+      if(window.__svExLogoImg){
+        try{
+          var im=window.__svExLogoImg, lgH=56*S, lgW=lgH*(im.width/im.height);
+          var gx=(page!=='current'?frameX:0)+14*S, gy=(page!=='current'?frameY:0)+14*S;
+          ctx.fillStyle=C.panel; roundRect(ctx,gx-4*S,gy-4*S,lgW+8*S,lgH+8*S,6*S); ctx.fill();
+          ctx.drawImage(im,gx,gy,lgW,lgH);
+        }catch(e){}
       }
       // credit
       // (credit stamp removed from layout)
@@ -5571,6 +5697,19 @@ function fallbackDownload(blob,fname){
   setTimeout(function(){URL.revokeObjectURL(a.href);},1500);
   toast('Exported '+fname+' — your browser will ask where to save');
 }
+/* layout marginalia wiring: author input visibility + logo image loading */
+(function(){
+  var aOn=document.getElementById('exAuthorOn'), aWrap=document.getElementById('exAuthorWrap');
+  if(aOn&&aWrap)aOn.onchange=function(){aWrap.style.display=this.checked?'block':'none';};
+  var lf=document.getElementById('exLogoFile');
+  if(lf)lf.onchange=function(){
+    var f=this.files&&this.files[0];
+    if(!f){window.__svExLogoImg=null;return;}
+    var r=new FileReader();
+    r.onload=function(){ var im=new Image(); im.onload=function(){window.__svExLogoImg=im;toast('Logo loaded — it will appear top-left on the layout');}; im.src=r.result; };
+    r.readAsDataURL(f);
+  };
+})();
 document.getElementById('exportPNG').onclick=function(){
   buildLayoutCanvas(function(canvas){ canvas.toBlob(function(blob){ saveBlob(blob, exportFileName('png'), 'image/png'); },'image/png'); });
 };
@@ -6192,28 +6331,57 @@ document.getElementById('exportPDF').onclick=function(){
       ctx.fillStyle='#111'; ctx.font='700 '+(s*0.28)+'px Inter,Arial'; ctx.textAlign='center';
       ctx.fillText('N', nx, ny+s*0.92); ctx.textAlign='left';
     }
-    // legend
+    // legend (categorized classes + lengths + total, matching the on-screen preview)
     var lEl=$('ldLegend');
     if(shown(lEl)){
       var lb=box(lEl);
       ctx.fillStyle='#fff'; ctx.strokeStyle='#6B7280'; ctx.lineWidth=1*res;
       ctx.fillRect(lb.x,lb.y,lb.w,lb.h); ctx.strokeRect(lb.x,lb.y,lb.w,lb.h);
       var items=Object.keys(layers).map(function(id){return layers[id];}).filter(function(L0){return L0.visible;});
-      var padX=10*res, yy=lb.y+18*res;
+      var lrows=[];
+      items.forEach(function(L0){
+        var gt0=L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||'');
+        if(L0.colorMode==='categorized'&&L0.catColors&&Object.keys(L0.catColors).length){
+          lrows.push({kind:'layer',text:String(L0.name).slice(0,22)+' ('+String(L0.uniqueField).slice(0,12)+')'});
+          var stats=svLengthStats(L0,L0.uniqueField);
+          var keys=Object.keys(L0.catColors).sort(function(a,b){var na=parseFloat(a),nb=parseFloat(b);if(!isNaN(na)&&!isNaN(nb))return na-nb;return a.localeCompare(b);});
+          keys.forEach(function(k){ lrows.push({kind:'class',color:L0.catColors[k],gt:gt0,hollow:!!L0.hollow,text:(k||'(blank)'),len:stats.hasLines?svFmtLen(stats.totals[k]||0):''}); });
+          if(stats.hasLines) lrows.push({kind:'total',text:'Total',len:svFmtLen(stats.grand)});
+        } else {
+          lrows.push({kind:'class',color:L0.color,gt:gt0,hollow:!!L0.hollow,text:String(L0.name).slice(0,24),len:''});
+        }
+      });
+      var padX=10*res, yy=lb.y+18*res, rowH=18*res, bottom=lb.y+lb.h-8*res;
       ctx.fillStyle='#1b1b1b'; ctx.font='700 '+(13*res)+'px Inter,Arial'; ctx.fillText('Legend', lb.x+padX, yy);
       ctx.strokeStyle='#6B7280'; ctx.lineWidth=0.8*res; ctx.beginPath(); ctx.moveTo(lb.x+padX,yy+6*res); ctx.lineTo(lb.x+lb.w-padX,yy+6*res); ctx.stroke();
-      yy+=24*res; ctx.font=(12*res)+'px Inter,Arial';
-      if(!items.length){ ctx.fillStyle='#666'; ctx.fillText('No visible layers', lb.x+padX, yy); }
-      items.forEach(function(L0){
-        var gt=L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||'');
-        ctx.fillStyle=L0.color; ctx.strokeStyle=L0.color;
-        if(gt==='LineString'){ ctx.lineWidth=2.5*res; ctx.beginPath(); ctx.moveTo(lb.x+padX,yy-4*res); ctx.lineTo(lb.x+padX+16*res,yy-4*res); ctx.stroke(); }
-        else if(gt==='Point'){ ctx.beginPath(); ctx.arc(lb.x+padX+8*res,yy-4*res,5*res,0,6.283); ctx.fill(); }
-        else { ctx.fillStyle=hexA2(L0.color,.55); ctx.fillRect(lb.x+padX,yy-10*res,16*res,12*res); ctx.strokeStyle=L0.color; ctx.lineWidth=1.2*res; ctx.strokeRect(lb.x+padX,yy-10*res,16*res,12*res); }
-        ctx.fillStyle='#1b1b1b'; ctx.font=(12*res)+'px Inter,Arial';
-        ctx.fillText(String(L0.name).slice(0,26), lb.x+padX+24*res, yy);
-        yy+=20*res;
-      });
+      yy+=24*res;
+      if(!lrows.length){ ctx.fillStyle='#666'; ctx.font=(12*res)+'px Inter,Arial'; ctx.fillText('No visible layers', lb.x+padX, yy); }
+      for(var ri=0; ri<lrows.length; ri++){
+        if(yy>bottom)break; // clip to the legend box
+        var r=lrows[ri];
+        if(r.kind==='layer'){
+          ctx.fillStyle='#1b1b1b'; ctx.font='700 '+(11.5*res)+'px Inter,Arial';
+          ctx.fillText(r.text, lb.x+padX, yy);
+          yy+=rowH; continue;
+        }
+        if(r.kind==='total'){
+          ctx.strokeStyle='#9aa0a6'; ctx.lineWidth=0.6*res; ctx.setLineDash([3*res,3*res]);
+          ctx.beginPath(); ctx.moveTo(lb.x+padX+14*res,yy-11*res); ctx.lineTo(lb.x+lb.w-padX,yy-11*res); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle='#1b1b1b'; ctx.font='700 '+(11*res)+'px Inter,Arial';
+          ctx.fillText(r.text, lb.x+padX+22*res, yy);
+          if(r.len){ ctx.font='700 '+(9*res)+'px monospace'; ctx.textAlign='right'; ctx.fillText(r.len, lb.x+lb.w-padX, yy); ctx.textAlign='left'; }
+          yy+=rowH; continue;
+        }
+        var symX=lb.x+padX+(r.gt==='Raster'?0:6*res);
+        ctx.fillStyle=r.color; ctx.strokeStyle=r.color;
+        if(r.gt==='LineString'||r.gt==='MultiLineString'){ ctx.lineWidth=2.5*res; ctx.beginPath(); ctx.moveTo(symX,yy-4*res); ctx.lineTo(symX+16*res,yy-4*res); ctx.stroke(); }
+        else if(r.gt==='Point'||r.gt==='MultiPoint'){ ctx.beginPath(); ctx.arc(symX+8*res,yy-4*res,5*res,0,6.283); ctx.fill(); }
+        else { if(!r.hollow){ctx.fillStyle=hexA2(r.color,.55); ctx.fillRect(symX,yy-10*res,16*res,12*res);} ctx.strokeStyle=r.color; ctx.lineWidth=(r.hollow?2:1.2)*res; ctx.strokeRect(symX,yy-10*res,16*res,12*res); }
+        ctx.fillStyle='#1b1b1b'; ctx.font=(11.5*res)+'px Inter,Arial';
+        ctx.fillText(r.text, symX+22*res, yy);
+        if(r.len){ ctx.fillStyle='#555'; ctx.font=(9*res)+'px monospace'; ctx.textAlign='right'; ctx.fillText(r.len, lb.x+lb.w-padX, yy); ctx.textAlign='left'; }
+        yy+=rowH;
+      }
     }
     // scale bar
     var sEl=$('ldScale');
@@ -7018,8 +7186,8 @@ function restoreProject(p){
   if(!p||!p.view){proLog('Invalid project file.');return;}
   Object.keys(layers).forEach(function(id){try{map.removeLayer(layers[id].leaflet);}catch(e){} delete layers[id];});renderLayers();refreshDropdowns();
   (p.layers||[]).forEach(function(x){try{var color=x.color||nextColor();var id=addLayer(geoJsonLayer(x.geojson,color),x.name||'Project layer',color,{zoom:false,geojson:x.geojson});
-    var L0=layers[id]; if(L0){ L0.uniqueField=x.uniqueField||''; L0.field=x.field||''; L0.colorMode=x.colorMode||''; L0.catColors=x.catColors||null; L0.size=x.size||6; if(x.opacity!=null)L0.opacity=x.opacity;
-      if(L0.colorMode==='categorized'||L0.colorMode==='graduated'||L0.colorMode==='native') svBuildLeafletLayer(L0); }
+    var L0=layers[id]; if(L0){ L0.uniqueField=x.uniqueField||''; L0.field=x.field||''; L0.colorMode=x.colorMode||''; L0.catColors=x.catColors||null; L0.weight=(x.weight!=null?x.weight:null); L0.hollow=!!x.hollow; L0.outlineColor=x.outlineColor||''; L0.size=x.size||6; if(x.opacity!=null)L0.opacity=x.opacity;
+      if(L0.colorMode==='categorized'||L0.colorMode==='graduated'||L0.colorMode==='native'||L0.weight!=null||L0.hollow||L0.outlineColor) svBuildLeafletLayer(L0); }
     if(x.visible===false){layers[id].visible=false;map.removeLayer(layers[id].leaflet);}}catch(e){}});
   if(p.theme){try{document.body.setAttribute('data-theme',p.theme);}catch(e){}}
   if(p.view)map.setView([p.view.lat,p.view.lng],p.view.zoom||map.getZoom());
@@ -7300,7 +7468,7 @@ document.getElementById('refreshBtn').onclick=function(){
 
   function snapshot(){
     try{
-      var pack={layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',colorMode:L0.colorMode||'',catColors:L0.catColors||null,labelField:L0.labelField||'',advLabelStyle:L0.advLabelStyle||null};})};
+      var pack={layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',colorMode:L0.colorMode||'',catColors:L0.catColors||null,weight:(L0.weight!=null?L0.weight:null),hollow:!!L0.hollow,outlineColor:L0.outlineColor||'',labelField:L0.labelField||'',advLabelStyle:L0.advLabelStyle||null};})};
       var s=JSON.stringify(pack); if(advState.history[advState.history.length-1]!==s){advState.history.push(s); if(advState.history.length>40)advState.history.shift(); advState.redo=[];}
     }catch(e){}
   }
@@ -7308,7 +7476,7 @@ document.getElementById('refreshBtn').onclick=function(){
   snapshot();
 
   function restoreSnapshot(s){
-    try{var pack=JSON.parse(s); pack.layers.forEach(function(x){var L0=layers[x.id]; if(L0){L0.name=x.name;L0.color=x.color;L0.visible=x.visible;L0.geojson=x.geojson;L0.uniqueField=x.uniqueField;L0.field=x.field;L0.colorMode=x.colorMode||'';L0.catColors=x.catColors||null;L0.labelField=x.labelField;L0.advLabelStyle=x.advLabelStyle; rebuild(L0);}}); renderLayers(); refreshDropdowns(); updateAdvStatus();}
+    try{var pack=JSON.parse(s); pack.layers.forEach(function(x){var L0=layers[x.id]; if(L0){L0.name=x.name;L0.color=x.color;L0.visible=x.visible;L0.geojson=x.geojson;L0.uniqueField=x.uniqueField;L0.field=x.field;L0.colorMode=x.colorMode||'';L0.catColors=x.catColors||null;L0.weight=(x.weight!=null?x.weight:L0.weight);L0.hollow=!!x.hollow;L0.outlineColor=x.outlineColor||'';L0.labelField=x.labelField;L0.advLabelStyle=x.advLabelStyle; rebuild(L0);}}); renderLayers(); refreshDropdowns(); updateAdvStatus();}
     catch(e){toast('Could not restore snapshot: '+e.message,true);}
   }
   function undo(){ if(advState.history.length<2){toast('Nothing to undo',true);return;} var cur=advState.history.pop(); advState.redo.push(cur); restoreSnapshot(advState.history[advState.history.length-1]); toast('Undo completed'); }
@@ -7462,7 +7630,7 @@ document.getElementById('refreshBtn').onclick=function(){
   };
 
   function packageProject(){
-    var c=map.getCenter(); return {app:'Spatial Itqan',version:'Full Restored Operational',saved:new Date().toISOString(),view:{lat:c.lat,lng:c.lng,zoom:map.getZoom()},theme:document.body.getAttribute('data-theme'),layerOrder:Object.keys(layers),layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',colorMode:L0.colorMode||'',catColors:L0.catColors||null,size:L0.size||6,opacity:L0.opacity,advLabelStyle:L0.advLabelStyle||null,labelField:L0.labelField||'',service:advState.services.find(function(s){return s.name===L0.name;})||null};}),services:advState.services,bookmarks:bookmarks||[],drawn:(typeof collectFeatures==='function'?collectFeatures():{type:'FeatureCollection',features:[]})};
+    var c=map.getCenter(); return {app:'Spatial Itqan',version:'Full Restored Operational',saved:new Date().toISOString(),view:{lat:c.lat,lng:c.lng,zoom:map.getZoom()},theme:document.body.getAttribute('data-theme'),layerOrder:Object.keys(layers),layers:Object.keys(layers).map(function(id){var L0=layers[id];return {id:id,name:L0.name,color:L0.color,visible:L0.visible,geojson:L0.geojson?clone(L0.geojson):null,uniqueField:L0.uniqueField||'',field:L0.field||'',colorMode:L0.colorMode||'',catColors:L0.catColors||null,weight:(L0.weight!=null?L0.weight:null),hollow:!!L0.hollow,outlineColor:L0.outlineColor||'',size:L0.size||6,opacity:L0.opacity,advLabelStyle:L0.advLabelStyle||null,labelField:L0.labelField||'',service:advState.services.find(function(s){return s.name===L0.name;})||null};}),services:advState.services,bookmarks:bookmarks||[],drawn:(typeof collectFeatures==='function'?collectFeatures():{type:'FeatureCollection',features:[]})};
   }
   if(typeof exportProjectObject==='function') exportProjectObject=packageProject;
   window.__svPackageProject=packageProject;
