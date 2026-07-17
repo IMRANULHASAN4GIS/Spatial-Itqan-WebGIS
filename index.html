@@ -12,7 +12,6 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
 <title>Spatial Itqan — Ultimate GIS Suite</title>
-<link rel="icon" type="image/png" href="assets/icon.png"/>
 <meta name="application-name" content="Spatial Itqan GIS Suite"/>
 <style>
   /* ============ 5 PREMIUM PROFESSIONAL THEMES ============ */
@@ -42,6 +41,7 @@
     --shadow:0 12px 34px rgba(0,0,0,.5);
   }
   :root{
+    --foot-h:32px;            /* page footer height — the attribute drawer stops here */
     --shadow:0 6px 22px rgba(35,40,45,.16);
     --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
     --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -245,8 +245,6 @@
   .coordcol-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
   .cc-opt{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer}
   .cc-opt input{accent-color:var(--brand)}
-  .anbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
-  .anbtns .btn{font-size:10.5px;padding:8px 4px;margin:0}
   .xp-coord{width:62px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);font-size:11px;padding:0 7px}
   .xp-coord:focus{outline:none;border-color:var(--brand)}
   .hdr-experience{display:flex;align-items:center;gap:6px;margin-right:6px}
@@ -287,8 +285,10 @@
     background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#06121f;border:none;box-shadow:var(--shadow);font-size:20px;cursor:pointer;align-items:center;justify-content:center}
 
   /* attribute table */
-  .attrdrawer{position:absolute;left:0;right:344px;bottom:0;height:240px;z-index:1150;background:var(--panel);
-    border-top:2px solid var(--brand);border-right:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.5);transform:translateY(100%);transition:transform .26s;display:flex;flex-direction:column;overflow:hidden}
+  /* the drawer stops exactly where the page footer starts (--foot-h) so the two never overlap */
+  .attrdrawer{position:absolute;left:0;right:344px;bottom:var(--foot-h,32px);height:240px;z-index:1150;background:var(--panel);
+    border-top:2px solid var(--brand);border-right:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.5);
+    transform:translateY(calc(100% + var(--foot-h,32px)));transition:transform .26s;display:flex;flex-direction:column;overflow:hidden}
   .attrdrawer.open{transform:translateY(0)}
   .attrdrawer .attrtable-wrap{overflow:auto;flex:1}
   @media (max-width:860px){.attrdrawer{right:0}}
@@ -309,8 +309,8 @@
   .attr-hscroll-track{flex:1;height:8px;background:var(--chip);border-radius:4px;position:relative;cursor:pointer}
   .attr-hscroll-track #attrHScrollThumb{position:absolute;top:0;left:0;height:100%;min-width:30px;background:var(--brand);border-radius:4px;cursor:grab}
   table.grid{border-collapse:collapse;width:100%;font-size:11.5px}
-  table.grid th{position:sticky;top:0;background:var(--bg-2);text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;color:var(--ink)}
-  table.grid td{padding:5px 9px;border-bottom:1px solid var(--line);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  table.grid th{position:sticky;top:0;z-index:5;background:var(--bg-2);text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);box-shadow:inset 0 -1px 0 var(--line);cursor:pointer;white-space:nowrap;color:var(--ink)}
+  table.grid td{padding:5px 9px;background:var(--panel);border-bottom:1px solid var(--line);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   table.grid tr:hover td{background:var(--panel-2);cursor:pointer}
   table.grid tr.sel td{background:rgba(0,229,255,.22)}
 
@@ -344,7 +344,7 @@
   .pt-label::before{display:none}
 
   /* page footer (outside the map) */
-  .pagefoot{height:32px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;
+  .pagefoot{height:var(--foot-h,32px);flex:none;display:flex;align-items:center;justify-content:center;gap:6px;
     background:var(--bg-2);border-top:1px solid var(--line);color:var(--ink-dim);font-size:11.5px;letter-spacing:.3px;z-index:1200}
   .pagefoot b{color:var(--brand-2);font-weight:700}
   .foot-weather{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;max-width:100%;padding:0 12px}
@@ -813,6 +813,15 @@
           <option value="midnight">Midnight (navy)</option>
         </select>
       </div>
+      <div class="sp-row">
+        <label>Rendering</label>
+        <select id="fastRenderSel" title="Canvas rendering draws thousands of features far faster">
+          <option value="auto">Auto (canvas when heavy)</option>
+          <option value="on">Fast &mdash; canvas always</option>
+          <option value="off">Quality &mdash; SVG always</option>
+        </select>
+        <span style="font-size:10px;color:var(--ink-dim)" id="fastRenderInfo"></span>
+      </div>
       <button class="btn" id="refreshBtn" style="margin:0">⟳ Refresh application</button>
     </div>
   </div>
@@ -1198,10 +1207,10 @@
 
         <div class="divider"></div>
         <p class="stitle">Command search</p>
-        <p class="hint">Type actions like <b>satellite</b>, <b>route</b>, <b>weather</b>, <b>aircraft</b>, <b>fit all</b>, <b>focus</b>, <b>grid</b>, <b>dark</b>, <b>light</b>, <b>blank</b>, <b>export</b>.</p>
+        <p class="hint">Type actions like <b>satellite</b>, <b>route</b>, <b>weather</b>, <b>fit all</b>, <b>focus</b>, <b>grid</b>, <b>dark</b>, <b>light</b>, <b>blank</b>, <b>export</b>.</p>
         <div class="cmd-row"><input id="proCommand" type="text" placeholder="Type a GIS command…"/><button id="proRunCommand">↵</button></div>
         <div class="cmd-suggestions" id="proCmdSuggestions">
-          <button>satellite</button><button>fit all</button><button>route</button><button>weather</button><button>aircraft</button><button>focus</button><button>grid</button><button>elements</button><button>clean map</button><button>all on</button><button>dark</button><button>blank</button>
+          <button>satellite</button><button>fit all</button><button>route</button><button>weather</button><button>focus</button><button>grid</button><button>elements</button><button>clean map</button><button>all on</button><button>dark</button><button>blank</button>
         </div>
         <div class="pro-log" id="proLog">Ready.</div>
 
@@ -1476,6 +1485,45 @@
     <div class="si-credit">Developed by <b>IUH</b></div>
   </section>
 </div>
+<div class="modal" id="cadModal">
+  <div class="modal-card" style="max-width:640px">
+    <div class="modal-head">
+      <b>&#9635; Add CAD Drawing</b>
+      <span class="grow"></span>
+      <button class="topbtn" id="cadClose">&#10005; Cancel</button>
+    </div>
+    <div class="modal-body" style="padding:16px;max-height:70vh;overflow:auto">
+      <p class="hint" style="margin-top:0">The drawing is added the way ArcMap / ArcGIS Pro does it &mdash; split into CAD feature classes, keeping every CAD attribute, drawing layer and layer colour. Everything loaded is fully editable.</p>
+      <div class="field"><label>Drawing</label>
+        <div style="font-weight:700;font-size:12.5px" id="cadFileName"></div>
+        <div style="font-size:11.5px;color:var(--ink-dim);margin-top:4px" id="cadSummary"></div>
+        <div style="font-size:11px;color:var(--ink-dim);margin-top:4px" id="cadSkipped"></div>
+      </div>
+      <div class="field"><label>Coordinate system of the drawing (georeferencing)</label>
+        <select id="cadCrs"></select>
+        <div class="hint" style="margin:5px 0 0">CAD files store plain grid coordinates with no CRS. Pick the system the drawing was surveyed in &mdash; the app reprojects it onto the basemap.</div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>CAD feature classes to add</label>
+          <div id="cadFcList" style="display:flex;flex-direction:column;gap:4px"></div>
+        </div>
+        <div class="field"><label>Symbology</label>
+          <label style="display:flex;align-items:center;gap:7px;font-size:12px"><input type="radio" name="cadSym" id="cadSymCad" checked/> Use CAD layer colours</label>
+          <label style="display:flex;align-items:center;gap:7px;font-size:12px"><input type="radio" name="cadSym" id="cadSymOne"/> Single colour per class</label>
+        </div>
+      </div>
+      <div class="field"><label>Drawing layers</label>
+        <div style="display:flex;gap:6px;margin-bottom:5px">
+          <button class="btn" id="cadLyrAll" style="padding:3px 8px;font-size:11px">Select all</button>
+          <button class="btn" id="cadLyrNone" style="padding:3px 8px;font-size:11px">Select none</button>
+        </div>
+        <div id="cadLyrList" style="max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:7px"></div>
+      </div>
+      <button class="btn accent" id="cadLoadBtn">&#10003; Add drawing to map</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="helpModal">
   <div class="modal-card">
     <div class="modal-head">
@@ -1948,7 +1996,8 @@ var layers={}, layerSeq=0;
 var layerListEl=document.getElementById('layerList'), legendBody=document.getElementById('legendBody'),
     layersHint=document.getElementById('layersHint');
 
-function escapeHtml(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var SV_ESC={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};
+function escapeHtml(s){s=String(s);return /[&<>"]/.test(s)?s.replace(/[&<>"]/g,function(c){return SV_ESC[c];}):s;}
 function popupFromProps(props,title){
   if(!props) return title||'Feature';
   var rows=Object.keys(props).slice(0,40).map(function(k){var v=props[k];
@@ -1960,8 +2009,80 @@ function styleVec(color){return {
   pointToLayer:function(f,ll){return L.circleMarker(ll,{radius:6,color:color,weight:2,fillColor:color,fillOpacity:.75});},
   onEachFeature:function(f,l){l.bindPopup(popupFromProps(f.properties));}
 };}
+/* ===== Fast rendering ==========================================================
+   Vector layers draw either with Leaflet's SVG renderer (one DOM node per feature —
+   rich but slow past a few thousand features) or with a single shared Canvas renderer
+   (one node total — dramatically faster).
+   ONE renderer instance is shared by every vector layer, so layer ordering, bringToFront
+   and restacking behave exactly as before. Tools that used to poke at SVG nodes
+   (definition query, time slider, blend modes) go through svShowFeature/svLayerElements,
+   which work with either renderer.                                                     */
+var svFastMode='auto';                 // 'auto' | 'on' | 'off'
+var SV_FAST_THRESHOLD=1500;            // total features before 'auto' switches to canvas
+var svCanvasRenderer=null;
+function svCanvas(){ if(!svCanvasRenderer)svCanvasRenderer=L.canvas({padding:0.5}); return svCanvasRenderer; }
+function svTotalFeatures(){
+  var n=0; Object.keys(layers).forEach(function(id){
+    var L0=layers[id]; if(L0&&L0.geojson&&L0.geojson.features)n+=L0.geojson.features.length; });
+  return n;
+}
+function svUseCanvas(){
+  if(svFastMode==='on')return true;
+  if(svFastMode==='off')return false;
+  return svTotalFeatures()>SV_FAST_THRESHOLD;
+}
+function svRendererOpt(){ return svUseCanvas()?svCanvas():undefined; }
+/* Show / hide one rendered feature — works for SVG paths, canvas paths and markers, so
+   filtering and time animation behave identically in both rendering modes. */
+function svShowFeature(ly,show){
+  if(!ly)return;
+  if(ly._icon){ ly._icon.style.display=show?'':'none'; if(ly._shadow)ly._shadow.style.display=show?'':'none'; return; }
+  if(ly._path){ ly._path.style.display=show?'':'none'; return; }
+  var el=(ly.getElement&&ly.getElement());
+  if(el&&el.style){ el.style.display=show?'':'none'; return; }
+  if(ly.setStyle){                       // canvas-rendered path: fade out instead of display:none
+    if(show){ if(ly.__svHid){ ly.setStyle(ly.__svPrev||{opacity:.95,fillOpacity:1}); ly.__svHid=false; } }
+    else if(!ly.__svHid){
+      ly.__svPrev={opacity:(ly.options.opacity==null?.95:ly.options.opacity),fillOpacity:(ly.options.fillOpacity==null?1:ly.options.fillOpacity)};
+      ly.setStyle({opacity:0,fillOpacity:0}); ly.__svHid=true;
+    }
+  }
+}
+/* Container elements of a layer, for CSS effects such as blend modes. */
+function svLayerElements(L0){
+  var els=[];
+  try{
+    if(L0.leaflet.getContainer)els.push(L0.leaflet.getContainer());
+    if(L0.leaflet._image)els.push(L0.leaflet._image);
+    if(L0.leaflet.eachLayer)L0.leaflet.eachLayer(function(ly){
+      if(ly._path)els.push(ly._path);
+      if(ly._icon)els.push(ly._icon);
+      if(ly.getContainer&&ly.getContainer())els.push(ly.getContainer());
+    });
+    if(svUseCanvas()&&svCanvasRenderer&&svCanvasRenderer._container)els.push(svCanvasRenderer._container);
+  }catch(e){}
+  return els.filter(Boolean);
+}
+var svRenderState='svg';               // what the vector layers are actually drawn with right now
+function svRebuildAllVectors(){
+  svRenderState=svUseCanvas()?'canvas':'svg';
+  Object.keys(layers).forEach(function(id){ var L0=layers[id]; if(L0&&L0.geojson&&!L0.isRaster)svBuildLeafletLayer(L0); });
+  try{restackLayers();}catch(e){}
+}
+/* In 'auto', flip to canvas once the map gets heavy (and back when it doesn't). */
+var svFastBusy=false;
+window.__svAutoFastRender=function(){
+  if(svFastMode!=='auto'||svFastBusy)return;
+  var want=svUseCanvas()?'canvas':'svg';
+  if(want===svRenderState)return;
+  svFastBusy=true;
+  try{
+    svRebuildAllVectors();
+    if(want==='canvas')toast('Fast rendering on — '+svTotalFeatures().toLocaleString('en-US')+' features drawn on canvas');
+  }finally{ svFastBusy=false; }
+};
 function geoJsonLayer(gj,color){var s=styleVec(color);
-  var lyr=L.geoJSON(gj,{style:s.style,pointToLayer:s.pointToLayer,onEachFeature:s.onEachFeature});
+  var lyr=L.geoJSON(gj,{style:s.style,pointToLayer:s.pointToLayer,onEachFeature:s.onEachFeature,renderer:svRendererOpt()});
   lyr._src=gj; return lyr; }
 
 /* ================= CATEGORIZED / GRADUATED SYMBOLOGY + SELECTION ENGINE ================= */
@@ -2019,9 +2140,6 @@ function svColorForFeature(L0,f){
   return L0.color||'#3B82F6';
 }
 
-function svSelectedLayerIds(){
-  return Object.keys((window.__svOpState&&window.__svOpState.selectedSets)||{}).filter(function(id){return layers[id]&&Object.keys(svSelSet(id)).length;});
-}
 function svClearAllSelections(rebuild){
   var changed={};
   Object.keys((window.__svOpState&&window.__svOpState.selectedSets)||{}).forEach(function(id){
@@ -2053,11 +2171,13 @@ function svBuildLeafletLayer(L0){
   var gIsPoly=/Polygon/.test(String(L0.geomType||geomTypeOf(L0.geojson)||''));
   var ocol=(gIsPoly&&L0.outlineColor&&L0.outlineColor[0]==='#')?L0.outlineColor:'';
   try{ if(L0.leaflet)map.removeLayer(L0.leaflet); }catch(e){}
+  var _rnd=svRendererOpt();
   var nl=L.geoJSON(L0.geojson,{
+    renderer:_rnd,
     style:function(f){ var c=svColorForFeature(L0,f), fid=String((f.properties&&f.properties.__sv_fid)||''), sel=!!selSet[fid];
       return sel?{color:'#00E5FF',weight:Math.max(w+2.5,5),opacity:1,fillColor:'#FACC15',fillOpacity:(hollow?0:.72),dashArray:'6,3'}:{color:(ocol||c),weight:w,opacity:.95,fillColor:c,fillOpacity:(hollow?0:opacity)}; },
     pointToLayer:function(f,ll){ var c=svColorForFeature(L0,f), fid=String((f.properties&&f.properties.__sv_fid)||''), sel=!!selSet[fid];
-      return L.circleMarker(ll, sel?{radius:size+3,color:'#00E5FF',weight:4,fillColor:'#FACC15',fillOpacity:.95}:{radius:size,color:c,weight:2,fillColor:c,fillOpacity:opacity}); },
+      return L.circleMarker(ll, sel?{radius:size+3,color:'#00E5FF',weight:4,fillColor:'#FACC15',fillOpacity:.95,renderer:_rnd}:{radius:size,color:c,weight:2,fillColor:c,fillOpacity:opacity,renderer:_rnd}); },
     onEachFeature:function(f,l){ l.bindPopup(popupFromProps(f.properties));
       l.on('click',function(e){
         if(!window.__svSelectToolOn)return;
@@ -2105,6 +2225,7 @@ function addLayer(leaflet,name,color,opts){
     isRaster:!!opts.isRaster, geomType:opts.geomType||geomTypeOf(opts.geojson||leaflet._src)};
   layerOrder.push(id);
   renderLayers(); refreshDropdowns();
+  try{ if(window.__svAutoFastRender)window.__svAutoFastRender(); if(window.__svFastInfo)window.__svFastInfo(); }catch(e){}
   if(opts.zoom!==false && window.__autoZoomNew!==false){ try{var b=leaflet.getBounds&&leaflet.getBounds(); if(b&&b.isValid())map.fitBounds(b.pad(.15));}catch(e){} }
   return id;
 }
@@ -2621,7 +2742,7 @@ var TOOL_HELP={
   ]},
   experience:{title:'Experience',body:[
     ['What it does','Live data layers and presentation modes.'],
-    ['Live','<b>☁ Live</b> opens weather radar (RainViewer), NASA satellite imagery, live aircraft, and a 3D globe — most work with no API key.'],
+    ['Live','<b>☁ Live</b> opens weather radar (RainViewer), NASA satellite imagery, live — most work with no API key.'],
     ['Theme','<b>⚡ Theme</b> cycles through the visual themes. You can also pick one in the top Theme dropdown.'],
     ['Focus','<b>◱ Focus</b> hides the panels for a clean, full-screen map — good for presenting. Press Esc to exit.']
   ]}
@@ -2719,203 +2840,368 @@ function handleECW(file,nice){
    Parses DXF entities (LINE, LWPOLYLINE, POLYLINE, POINT, CIRCLE, ARC, TEXT) into
    GeoJSON. CAD files are usually in a projected/local CRS, so we reproject from the
    active CRS when coordinates look projected. */
-function dxfToGeoJSON(dxf){
-  var feats=[];
-  function add(geom,props){ feats.push({type:'Feature',properties:props||{},geometry:geom}); }
-  function vtx(v){ return [v.x,v.y]; }
-  (dxf.entities||[]).forEach(function(e){
-    try{
-      var layer=e.layer||'0';
-      if(e.type==='LINE'&&e.vertices&&e.vertices.length>=2){ add({type:'LineString',coordinates:e.vertices.map(vtx)},{layer:layer,type:'LINE'}); }
-      else if((e.type==='LWPOLYLINE'||e.type==='POLYLINE')&&e.vertices&&e.vertices.length>=2){
-        var coords=e.vertices.map(vtx);
-        if(e.shape||e.closed){ coords.push(coords[0]); add({type:'Polygon',coordinates:[coords]},{layer:layer,type:e.type}); }
-        else add({type:'LineString',coordinates:coords},{layer:layer,type:e.type});
-      }
-      else if(e.type==='POINT'&&e.position){ add({type:'Point',coordinates:[e.position.x,e.position.y]},{layer:layer,type:'POINT'}); }
-      else if(e.type==='CIRCLE'&&e.center){
-        var cc=[],cx=e.center.x,cy=e.center.y,rr=e.radius||0;
-        for(var a=0;a<=360;a+=10)cc.push([cx+rr*Math.cos(a*Math.PI/180),cy+rr*Math.sin(a*Math.PI/180)]);
-        add({type:'Polygon',coordinates:[cc]},{layer:layer,type:'CIRCLE'});
-      }
-      else if(e.type==='ARC'&&e.center){
-        var ac=[],ax=e.center.x,ay=e.center.y,ar=e.radius||0,s=e.startAngle||0,en=e.endAngle||0;
-        if(en<s)en+=2*Math.PI;
-        for(var t=s;t<=en;t+=0.15)ac.push([ax+ar*Math.cos(t),ay+ar*Math.sin(t)]);
-        add({type:'LineString',coordinates:ac},{layer:layer,type:'ARC'});
-      }
-      else if((e.type==='TEXT'||e.type==='MTEXT')&&e.startPoint){ add({type:'Point',coordinates:[e.startPoint.x,e.startPoint.y]},{layer:layer,type:'TEXT',text:e.text||''}); }
-    }catch(err){}
+/* ================= CAD (DXF) — ESRI / ArcGIS-style import =================
+   Mirrors how ArcMap / ArcGIS Pro add a CAD drawing:
+     • the drawing is split into CAD feature classes: Point, Polyline, Polygon, Annotation
+     • every entity carries the standard ESRI CAD attributes (Layer, Entity, Handle, Color,
+       Linetype, Elevation, RefName, DocName …)
+     • drawing layers can be switched on/off before loading (ArcMap "Drawing Layers" tab)
+     • symbology honours the AutoCAD layer colours (ArcGIS "use CAD layer colours")
+     • the drawing is georeferenced by assigning its coordinate system on import
+   Everything produced is a normal vector layer, so all edit/select/table tools apply.        */
+
+/* AutoCAD Color Index → hex. 1–9 and 250–255 are the fixed AutoCAD values; 10–249 follow the
+   documented 24-hue × 5-brightness × (full/pale) rule, so the palette matches AutoCAD/ArcGIS. */
+var CAD_ACI=(function(){
+  var t={0:'#000000',1:'#FF0000',2:'#FFFF00',3:'#00FF00',4:'#00FFFF',5:'#0000FF',6:'#FF00FF',
+         7:'#000000',8:'#808080',9:'#C0C0C0',
+         250:'#333333',251:'#505050',252:'#696969',253:'#828282',254:'#BEBEBE',255:'#FFFFFF'};
+  function hsv(h,s,v){
+    var c=v*s, x=c*(1-Math.abs((h/60)%2-1)), m=v-c, r=0,g=0,b=0;
+    if(h<60){r=c;g=x;} else if(h<120){r=x;g=c;} else if(h<180){g=c;b=x;}
+    else if(h<240){g=x;b=c;} else if(h<300){r=x;b=c;} else {r=c;b=x;}
+    function hx(n){n=Math.floor(n+m);n=Math.max(0,Math.min(255,n));return (n<16?'0':'')+n.toString(16);}
+    return ('#'+hx(r)+hx(g)+hx(b)).toUpperCase();
+  }
+  var lev=[255,165,127,76,38];
+  for(var i=10;i<=249;i++){
+    var h=(Math.floor((i-10)/10)*15)%360, s=(i-10)%10, p=Math.floor(s/2), pale=(s%2)===1;
+    t[i]=hsv(h, pale?0.5:1, lev[p]);
+  }
+  return t;
+})();
+function cadAciHex(idx){ var c=CAD_ACI[idx]; return c||'#000000'; }
+function cadIntToHex(n){ if(n==null||isNaN(n))return null; var s=(n>>>0).toString(16); while(s.length<6)s='0'+s; return ('#'+s.slice(-6)).toUpperCase(); }
+
+/* ---- geometry helpers ---- */
+/* AutoCAD bulge → arc points. bulge = tan(includedAngle/4); positive = counter-clockwise. */
+function cadBulgePts(p1,p2,bulge){
+  var theta=4*Math.atan(bulge);
+  var dx=p2[0]-p1[0], dy=p2[1]-p1[1], chord=Math.sqrt(dx*dx+dy*dy);
+  if(!chord||!bulge||!isFinite(theta))return [];
+  var st=Math.sin(theta/2); if(!st)return [];
+  var r=chord/(2*st), apo=r*Math.cos(theta/2);
+  var ux=dx/chord, uy=dy/chord;
+  var cx=(p1[0]+p2[0])/2+(-uy)*apo, cy=(p1[1]+p2[1])/2+(ux)*apo;
+  var R=Math.abs(r), a1=Math.atan2(p1[1]-cy,p1[0]-cx);
+  var n=Math.max(2,Math.min(72,Math.ceil(Math.abs(theta)/0.18)));
+  var out=[];
+  for(var i=1;i<n;i++){ var a=a1+theta*(i/n); out.push([cx+R*Math.cos(a), cy+R*Math.sin(a)]); }
+  return out;
+}
+/* compose an INSERT (block reference) transform: scale → rotate → translate */
+function cadInsTx(ins,parent){
+  var rot=((ins.rotation||0)*Math.PI/180), sx=(ins.xScale==null?1:ins.xScale), sy=(ins.yScale==null?1:ins.yScale);
+  var px=(ins.position&&ins.position.x)||0, py=(ins.position&&ins.position.y)||0;
+  var cos=Math.cos(rot), sin=Math.sin(rot);
+  return function(p){
+    var x=p[0]*sx, y=p[1]*sy;
+    var q=[px+x*cos-y*sin, py+x*sin+y*cos];
+    return parent?parent(q):q;
+  };
+}
+
+/* ---- main converter: DXF → ESRI-style CAD feature classes ---- */
+function cadParse(dxf,docName){
+  var lyrTable={};
+  try{
+    var lt=(dxf.tables&&dxf.tables.layer&&dxf.tables.layer.layers)||{};
+    Object.keys(lt).forEach(function(k){
+      var L=lt[k];
+      var hex=(L.color!=null)?cadIntToHex(L.color):cadAciHex(Math.abs(L.colorIndex||7));
+      lyrTable[k]={name:k,color:hex||'#000000',aci:(L.colorIndex==null?7:L.colorIndex),
+        lineType:L.lineType||'CONTINUOUS', on:(L.visible!==false), frozen:!!L.frozen};
+    });
+  }catch(e){}
+  function lyrOf(n){ return lyrTable[n]||(lyrTable[n]={name:n,color:'#000000',aci:7,lineType:'CONTINUOUS',on:true,frozen:false}); }
+
+  var out={Point:[],Polyline:[],Polygon:[],Annotation:[]}, counts={}, skipped={};
+  var docVer=''; try{ docVer=(dxf.header&&(dxf.header.$ACADVER||dxf.header.acadVer))||''; }catch(e){}
+
+  function colorOf(e,inherit){
+    // AutoCAD rules: 256 = BYLAYER, 0 = BYBLOCK, true colour wins when present
+    if(e.color!=null && !isNaN(e.color)) return cadIntToHex(e.color);
+    var ci=e.colorIndex;
+    if(ci==null||ci===256) return lyrOf(e.layer||'0').color;
+    if(ci===0) return inherit||lyrOf(e.layer||'0').color;
+    return cadAciHex(Math.abs(ci));
+  }
+  function baseProps(e,inherit,refName){
+    var lay=e.layer||'0', L=lyrOf(lay);
+    return {
+      Layer:lay, Entity:e.type||'', Handle:e.handle||'',
+      Color:colorOf(e,inherit), EntColor:(e.colorIndex==null?256:e.colorIndex), LyrColor:L.aci,
+      Linetype:(e.lineType&&e.lineType!=='BYLAYER')?e.lineType:L.lineType,
+      Elevation:(e.elevation!=null?e.elevation:((e.position&&e.position.z)||0)),
+      LineWt:(e.lineweight!=null?e.lineweight:-1),
+      RefName:refName||'', DocName:docName||'', DocType:'DXF', DocVer:docVer, CADType:'DXF'
+    };
+  }
+  function push(kind,geom,props){ if(!geom)return; out[kind].push({type:'Feature',properties:props,geometry:geom}); counts[props.Entity]=(counts[props.Entity]||0)+1; }
+  function tx(p,T){ return T?T(p):p; }
+
+  function walk(entities,T,inherit,refName,depth){
+    if(!entities||depth>6)return;
+    entities.forEach(function(e){
+      try{
+        var ty=e.type;
+        if(ty==='INSERT'){
+          var blk=(dxf.blocks||{})[e.name];
+          if(blk&&blk.entities){
+            var bp=(blk.position||{x:0,y:0});
+            var inner=cadInsTx(e,T);
+            // block base point offset
+            var T2=function(p){ return inner([p[0]-(bp.x||0), p[1]-(bp.y||0)]); };
+            walk(blk.entities,T2,colorOf(e,inherit),e.name,(depth||0)+1);
+          } else if(e.position){
+            push('Point',{type:'Point',coordinates:tx([e.position.x,e.position.y],T)},baseProps(e,inherit,e.name||refName));
+          }
+          return;
+        }
+        var P=baseProps(e,inherit,refName);
+        if(ty==='LINE'&&e.vertices&&e.vertices.length>=2){
+          push('Polyline',{type:'LineString',coordinates:e.vertices.map(function(v){return tx([v.x,v.y],T);})},P);
+        }
+        else if((ty==='LWPOLYLINE'||ty==='POLYLINE')&&e.vertices&&e.vertices.length>=2){
+          var pts=[];
+          for(var i=0;i<e.vertices.length;i++){
+            var v=e.vertices[i], cur=[v.x,v.y];
+            pts.push(cur);
+            var nxt=e.vertices[i+1]||((e.shape||e.closed)?e.vertices[0]:null);
+            if(nxt&&v.bulge){ cadBulgePts(cur,[nxt.x,nxt.y],v.bulge).forEach(function(q){pts.push(q);}); }
+          }
+          var coords=pts.map(function(p){return tx(p,T);});
+          if(e.shape||e.closed){
+            coords.push(coords[0]);
+            if(coords.length>=4) push('Polygon',{type:'Polygon',coordinates:[coords]},P);
+            else push('Polyline',{type:'LineString',coordinates:coords},P);
+          } else push('Polyline',{type:'LineString',coordinates:coords},P);
+        }
+        else if(ty==='POINT'&&e.position){
+          push('Point',{type:'Point',coordinates:tx([e.position.x,e.position.y],T)},P);
+        }
+        else if(ty==='CIRCLE'&&e.center){
+          var cc=[],r=e.radius||0;
+          for(var a=0;a<=360;a+=6)cc.push(tx([e.center.x+r*Math.cos(a*Math.PI/180), e.center.y+r*Math.sin(a*Math.PI/180)],T));
+          push('Polygon',{type:'Polygon',coordinates:[cc]},P);
+        }
+        else if(ty==='ARC'&&e.center){
+          var ac=[],ar=e.radius||0,s=e.startAngle||0,en=e.endAngle||0;
+          if(en<s)en+=2*Math.PI;
+          var step=Math.max(0.05,(en-s)/72);
+          for(var t=s;t<en+1e-9;t+=step)ac.push(tx([e.center.x+ar*Math.cos(t), e.center.y+ar*Math.sin(t)],T));
+          if(ac.length>=2)push('Polyline',{type:'LineString',coordinates:ac},P);
+        }
+        else if(ty==='ELLIPSE'&&e.center&&e.majorAxisEndPoint){
+          var mx=e.majorAxisEndPoint.x,my=e.majorAxisEndPoint.y;
+          var A=Math.sqrt(mx*mx+my*my), B=A*(e.axisRatio==null?1:e.axisRatio), rot=Math.atan2(my,mx);
+          var s2=(e.startAngle==null?0:e.startAngle), e2=(e.endAngle==null?2*Math.PI:e.endAngle);
+          if(e2<s2)e2+=2*Math.PI;
+          var ec=[],st2=Math.max(0.05,(e2-s2)/72);
+          for(var u=s2;u<e2+1e-9;u+=st2){
+            var xx=A*Math.cos(u), yy=B*Math.sin(u);
+            ec.push(tx([e.center.x+xx*Math.cos(rot)-yy*Math.sin(rot), e.center.y+xx*Math.sin(rot)+yy*Math.cos(rot)],T));
+          }
+          var closed=Math.abs((e2-s2)-2*Math.PI)<1e-6;
+          if(closed&&ec.length>=4){ ec.push(ec[0]); push('Polygon',{type:'Polygon',coordinates:[ec]},P); }
+          else if(ec.length>=2) push('Polyline',{type:'LineString',coordinates:ec},P);
+        }
+        else if(ty==='SPLINE'){
+          var sp=(e.fitPoints&&e.fitPoints.length?e.fitPoints:e.controlPoints)||[];
+          if(sp.length>=2) push('Polyline',{type:'LineString',coordinates:sp.map(function(v){return tx([v.x,v.y],T);})},P);
+        }
+        else if((ty==='SOLID'||ty==='3DFACE')&&e.points&&e.points.length>=3){
+          var q=e.points.map(function(v){return tx([v.x,v.y],T);});
+          // AutoCAD SOLID stores corners in bow-tie order (3rd and 4th swapped)
+          if(q.length===4){ var tmp=q[2]; q[2]=q[3]; q[3]=tmp; }
+          q.push(q[0]); push('Polygon',{type:'Polygon',coordinates:[q]},P);
+        }
+        else if(ty==='TEXT'||ty==='MTEXT'||ty==='ATTRIB'){
+          var pos=e.startPoint||e.position||e.insertionPoint;
+          if(pos){
+            P.Text=String(e.text==null?'':e.text).replace(/\\[A-Za-z][^;]*;/g,'').replace(/[{}]/g,'');
+            P.TxtHeight=(e.textHeight!=null?e.textHeight:(e.height||0));
+            P.TxtRot=(e.rotation||0);
+            push('Annotation',{type:'Point',coordinates:tx([pos.x,pos.y],T)},P);
+          }
+        }
+        else { skipped[ty]=(skipped[ty]||0)+1; }
+      }catch(err){}
+    });
+  }
+  walk(dxf.entities,null,null,'',0);
+  return {sub:out, layers:lyrTable, counts:counts, skipped:skipped, docName:docName, docVer:docVer};
+}
+
+/* ---- import dialog (ArcMap "Add CAD" behaviour) ---- */
+var cadState=null;
+function cadCrsOptions(sel){
+  var keys=Object.keys(CRS);
+  var pref=['wgs84','webmerc'];
+  var rest=keys.filter(function(k){return pref.indexOf(k)<0;}).sort(function(a,b){
+    var A=CRS[a],B=CRS[b];
+    if(A.utmZone&&B.utmZone){ if(A.utmZone!==B.utmZone)return A.utmZone-B.utmZone; return (A.utmSouth?1:0)-(B.utmSouth?1:0); }
+    return String(A.label).localeCompare(String(B.label));
   });
-  return {type:'FeatureCollection',features:feats};
+  return pref.concat(rest).map(function(k){
+    return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+escapeHtml(CRS[k].label+' ('+CRS[k].code+')')+'</option>';
+  }).join('');
+}
+function openCadDialog(parsed,fileName,color){
+  cadState={parsed:parsed,fileName:fileName,color:color};
+  var sub=parsed.sub;
+  var total=sub.Point.length+sub.Polyline.length+sub.Polygon.length+sub.Annotation.length;
+  // coordinate extent (to help the user pick the right CRS, like ArcGIS' warning)
+  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  ['Point','Polyline','Polygon','Annotation'].forEach(function(k){
+    sub[k].forEach(function(f){
+      var g=f.geometry, cs=(g.type==='Point')?[g.coordinates]:(g.type==='Polygon'?g.coordinates[0]:g.coordinates);
+      cs.forEach(function(c){ if(c[0]<minX)minX=c[0]; if(c[0]>maxX)maxX=c[0]; if(c[1]<minY)minY=c[1]; if(c[1]>maxY)maxY=c[1]; });
+    });
+  });
+  var looksGeo=(isFinite(minX)&&Math.abs(minX)<=180&&Math.abs(maxX)<=180&&Math.abs(minY)<=90&&Math.abs(maxY)<=90);
+  var guess=looksGeo?'wgs84':((crsKey==='autoutm')?effectiveCrsKey():crsKey);
+  cadState.guess=guess;
+
+  // per-CAD-layer entity counts
+  var lyrCount={};
+  ['Point','Polyline','Polygon','Annotation'].forEach(function(k){
+    sub[k].forEach(function(f){ var n=f.properties.Layer; lyrCount[n]=(lyrCount[n]||0)+1; });
+  });
+  var lyrNames=Object.keys(lyrCount).sort();
+
+  document.getElementById('cadFileName').textContent=fileName;
+  document.getElementById('cadSummary').innerHTML=
+    '<b>'+total.toLocaleString('en-US')+'</b> entities · '+lyrNames.length+' drawing layer(s)'+
+    (isFinite(minX)?('<br>Extent: X '+minX.toFixed(2)+' … '+maxX.toFixed(2)+'  |  Y '+minY.toFixed(2)+' … '+maxY.toFixed(2)):'')+
+    (looksGeo?'<br><span style="color:var(--good)">Coordinates look like longitude/latitude.</span>'
+             :'<br><span style="color:var(--accent)">Coordinates look projected (local/grid) — choose the drawing\'s coordinate system below.</span>');
+
+  var skips=Object.keys(parsed.skipped||{});
+  document.getElementById('cadSkipped').innerHTML = skips.length
+    ? ('Not converted: '+skips.map(function(k){return escapeHtml(k)+' ('+parsed.skipped[k]+')';}).join(', '))
+    : '';
+
+  document.getElementById('cadCrs').innerHTML=cadCrsOptions(guess);
+
+  // sub-layer (CAD feature class) checkboxes
+  var fcHtml='';
+  [['Polyline','Polyline'],['Polygon','Polygon'],['Point','Point'],['Annotation','Annotation']].forEach(function(p){
+    var n=sub[p[0]].length;
+    fcHtml+='<label style="display:flex;align-items:center;gap:7px;font-size:12px;'+(n?'':'opacity:.45')+'">'+
+      '<input type="checkbox" class="cad-fc" value="'+p[0]+'"'+(n?' checked':' disabled')+'/> '+
+      p[1]+' <span style="color:var(--ink-dim)">('+n.toLocaleString('en-US')+')</span></label>';
+  });
+  document.getElementById('cadFcList').innerHTML=fcHtml;
+
+  // drawing layer checkboxes with CAD colour swatches
+  document.getElementById('cadLyrList').innerHTML=lyrNames.map(function(n){
+    var col=(parsed.layers[n]&&parsed.layers[n].color)||'#000000';
+    var off=(parsed.layers[n]&&(parsed.layers[n].on===false||parsed.layers[n].frozen));
+    return '<label style="display:flex;align-items:center;gap:7px;font-size:12px;padding:2px 0">'+
+      '<input type="checkbox" class="cad-lyr" value="'+escapeHtml(n)+'"'+(off?'':' checked')+'/>'+
+      '<span style="width:12px;height:12px;border-radius:2px;border:1px solid rgba(255,255,255,.35);background:'+col+';flex:none"></span>'+
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">'+escapeHtml(n)+'</span>'+
+      '<span style="color:var(--ink-dim)">'+lyrCount[n].toLocaleString('en-US')+'</span>'+
+      (off?'<span style="color:var(--ink-dim);font-size:10px">off/frozen</span>':'')+'</label>';
+  }).join('');
+
+  document.getElementById('cadModal').classList.add('open');
+}
+function cadLoad(){
+  if(!cadState){return;}
+  var parsed=cadState.parsed, fileName=cadState.fileName;
+  var fcs=Array.prototype.slice.call(document.querySelectorAll('.cad-fc:checked')).map(function(c){return c.value;});
+  if(!fcs.length){ toast('Choose at least one CAD feature class',true); return; }
+  var keep={}; Array.prototype.slice.call(document.querySelectorAll('.cad-lyr:checked')).forEach(function(c){keep[c.value]=true;});
+  if(!Object.keys(keep).length){ toast('Choose at least one drawing layer',true); return; }
+  var srcKey=document.getElementById('cadCrs').value;
+  var useCad=document.getElementById('cadSymCad').checked;
+
+  var fwd=null;
+  if(srcKey!=='wgs84'){
+    if(!hasProj){ toast('proj4 is not loaded — cannot georeference this drawing.',true); return; }
+    fwd=function(xy){ try{ return proj4(CRS[srcKey].code,'EPSG:4326',xy); }catch(e){ return xy; } };
+  }
+  document.getElementById('cadModal').classList.remove('open');
+
+  var made=0,totalF=0, firstId=null;
+  var palette=['#3B82F6','#F59E0B','#34D399','#F472B6','#A78BFA','#FB7185','#22D3EE','#4ADE80'];
+  fcs.forEach(function(kind){
+    var feats=parsed.sub[kind].filter(function(f){return keep[f.properties.Layer];});
+    if(!feats.length)return;
+    var fc={type:'FeatureCollection',features:feats.map(function(f){return {type:'Feature',properties:JSON.parse(JSON.stringify(f.properties)),geometry:JSON.parse(JSON.stringify(f.geometry))};})};
+    if(fwd)fc=projectFC(fc,fwd);
+    var col=useCad?'#3B82F6':(palette[made%palette.length]);
+    var nm=fileName.replace(/\.[^.]+$/,'')+' — '+kind;
+    var id=addLayer(geoJsonLayer(fc,col),nm,col,{geojson:fc,zoom:false});
+    var L0=layers[id]; if(!L0)return;
+    if(firstId===null)firstId=id;
+    ensureFids(L0.geojson);
+    if(kind==='Polygon'){ L0.hollow=true; }        // CAD polygons draw as outlines, like ArcGIS
+    if(kind==='Point'||kind==='Annotation'){ L0.size=4; }
+    if(useCad){
+      var cols={};
+      Object.keys(keep).forEach(function(n){ if(parsed.layers[n])cols[n]=parsed.layers[n].color; });
+      L0.colorMode='categorized'; L0.uniqueField='Layer'; L0.catColors=cols;
+    }
+    if(kind==='Annotation'){
+      L0.advLabelStyle={field:'Text',size:11,color:'#FFFFFF',halo:'#000000'};
+    }
+    svBuildLeafletLayer(L0);
+    if(kind==='Annotation'&&window.__svApplyLabels){ try{window.__svApplyLabels(L0);}catch(e){} }
+    made++; totalF+=feats.length;
+  });
+  renderLegend(); refreshDropdowns(); renderLayers();
+  try{ if(firstId&&layers[firstId].leaflet.getBounds){ var b=layers[firstId].leaflet.getBounds(); if(b.isValid())map.fitBounds(b.pad(.15)); } }catch(e){}
+  try{ if(window.__svAutoFastRender)window.__svAutoFastRender(); }catch(e){}
+  toast(made?('CAD loaded: '+totalF.toLocaleString('en-US')+' entities in '+made+' feature class(es)'+(srcKey!=='wgs84'?(' — georeferenced from '+CRS[srcKey].esri):'')):'Nothing matched the chosen filters',!made);
 }
 function readDXF(file,nice,color){
   if(typeof DxfParser==='undefined'){ toast('DXF parser did not load — needs internet on first open. Reload with a connection.',true); return; }
   var r=new FileReader();
   r.onload=function(){
-    toast('Reading DXF…');
-    try{
-      var parser=new DxfParser();
-      var dxf=parser.parseSync(r.result);
-      var fc=dxfToGeoJSON(dxf);
-      if(!fc.features.length){ toast('No supported entities found in DXF (lines, polylines, points, circles, arcs, text).',true); return; }
-      // CAD coords are almost always projected/local — reproject if they look projected
-      var c0=fc.features[0].geometry.coordinates; while(c0&&typeof c0[0]!=='number')c0=c0[0];
-      var reproj=false;
-      if(c0 && (Math.abs(c0[0])>180||Math.abs(c0[1])>90)){
-        if(hasProj){
-          var srcKey=(crsKey==='autoutm')?effectiveCrsKey():crsKey;
-          if(srcKey==='wgs84')srcKey=effectiveCrsKey();
-          var fwd=function(xy){try{return proj4(CRS[srcKey].code,'EPSG:4326',xy);}catch(e){return xy;}};
-          fc=projectFC(fc,fwd); reproj=true;
-        } else {
-          toast('DXF appears to be in local/projected coordinates but proj4 is not loaded — it may not align.',true);
-        }
-      }
-      addLayer(geoJsonLayer(fc,color),nice+' (DXF)',color,{geojson:fc});
-      toast('Loaded '+fc.features.length+' entity(ies) from DXF'+(reproj?' (reprojected from '+CRS[(crsKey==='autoutm'?effectiveCrsKey():crsKey)].esri+' — set the CRS dropdown to the DXF\'s real system if it looks off)':''));
-    }catch(err){ toast('DXF read error: '+err.message,true); }
+    toast('Reading CAD drawing…');
+    setTimeout(function(){
+      try{
+        var parser=new DxfParser();
+        var dxf=parser.parseSync(r.result);
+        var parsed=cadParse(dxf,file.name);
+        var total=parsed.sub.Point.length+parsed.sub.Polyline.length+parsed.sub.Polygon.length+parsed.sub.Annotation.length;
+        if(!total){ toast('No convertible entities found in this DXF.',true); return; }
+        openCadDialog(parsed,file.name,color);
+      }catch(err){ toast('DXF read error: '+err.message,true); }
+    },30);
   };
   r.readAsText(file);
 }
-/* DWG is AutoCAD's proprietary binary — no browser decoder. Advise conversion. */
+/* DWG is AutoCAD's proprietary binary — no browser decoder exists. Advise conversion (as ArcGIS
+   itself requires a DWG-capable reader; browsers have none). */
 function handleDWG(file,nice){
-  toast('DWG is a proprietary binary format that browsers cannot read. Convert it to DXF first (free: ODA File Converter, or AutoCAD/BricsCAD "Save As DXF", or QGIS), then load the .dxf here.',true);
+  toast('DWG is a proprietary binary format that browsers cannot read. Convert it to DXF first (free: ODA File Converter, or AutoCAD/BricsCAD "Save As DXF", or QGIS "Save As DXF"), then load the .dxf here — it will import with full CAD layers, colours and annotation.',true);
 }
-/* ================= ANALYSIS TOOLS ================= */
-var anState={heat:{}, cluster:{}};
-function anLayerList(){
-  var sel=document.getElementById('anLayer'); if(!sel)return;
-  var cur=sel.value;
-  sel.innerHTML='<option value="">— choose a layer —</option>'+Object.keys(layers).map(function(id){
-    return '<option value="'+id+'">'+escapeHtml(layers[id].name)+'</option>';
-  }).join('');
-  if(cur&&layers[cur])sel.value=cur;
-}
-function anActiveLayer(){
-  var sel=document.getElementById('anLayer'); var id=sel&&sel.value;
-  if(!id||!layers[id]){ toast('Choose a layer for analysis first',true); return null; }
-  return layers[id];
-}
-function anPoints(L0){ // gather [lat,lng,(val)] from a layer's features
-  var pts=[];
-  if(L0.geojson&&L0.geojson.features){
-    L0.geojson.features.forEach(function(f){
-      var g=f.geometry; if(!g)return;
-      if(g.type==='Point'){ pts.push([g.coordinates[1],g.coordinates[0],f.properties]); }
-    });
-  } else {
-    L0.leaflet.eachLayer(function(ly){ if(ly.getLatLng){var ll=ly.getLatLng();pts.push([ll.lat,ll.lng,ly.feature&&ly.feature.properties]);} });
+/* CAD dialog wiring */
+(function(){
+  function $c(id){return document.getElementById(id);}
+  var c=$c('cadClose'); if(c)c.onclick=function(){$c('cadModal').classList.remove('open');cadState=null;};
+  var m=$c('cadModal'); if(m)m.addEventListener('click',function(e){if(e.target===m){m.classList.remove('open');cadState=null;}});
+  var lb=$c('cadLoadBtn'); if(lb)lb.onclick=cadLoad;
+  var a=$c('cadLyrAll'); if(a)a.onclick=function(){document.querySelectorAll('.cad-lyr').forEach(function(x){x.checked=true;});};
+  var n=$c('cadLyrNone'); if(n)n.onclick=function(){document.querySelectorAll('.cad-lyr').forEach(function(x){x.checked=false;});};
+})();
+/* Fast-rendering setting */
+(function(){
+  var sel=document.getElementById('fastRenderSel'); if(!sel)return;
+  function info(){
+    var el=document.getElementById('fastRenderInfo'); if(!el)return;
+    el.textContent=svTotalFeatures().toLocaleString('en-US')+' features \u00b7 '+(svUseCanvas()?'canvas':'SVG');
   }
-  return pts;
-}
-function anShowOut(html){ var o=document.getElementById('anOut'); if(o){o.style.display='block';o.innerHTML=html;} }
-/* Heatmap */
-function anToggleHeatmap(){
-  var L0=anActiveLayer(); if(!L0)return;
-  if(typeof L.heatLayer==='undefined'){ toast('Heatmap library not loaded — check connection/reload',true); return; }
-  if(anState.heat[L0.id]){ map.removeLayer(anState.heat[L0.id]); delete anState.heat[L0.id]; toast('Heatmap off for '+L0.name); return; }
-  var pts=anPoints(L0).map(function(p){return [p[0],p[1],0.6];});
-  if(!pts.length){ toast('Heatmap needs point features',true); return; }
-  var h=L.heatLayer(pts,{radius:25,blur:18,maxZoom:17}).addTo(map);
-  anState.heat[L0.id]=h; toast('Heatmap on: '+pts.length+' points');
-}
-/* Clustering */
-function anToggleCluster(){
-  var L0=anActiveLayer(); if(!L0)return;
-  if(typeof L.markerClusterGroup==='undefined'){ toast('Clustering library not loaded — check connection/reload',true); return; }
-  if(anState.cluster[L0.id]){ map.removeLayer(anState.cluster[L0.id]); delete anState.cluster[L0.id]; if(L0.visible)L0.leaflet.addTo(map); toast('Clustering off'); return; }
-  var pts=anPoints(L0); if(!pts.length){ toast('Clustering needs point features',true); return; }
-  var cg=L.markerClusterGroup();
-  pts.forEach(function(p){ cg.addLayer(L.marker([p[0],p[1]])); });
-  map.removeLayer(L0.leaflet); cg.addTo(map); anState.cluster[L0.id]=cg;
-  toast('Clustering on: '+pts.length+' points grouped');
-}
-/* Contours from point values via Turf isolines */
-function anPrepContours(){
-  var L0=anActiveLayer(); if(!L0)return;
-  var wrap=document.getElementById('anContourWrap'); var fsel=document.getElementById('anContourField');
-  var fields={}; (L0.geojson&&L0.geojson.features||[]).forEach(function(f){ Object.keys(f.properties||{}).forEach(function(k){ if(!isNaN(parseFloat((f.properties||{})[k])))fields[k]=1; }); });
-  var ks=Object.keys(fields);
-  if(!ks.length){ toast('Layer needs a numeric field (e.g. elevation) for contours',true); return; }
-  fsel.innerHTML=ks.map(function(k){return '<option>'+escapeHtml(k)+'</option>';}).join('');
-  wrap.style.display='block';
-}
-function anRunContours(){
-  var L0=anActiveLayer(); if(!L0||!L0.geojson)return;
-  var field=document.getElementById('anContourField').value;
-  var interval=parseFloat(document.getElementById('anContourInterval').value)||10;
-  try{
-    var vals=L0.geojson.features.map(function(f){return parseFloat((f.properties||{})[field]);}).filter(function(v){return !isNaN(v);});
-    if(vals.length<3){ toast('Need at least 3 points with values',true); return; }
-    var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals);
-    var breaks=[]; for(var b=Math.ceil(mn/interval)*interval;b<=mx;b+=interval)breaks.push(+b.toFixed(3));
-    if(!breaks.length){ toast('Interval too large for value range '+mn.toFixed(1)+'–'+mx.toFixed(1),true); return; }
-    // build a point grid feature collection with the property turf expects
-    var pts={type:'FeatureCollection',features:L0.geojson.features.filter(function(f){return f.geometry&&f.geometry.type==='Point';}).map(function(f){
-      return turf.point(f.geometry.coordinates,{z:parseFloat((f.properties||{})[field])});
-    })};
-    if(pts.features.length<3){ toast('Contours need point features with values',true); return; }
-    // interpolate to a grid then isolines
-    var bbox=turf.bbox(pts);
-    var cell=Math.max((bbox[2]-bbox[0]),(bbox[3]-bbox[1]))/40 || 0.01;
-    var grid=turf.interpolate(pts,cell,{gridType:'point',property:'z',units:'degrees',weight:2});
-    var lines=turf.isolines(grid,breaks,{zProperty:'z'});
-    var c=nextColor();
-    var lyr=L.geoJSON(lines,{style:function(){return {color:c,weight:1.4,opacity:.9};},
-      onEachFeature:function(ft,ly){ if(ft.properties&&ft.properties.z!=null)ly.bindTooltip(String(ft.properties.z),{sticky:true}); }});
-    lyr._src=lines;
-    addLayer(lyr, L0.name+' contours ('+interval+')', c, {geojson:lines,geomType:'LineString'});
-    toast('Generated '+(lines.features?lines.features.length:0)+' contour line(s) at '+interval+' interval');
-  }catch(err){ toast('Contour error: '+err.message,true); }
-}
-/* Measure — reuse existing measure tools if present, else quick draw */
-function anMeasure(kind){
-  // trigger the existing measure control if available
-  var btn=document.getElementById(kind==='line'?'measureLineBtn':'measureAreaBtn');
-  if(btn){ btn.click(); return; }
-  toast('Use the draw tools, then read length/area in the feature attributes',true);
-}
-/* Elevation profile along a drawn line (uses open-elevation API) */
-function anElevationProfile(){
-  toast('Draw a line first (Editing → Feature → Line), then click Elevation profile again with that line selected.',true);
-  var L0=anActiveLayer(); if(!L0||!L0.geojson)return;
-  var lineF=(L0.geojson.features||[]).find(function(f){return f.geometry&&f.geometry.type==='LineString';});
-  if(!lineF){ toast('No line found in this layer — draw or load a line layer',true); return; }
-  try{
-    var line=turf.lineString(lineF.geometry.coordinates);
-    var len=turf.length(line,{units:'kilometers'});
-    var n=Math.min(60,Math.max(10,Math.round(len*4)));
-    var samples=[]; for(var i=0;i<=n;i++){ var pt=turf.along(line,len*i/n,{units:'kilometers'}); samples.push(pt.geometry.coordinates); }
-    anShowOut('Sampling '+samples.length+' points along '+len.toFixed(2)+' km… fetching elevations.');
-    var locs=samples.map(function(c){return c[1]+','+c[0];}).join('|');
-    fetch('https://api.open-elevation.com/api/v1/lookup?locations='+encodeURIComponent(locs))
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var elevs=(d.results||[]).map(function(r){return r.elevation;});
-        if(!elevs.length){ anShowOut('No elevation data returned.'); return; }
-        anRenderProfile(elevs,len);
-      }).catch(function(e){ anShowOut('Elevation service unavailable (needs internet): '+e.message); });
-  }catch(err){ toast('Profile error: '+err.message,true); }
-}
-function anRenderProfile(elevs,lenKm){
-  var w=260,h=90,mn=Math.min.apply(null,elevs),mx=Math.max.apply(null,elevs),rng=(mx-mn)||1;
-  var pts=elevs.map(function(e,i){ return (i/(elevs.length-1)*w)+','+(h-((e-mn)/rng)*h); }).join(' ');
-  anShowOut('Elevation profile · '+lenKm.toFixed(2)+' km · min '+mn.toFixed(0)+' m / max '+mx.toFixed(0)+' m'+
-    '<br><svg width="'+w+'" height="'+h+'" style="margin-top:6px;background:var(--chip);border-radius:6px"><polyline points="'+pts+'" fill="none" stroke="var(--brand)" stroke-width="1.6"/></svg>');
-}
-function wireAnalysisTools(){
-  anLayerList();
-  var ah=document.getElementById('anHeatmap'); if(ah)ah.onclick=anToggleHeatmap;
-  var ac=document.getElementById('anCluster'); if(ac)ac.onclick=anToggleCluster;
-  var act=document.getElementById('anContours'); if(act)act.onclick=anPrepContours;
-  var acr=document.getElementById('anContourRun'); if(acr)acr.onclick=anRunContours;
-  var aml=document.getElementById('anMeasureLine'); if(aml)aml.onclick=function(){anMeasure('line');};
-  var ama=document.getElementById('anMeasureArea'); if(ama)ama.onclick=function(){anMeasure('area');};
-  var ap=document.getElementById('anProfile'); if(ap)ap.onclick=anElevationProfile;
-  wireCartoTools(); wireProductivityTools();
-}
-
+  window.__svFastInfo=info;
+  sel.value=svFastMode;
+  sel.onchange=function(){ svFastMode=this.value; svRebuildAllVectors(); info();
+    toast('Rendering: '+(svUseCanvas()?'fast canvas':'SVG')+' \u2014 '+svTotalFeatures().toLocaleString('en-US')+' features'); };
+  info();
+})();
 /* ================= CARTOGRAPHY TOOLS ================= */
 function cgLayerList(){
   var sel=document.getElementById('cgLayer'); if(!sel)return; var cur=sel.value;
@@ -2928,12 +3214,9 @@ function cgSetBlend(){
   var L0=cgActive(); if(!L0)return; var mode=document.getElementById('cgBlend').value;
   L0.blendMode=mode;
   function apply(el){ if(el)el.style.mixBlendMode=(mode==='normal'?'':mode); }
-  try{
-    if(L0.leaflet.getContainer) apply(L0.leaflet.getContainer());
-    if(L0.leaflet.eachLayer) L0.leaflet.eachLayer(function(ly){ if(ly._path)apply(ly._path); if(ly._icon)apply(ly._icon); if(ly.getContainer)apply(ly.getContainer()); });
-    if(L0.leaflet._image) apply(L0.leaflet._image);
-  }catch(e){}
-  toast('Blend mode “'+mode+'” applied to '+L0.name);
+  try{ svLayerElements(L0).forEach(apply); }catch(e){}
+  var shared=svUseCanvas()&&!L0.isRaster;
+  toast('Blend mode “'+mode+'” applied to '+L0.name+(shared?' (fast rendering shares one canvas, so this affects all vector layers)':''));
 }
 function cgProportional(){
   var L0=cgActive(); if(!L0||!L0.geojson)return;
@@ -3325,8 +3608,7 @@ function gpDefQuery(){
   L0.leaflet.eachLayer(function(ly){
     if(!ly.feature)return; var v=(ly.feature.properties||{})[field];
     var keep=sbaCompare(v,op,val);
-    var el=ly._path||ly._icon||(ly.getElement&&ly.getElement());
-    if(el){ el.style.display=keep?'':'none'; }
+    svShowFeature(ly,keep);
     keep?shown++:hidden++;
   });
   L0.defQuery={field:field,op:op,val:val};
@@ -3335,7 +3617,7 @@ function gpDefQuery(){
 }
 function gpClearFilter(){
   var L0=gpInput(); if(!L0)return;
-  L0.leaflet.eachLayer(function(ly){ var el=ly._path||ly._icon||(ly.getElement&&ly.getElement()); if(el)el.style.display=''; });
+  L0.leaflet.eachLayer(function(ly){ svShowFeature(ly,true); });
   L0.defQuery=null; gpShow('Filter cleared.'); toast('Filter cleared');
 }
 /* Select by location */
@@ -3428,8 +3710,6 @@ function dtLists(){ var sel=document.getElementById('dtLayer'); if(!sel)return; 
 function dtInput(){ var s=document.getElementById('dtLayer'); var L0=s&&layers[s.value]; if(!L0||!L0.geojson){toast('Choose a layer',true);return null;} return L0; }
 function dtShow(h){ var o=document.getElementById('dtOut'); if(o){o.style.display='block';o.innerHTML=h;} }
 var dtUnitMode='metric';
-function dtFmtDist(m){ if(dtUnitMode==='imperial'){ var ft=m*3.28084; return ft<5280?ft.toFixed(1)+' ft':(ft/5280).toFixed(3)+' mi'; } return m<1000?m.toFixed(1)+' m':(m/1000).toFixed(3)+' km'; }
-function dtFmtArea(m2){ if(dtUnitMode==='imperial'){ var ac=m2/4046.86; return ac<640?ac.toFixed(3)+' ac':(ac/640).toFixed(3)+' mi²'; } return m2<10000?m2.toFixed(1)+' m²':(m2/10000).toFixed(3)+' ha'; }
 function dtBatchEdit(){ var L0=dtInput(); if(!L0)return;
   var fl=dashFields(L0); var fields=fl.num.concat(fl.cat); if(!fields.length){toast('No attributes',true);return;}
   var field=prompt('Field to set ('+fields.join(', ')+'):',fields[0]); if(!field)return;
@@ -3539,7 +3819,7 @@ function gpTimeSlider(){
     var cut=min+(max-min)*pct;
     document.getElementById('timeLabel').textContent='Showing up to '+new Date(cut).toLocaleDateString();
     var shown=0;
-    L0.leaflet.eachLayer(function(ly){ if(!ly.feature)return; var d=Date.parse((ly.feature.properties||{})[timeState.field]); var keep=isNaN(d)||d<=cut; var el=ly._path||ly._icon||(ly.getElement&&ly.getElement()); if(el)el.style.display=keep?'':'none'; if(keep)shown++; });
+    L0.leaflet.eachLayer(function(ly){ if(!ly.feature)return; var d=Date.parse((ly.feature.properties||{})[timeState.field]); var keep=isNaN(d)||d<=cut; svShowFeature(ly,keep); if(keep)shown++; });
   }
   fsel.onchange=rebuild; document.getElementById('timeRange').oninput=apply;
   rebuild(); toast('Time slider active — drag to animate by date');
@@ -4129,13 +4409,6 @@ function smartTableLoad(rows, name, color){
   var plan=smartDetectTable(rows);
   if(!plan.ok){ toast(plan.reason||'No coordinates detected in '+name, true); return; }
   showImportPreview(plan, rows, name, color);
-}
-
-function tableToGeoJSON(rows){
-  // kept for compatibility (silent build, points/auto) — used by any legacy callers
-  var plan=smartDetectTable(rows); if(!plan.ok) return {type:'FeatureCollection',features:[]};
-  var crs=resolveTableCRS(plan.crsGuess);
-  return buildFromPlan(rows, plan, crs);
 }
 
 /* ---- Import preview dialog: shows what was detected, lets the user confirm/override ---- */
@@ -4739,7 +5012,6 @@ function fillSel(sel,items,vf,tf,ph){sel.innerHTML=ph?'<option value="">'+ph+'</
 function refreshDropdowns(){var vs=vectorLayers();
   ['sLayer','eLayer'].forEach(function(id){var sel=document.getElementById(id);if(!sel)return;var prev=sel.value;
     fillSel(sel,vs,function(l){return l.id;},function(l){return l.name;},vs.length?null:'— no layers —');if(prev)sel.value=prev;});
-  if(typeof anLayerList==='function')anLayerList();
   syncS();}
 /* attribute table */
 var drawer=document.getElementById('attrDrawer'),attrWrap=document.getElementById('attrTableWrap'),curTbl=null,sortc={key:null,dir:1};
@@ -4798,11 +5070,6 @@ function svSelectionMetricsAll(){
     total.layers.push({id:id,name:L0.name,count:m.count});
   });
   return total;
-}
-function svFindSelectionLayer(preferred){
-  if(preferred&&svSelectedFeatures(preferred).length)return preferred;
-  if(curTbl&&svSelectedFeatures(curTbl).length)return curTbl;
-  var ids=svSelectedLayerIds();return ids.length?layers[ids[0]]:null;
 }
 function svUpdateSelectionSummary(){
   var box=document.getElementById('selectionSummary'); if(!box)return;
@@ -4996,17 +5263,6 @@ function svBeginCellEdit(td,feature,field){
   }
   input.onkeydown=function(e){e.stopPropagation();if(e.key==='Enter'){e.preventDefault();finish(true);}else if(e.key==='Escape'){e.preventDefault();finish(false);}};input.onblur=function(){finish(true);};input.onclick=function(e){e.stopPropagation();};
 }
-function svOpenAttributeEditor(){
-  if(!curTbl){toast('Open an attribute table first',true);return;}var feats=svSelectedFeatures(curTbl);if(!feats.length){toast('Select one or more records first',true);return;}
-  var fields=fieldsOf(curTbl).filter(function(f){return String(f).indexOf('__sv')!==0&&f!==SV_SHAPE_FIELD;}),grid=document.getElementById('attrEditGrid');
-  document.getElementById('attrEditLayerName').textContent=curTbl.name;document.getElementById('attrEditInfo').textContent=feats.length+' selected feature(s). For multiple records, only fields you change will be applied to all selected records.';
-  var html='<div class="ae-head">Field</div><div class="ae-head">Value</div><div class="ae-head">Set NULL</div>';
-  fields.forEach(function(field){var first=(feats[0].properties||{})[field],same=feats.every(function(f){return String((f.properties||{})[field])===String(first);});
-    html+='<label title="'+escapeHtml(field)+'">'+escapeHtml(field)+'</label><input type="text" data-field="'+escapeHtml(field)+'" data-changed="0" class="'+(!same?'mixed':'')+'" value="'+(same&&first!=null?escapeHtml(first):'')+'" placeholder="'+(!same?'&lt;multiple values&gt;':'')+'"/><label class="ae-null"><input type="checkbox" data-null="'+escapeHtml(field)+'"/> NULL</label>';});
-  grid.innerHTML=html;grid.querySelectorAll('input[type=text]').forEach(function(inp){inp.oninput=function(){inp.setAttribute('data-changed','1');inp.classList.remove('mixed');};});
-  grid.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.onchange=function(){var inp=grid.querySelector('input[data-field="'+CSS.escape(cb.getAttribute('data-null'))+'"]');if(inp){inp.setAttribute('data-changed','1');inp.disabled=cb.checked;}};});
-  document.getElementById('attrEditModal').classList.add('open');
-}
 function svApplyAttributeEditor(){
   if(!curTbl)return;var feats=svSelectedFeatures(curTbl),grid=document.getElementById('attrEditGrid'),changes=[];
   grid.querySelectorAll('input[data-field]').forEach(function(inp){if(inp.getAttribute('data-changed')!=='1')return;var field=inp.getAttribute('data-field'),cb=grid.querySelector('input[data-null="'+CSS.escape(field)+'"]');changes.push({field:field,value:cb&&cb.checked?null:inp.value});});
@@ -5041,30 +5297,70 @@ function openTable(id){var L0=layers[id];if(!L0||!L0.geojson){toast('No attribut
   ensureFids(L0.geojson);curTbl=L0;sortc={key:null,dir:1};svTableAnchorFid=null;document.getElementById('attrTitle').textContent=L0.name;
   document.getElementById('attrFilter').value='';svFillTableLayerSelect();renderTable();drawer.classList.add('open');svUpdateSelectionSummary();
   setTimeout(function(){if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();},30);}
+/* ---- attribute table rendering -----------------------------------------------
+   A big table (3k+ rows x 40+ columns = 100k+ cells) is far too much to build in one
+   blocking pass, so rows are streamed in: the first chunk paints immediately (the table
+   opens instantly) and the rest fill in over the following frames. Row clicks use one
+   delegated listener instead of one closure per row. Look and behaviour are unchanged. */
+var SV_TABLE_MAX=2000, SV_FIRST_CHUNK=100, SV_CHUNK=400;
+var svRenderToken=0, svTableRows=[];
+function svRowHtml(f,i,cols,selSet,hasPending,layerId){
+  var fid=String((f.properties&&f.properties.__sv_fid)||'');
+  var s='<tr data-i="'+i+'" data-fid="'+escapeHtml(fid)+'" class="'+(selSet[fid]?'sel':'')+'">';
+  for(var c=0;c<cols.length;c++){
+    var col=cols[c], v=svTableFieldValue(f,col), editable=(col!==SV_SHAPE_FIELD);
+    var pending=hasPending&&editable&&window.__svPendingCells[svPendingCellKey(layerId,f,col)];
+    s+='<td data-k="'+escapeHtml(col)+'" title="'+(editable?'Double-click to edit':'Use Edit Geometry for SHAPE')+'" class="'+(editable?'attr-editable ':'')+(pending?'attr-pending':'')+'">'+(v==null?'':escapeHtml(v))+'</td>';
+  }
+  return s+'</tr>';
+}
 function renderTable(){if(!curTbl)return;var feats=svCurrentTableFeatures(),cols=svTableColumns(curTbl);
   if(sortc.key)feats.sort(function(a,b){var x=svTableFieldValue(a,sortc.key),y=svTableFieldValue(b,sortc.key),nx=parseFloat(x),ny=parseFloat(y);if(!isNaN(nx)&&!isNaN(ny))return (nx-ny)*sortc.dir;return String(x==null?'':x).localeCompare(String(y==null?'':y))*sortc.dir;});
   var selSet=svSelSet(curTbl.id);svSetAttrCount(feats.length);var showBtn=document.getElementById('attrShowSel');if(showBtn)showBtn.classList.toggle('active',svTableSelectedOnly);
-  if(svTableSelectedOnly&&!feats.length){attrWrap.innerHTML='<div class="attr-empty-selected">No selected records in this feature class.</div>';if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();return;}
-  var html='<table class="grid"><thead><tr>';cols.forEach(function(c){var label=svTableFieldLabel(c);html+='<th data-k="'+escapeHtml(c)+'" title="Left-click to sort · Right-click for field tools">'+escapeHtml(label)+(sortc.key===c?(sortc.dir>0?' ▲':' ▼'):'')+'</th>';});
-  html+='</tr></thead><tbody>';feats.slice(0,2000).forEach(function(f,i){var fid=String((f.properties&&f.properties.__sv_fid)||'');html+='<tr data-i="'+i+'" data-fid="'+escapeHtml(fid)+'" class="'+(selSet[fid]?'sel':'')+'">';
-    cols.forEach(function(c){var v=svTableFieldValue(f,c),editable=c!==SV_SHAPE_FIELD,pending=editable&&window.__svPendingCells[svPendingCellKey(curTbl.id,f,c)];html+='<td data-k="'+escapeHtml(c)+'" title="'+(editable?'Double-click to edit':'Use Edit Geometry for SHAPE')+'" class="'+(editable?'attr-editable ':'')+(pending?'attr-pending':'')+'">'+(v==null?'':escapeHtml(v))+'</td>';});html+='</tr>';});
-  html+='</tbody></table>';attrWrap.innerHTML=html;
+  svRenderToken++;                                  // cancels any in-flight streaming render
+  if(svTableSelectedOnly&&!feats.length){attrWrap.innerHTML='<div class="attr-empty-selected">No selected records in this feature class.</div>';svTableRows=[];if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();return;}
+  svTableRows=feats;
+  var html='<table class="grid"><thead><tr>';cols.forEach(function(c){var label=svTableFieldLabel(c);html+='<th data-k="'+escapeHtml(c)+'" title="Left-click to sort \u00b7 Right-click for field tools">'+escapeHtml(label)+(sortc.key===c?(sortc.dir>0?' \u25B2':' \u25BC'):'')+'</th>';});
+  html+='</tr></thead><tbody></tbody></table>';attrWrap.innerHTML=html;
   attrWrap.querySelectorAll('th').forEach(function(th){th.onclick=function(){var k=th.getAttribute('data-k');sortc.dir=(sortc.key===k)?-sortc.dir:1;sortc.key=k;renderTable();};th.oncontextmenu=function(e){svOpenFieldMenu(e,th.getAttribute('data-k'),th);};});
-  var rows=Array.prototype.slice.call(attrWrap.querySelectorAll('tbody tr'));
-  rows.forEach(function(tr,idx){var feature=feats[idx];
-    tr.onclick=function(e){
-      if((e.target&&e.target.tagName==='INPUT')||e.detail>1)return;
-      var fid=tr.getAttribute('data-fid'),mod=svSelectionModifier(e),changed={};
-      if(e.shiftKey&&svTableAnchorFid){var anchor=rows.findIndex(function(r){return r.getAttribute('data-fid')===svTableAnchorFid;});if(anchor<0)anchor=idx;var lo=Math.min(anchor,idx),hi=Math.max(anchor,idx);for(var k=lo;k<=hi;k++)selSet[rows[k].getAttribute('data-fid')]=true;}
-      else if(mod.toggle){if(selSet[fid])delete selSet[fid];else selSet[fid]=true;}
-      else{changed=svClearAllSelections(false);selSet=svSelSet(curTbl.id);selSet[fid]=true;try{var l=L.geoJSON(feature),b=l.getBounds();if(b.isValid())map.fitBounds(b.pad(.3));}catch(e2){}}
-      changed[curTbl.id]=true;svTableAnchorFid=fid;
-      Object.keys(changed).forEach(function(id){if(layers[id]&&layers[id].geojson)svBuildLeafletLayer(layers[id]);});
-      svSyncRenderedTableSelection();
-    };
-  });
+  var tbody=attrWrap.querySelector('tbody'), layerId=curTbl.id;
+  var total=Math.min(feats.length,SV_TABLE_MAX);
+  var hasPending=!!Object.keys(window.__svPendingCells||{}).length;
+  var token=svRenderToken, i=0;
+  function chunk(n){
+    if(token!==svRenderToken)return;                // a newer render started — abandon this one
+    var end=Math.min(i+n,total), buf='';
+    for(;i<end;i++)buf+=svRowHtml(feats[i],i,cols,selSet,hasPending,layerId);
+    if(buf)tbody.insertAdjacentHTML('beforeend',buf);
+    if(i<total)requestAnimationFrame(function(){chunk(SV_CHUNK);});
+    else if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();
+  }
+  chunk(SV_FIRST_CHUNK);
   svUpdateSelectionSummary();if(window.__svSyncAttrScroll)window.__svSyncAttrScroll();
 }
+/* one delegated row-click handler for the whole table (was one closure per rendered row) */
+attrWrap.addEventListener('click',function(e){
+  if(!curTbl||!e.target||!e.target.closest)return;
+  if(e.target.tagName==='INPUT'||e.detail>1)return;
+  var tr=e.target.closest('tbody tr[data-fid]'); if(!tr||!attrWrap.contains(tr))return;
+  var rows=Array.prototype.slice.call(attrWrap.querySelectorAll('tbody tr[data-fid]'));
+  var idx=rows.indexOf(tr), feature=svTableRows[+tr.getAttribute('data-i')];
+  var selSet=svSelSet(curTbl.id), fid=tr.getAttribute('data-fid'), mod=svSelectionModifier(e), changed={};
+  if(e.shiftKey&&svTableAnchorFid){
+    var anchor=rows.findIndex(function(r){return r.getAttribute('data-fid')===svTableAnchorFid;});
+    if(anchor<0)anchor=idx;
+    var lo=Math.min(anchor,idx),hi=Math.max(anchor,idx);
+    for(var k=lo;k<=hi;k++)selSet[rows[k].getAttribute('data-fid')]=true;
+  }
+  else if(mod.toggle){ if(selSet[fid])delete selSet[fid]; else selSet[fid]=true; }
+  else{
+    changed=svClearAllSelections(false); selSet=svSelSet(curTbl.id); selSet[fid]=true;
+    try{var l=L.geoJSON(feature),b=l.getBounds();if(b.isValid())map.fitBounds(b.pad(.3));}catch(e2){}
+  }
+  changed[curTbl.id]=true; svTableAnchorFid=fid;
+  Object.keys(changed).forEach(function(id){if(layers[id]&&layers[id].geojson)svBuildLeafletLayer(layers[id]);});
+  svSyncRenderedTableSelection();
+});
 attrWrap.addEventListener('dblclick',function(e){
   var td=e.target&&e.target.closest?e.target.closest('td.attr-editable'):null;if(!td||!attrWrap.contains(td)||!curTbl)return;
   var tr=td.closest('tr[data-fid]');if(!tr)return;e.preventDefault();e.stopPropagation();
@@ -7004,107 +7300,12 @@ document.getElementById('weatherApply').onclick=applyWeatherLayer;
 document.getElementById('weatherClear').onclick=clearWeatherLayer;
 document.getElementById('weatherOpacity').oninput=function(){document.getElementById('weatherOpacityV').textContent=(+this.value).toFixed(2); if(weatherLayer)weatherLayer.setOpacity(+this.value);};
 
-/* ================= LIVE AIR TRAFFIC ================= */
-var airGroup=L.featureGroup().addTo(map), airTimer=null, airSource='';
-function airSetStatus(txt){var el=document.getElementById('airStatus'); if(el) el.innerHTML=escapeHtml(txt).replace(/Loaded:/g,'<b>Loaded:</b>').replace(/Source:/g,'<b>Source:</b>').replace(/Note:/g,'<b>Note:</b>');}
-function clearAirTraffic(){ if(airTimer){clearInterval(airTimer); airTimer=null;} airGroup.clearLayers(); airSetStatus('Air traffic layer is off.'); var b=document.getElementById('airAuto'); if(b)b.textContent='▶ Auto refresh 30s'; }
-function aircraftIcon(track,onGround){
-  var deg=isFinite(track)?track:0;
-  return L.divIcon({className:'aircraft-icon',html:'<div class="air-symbol '+(onGround?'ground':'')+'" style="transform:rotate('+deg+'deg)">✈</div>',iconSize:[28,28],iconAnchor:[14,14]});
-}
-function popupAircraft(a){
-  var callsign=(a.flight||a.callsign||a[1]||'').trim()||'Unknown';
-  var country=a.origin_country||a.country||''; var alt=a.alt_baro||a.baro_altitude||a[7]; var gs=a.gs||a.velocity||a[9]; var track=a.track||a.true_track||a[10];
-  return '<b>'+escapeHtml(callsign)+'</b><table class="attr-table">'+
-    '<tr><td>Country</td><td>'+escapeHtml(country||'')+'</td></tr>'+
-    '<tr><td>Altitude</td><td>'+escapeHtml(alt==null?'n/a':alt)+'</td></tr>'+
-    '<tr><td>Speed</td><td>'+escapeHtml(gs==null?'n/a':gs)+'</td></tr>'+
-    '<tr><td>Track</td><td>'+escapeHtml(track==null?'n/a':Math.round(track)+'°')+'</td></tr>'+
-    '<tr><td>Type</td><td>'+escapeHtml(a.t||a.type||'')+'</td></tr>'+
-    '</table>';
-}
-function renderAirplanesLive(j){
-  airGroup.clearLayers(); var list=(j&&j.aircraft)||[]; var count=0;
-  list.forEach(function(a){var lat=+a.lat, lon=+a.lon; if(!isFinite(lat)||!isFinite(lon))return; count++;
-    L.marker([lat,lon],{icon:aircraftIcon(+a.track,!!a.ground),title:(a.flight||'Aircraft')}).bindPopup(popupAircraft(a)).addTo(airGroup);
-  });
-  if(count) try{airGroup.bringToFront();}catch(e){}
-  airSource='Airplanes.live'; airSetStatus('Loaded: '+count+' aircraft\nSource: Airplanes.live no-key ADS-B point API\nNote: Public API has no SLA and can be rate-limited.');
-}
-function renderOpenSky(j){
-  airGroup.clearLayers(); var states=(j&&j.states)||[]; var count=0;
-  states.forEach(function(s){var lon=+s[5], lat=+s[6]; if(!isFinite(lat)||!isFinite(lon))return; count++;
-    var a={callsign:(s[1]||'').trim(),origin_country:s[2],baro_altitude:s[7],velocity:s[9],true_track:s[10]};
-    L.marker([lat,lon],{icon:aircraftIcon(+s[10],!!s[8]),title:a.callsign||'Aircraft'}).bindPopup(popupAircraft(a)).addTo(airGroup);
-  });
-  airSource='OpenSky'; airSetStatus('Loaded: '+count+' aircraft\nSource: OpenSky no-key bbox API fallback\nNote: Anonymous API credits/rate limits apply.');
-}
-function fetchAirTraffic(){
-  var c=map.getCenter(), b=map.getBounds();
-  var radiusNm=Math.max(5,Math.min(250,Math.ceil(map.distance(c,b.getNorthEast())/1852)));
-  airSetStatus('Loading aircraft around map centre…\nRadius: '+radiusNm+' NM');
-  var p1='https://api.airplanes.live/v2/point/'+c.lat.toFixed(5)+'/'+c.lng.toFixed(5)+'/'+radiusNm;
-  fetch(p1).then(function(r){if(!r.ok)throw new Error('Airplanes.live HTTP '+r.status); return r.json();}).then(renderAirplanesLive).catch(function(e){
-    var bb=map.getBounds();
-    var url='https://opensky-network.org/api/states/all?lamin='+bb.getSouth().toFixed(5)+'&lomin='+bb.getWest().toFixed(5)+'&lamax='+bb.getNorth().toFixed(5)+'&lomax='+bb.getEast().toFixed(5);
-    airSetStatus('Primary air traffic source failed: '+e.message+'\nTrying OpenSky fallback…');
-    fetch(url).then(function(r){if(!r.ok)throw new Error('OpenSky HTTP '+r.status); return r.json();}).then(renderOpenSky).catch(function(e2){
-      airSetStatus('Air traffic failed.\nPrimary: '+e.message+'\nFallback: '+e2.message+'\nNote: No-key services can be temporarily blocked, rate-limited, or unavailable.'); toast('Air traffic unavailable',true);
-    });
-  });
-}
-function toggleAirAuto(){
-  var b=document.getElementById('airAuto');
-  if(airTimer){clearInterval(airTimer); airTimer=null; b.textContent='▶ Auto refresh 30s'; airSetStatus('Auto refresh stopped. Last source: '+(airSource||'none')); return;}
-  fetchAirTraffic(); airTimer=setInterval(fetchAirTraffic,30000); b.textContent='⏸ Stop auto refresh';
-}
-var _as=document.getElementById('airStart'); if(_as)_as.onclick=fetchAirTraffic;
-var _ar=document.getElementById('airRefresh'); if(_ar)_ar.onclick=fetchAirTraffic;
-var _aa=document.getElementById('airAuto'); if(_aa)_aa.onclick=toggleAirAuto;
-var _ac=document.getElementById('airClear'); if(_ac)_ac.onclick=clearAirTraffic;
-
-/* ================= ONLINE 3D GLOBE ================= */
-var cesiumViewer=null, cesiumLoading=false;
-function threeDMessage(msg,err){var el=document.getElementById('threeDMsg'); if(!el)return; el.textContent=msg; el.style.display='block'; el.style.borderColor=err?'var(--bad)':'var(--line)'; clearTimeout(threeDMessage._t); threeDMessage._t=setTimeout(function(){el.style.display='none';},4500);}
-function ensureCesium(cb){
-  if(window.Cesium){cb(true);return;} if(cesiumLoading){setTimeout(function(){ensureCesium(cb);},500);return;} cesiumLoading=true;
-  var css=document.createElement('link'); css.rel='stylesheet'; css.href='https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/Widgets/widgets.css'; document.head.appendChild(css);
-  var s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/Cesium.js';
-  s.onload=function(){cesiumLoading=false; cb(!!window.Cesium);}; s.onerror=function(){cesiumLoading=false; cb(false);}; document.head.appendChild(s);
-}
-function flyCesiumToMap(){
-  if(!cesiumViewer||!window.Cesium)return; var c=map.getCenter();
-  cesiumViewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(c.lng,c.lat,2200),orientation:{heading:0,pitch:Cesium.Math.toRadians(-45),roll:0},duration:1.6});
-  var _ti=document.getElementById('threeDInfo'); if(_ti)_ti.textContent='3D centre: '+c.lat.toFixed(5)+', '+c.lng.toFixed(5);
-}
-function open3DView(){
-  var _ov=document.getElementById('threeDOverlay'); if(!_ov)return; _ov.classList.add('open'); threeDMessage('Loading 3D globe…');
-  ensureCesium(function(ok){
-    if(!ok){threeDMessage('Could not load CesiumJS. Check internet connection.',true);return;}
-    if(cesiumViewer){flyCesiumToMap();return;}
-    var ctEl=document.getElementById('cesiumToken'); var token=ctEl?ctEl.value.trim():''; if(token) Cesium.Ion.defaultAccessToken=token;
-    var imagery=new Cesium.UrlTemplateImageryProvider({url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',credit:'© OpenStreetMap contributors'});
-    function makeViewer(tp){
-      cesiumViewer=new Cesium.Viewer('cesiumContainer',{animation:false,timeline:false,baseLayerPicker:false,sceneModePicker:true,geocoder:true,homeButton:true,navigationHelpButton:true,imageryProvider:imagery,terrainProvider:tp||new Cesium.EllipsoidTerrainProvider()});
-      flyCesiumToMap(); threeDMessage(token?'3D globe loaded with terrain token if valid.':'3D globe loaded. Add Cesium token for real terrain.');
-    }
-    if(token && Cesium.createWorldTerrainAsync){Cesium.createWorldTerrainAsync().then(makeViewer).catch(function(){makeViewer();threeDMessage('Terrain token failed; opened basic globe.',true);});}
-    else makeViewer();
-  });
-}
-var _o3=document.getElementById('open3D'); if(_o3)_o3.onclick=open3DView;
-var _t3c=document.getElementById('threeDClose'); if(_t3c)_t3c.onclick=function(){var o=document.getElementById('threeDOverlay'); if(o)o.classList.remove('open');};
-var _tfm=document.getElementById('threeDFlyMap'); if(_tfm)_tfm.onclick=flyCesiumToMap;
-
-
-
-
 /* ================= ULTIMATE EXPERIENCE ADD-ON ================= */
 var ultimateGridLayer=null;
 function proLog(msg){var el=document.getElementById('proLog'); if(el){el.innerHTML='<b>'+new Date().toLocaleTimeString()+'</b> — '+escapeHtml(msg)+'\n'+el.textContent.slice(0,1200);} try{toast(msg);}catch(e){} }
 function proCountFeatures(){var total=0;Object.keys(layers).forEach(function(id){var gj=layers[id].geojson;if(gj&&gj.features)total+=gj.features.length;});return total;}
 function proDrawCount(){var n=0;try{n=drawn.point.length+drawn.line.length+drawn.polygon.length+ptItems.length;}catch(e){}return n;}
-function proLiveStatus(){var live=[];try{if(weatherLayer)live.push('Weather');}catch(e){} try{if(airGroup&&airGroup.getLayers().length)live.push('Air');}catch(e){} try{if(routeLine)live.push('Route');}catch(e){} return live.length?live.join('+'):'OFF';}
+function proLiveStatus(){var live=[];try{if(weatherLayer)live.push('Weather');}catch(e){} try{if(routeLine)live.push('Route');}catch(e){} return live.length?live.join('+'):'OFF';}
 function updateProStats(){
   var el=document.getElementById('proStats'); if(!el)return;
   var layerCount=Object.keys(layers).length, visible=Object.keys(layers).filter(function(id){return layers[id].visible;}).length;
@@ -7154,13 +7355,12 @@ function runProCommand(){
   else if(q.indexOf('fit')>=0||q.indexOf('zoom all')>=0){fitAllData();}
   else if(q.indexOf('route')>=0){switchTab('route');proLog('Route planner opened.');}
   else if(q.indexOf('weather')>=0||q.indexOf('cloud')>=0){switchTab('live');document.getElementById('weatherApply').click();proLog('Weather layer requested.');}
-  else if(q.indexOf('air')>=0||q.indexOf('flight')>=0){switchTab('live');var _a=document.getElementById('airStart');if(_a)_a.click();proLog('Air traffic requested.');}
   else if(q.indexOf('focus')>=0||q.indexOf('presentation')>=0){toggleFocusMode();}
   else if(q.indexOf('grid')>=0){toggleGrid();}
   else if(q.indexOf('center')>=0||q.indexOf('copy')>=0){copyText(currentCenterText());}
   else if(q.indexOf('export')>=0){switchTab('layout');proLog('Layout export opened.');}
   else if(q.indexOf('home')>=0){map.setView(HOME.center,HOME.zoom);proLog('Returned to home extent.');}
-  else proLog('Command not recognized. Try satellite, route, weather, aircraft, fit all, focus, grid, dark, light, blank.');
+  else proLog('Command not recognized. Try satellite, route, weather, fit all, focus, grid, dark, light, blank.');
   updateProStats();
 }
 function layerHealthCheck(){
@@ -7301,8 +7501,6 @@ function uxToolLaunch(tool){
   else if(tool==='digitize-polygon'){switchTab('tools');setTimeout(function(){document.getElementById('digiPoly').click();},80);}
   else if(tool==='route'){var rb=document.getElementById('xpRoute'); if(rb)rb.click();}
   else if(tool==='weather'){switchTab('live');setTimeout(function(){document.getElementById('weatherApply').click();},80);}
-  else if(tool==='air'){switchTab('live');setTimeout(function(){var _a=document.getElementById('airStart');if(_a)_a.click();},80);}
-  else if(tool==='globe'){switchTab('live');setTimeout(function(){var _g=document.getElementById('open3D');if(_g)_g.click();},80);}
   else if(tool==='export'){switchTab('layout');}
   else if(tool==='health'){switchTab('pro');setTimeout(function(){document.getElementById('proHealth').click();},80);}
   try{proLog('Tool opened: '+tool);}catch(e){try{toast('Tool opened: '+tool);}catch(x){}}
@@ -7371,7 +7569,8 @@ var wcStartBtn=document.getElementById('wcStart');
   t.onclick=function(){ var open=g.style.display==='none'; g.style.display=open?'grid':'none'; if(c)c.textContent=open?'▾':'▸'; };
 })();
 if(wcStartBtn){ wcStartBtn.onclick=closeWelcome; }
-try{ if(typeof wireAnalysisTools==='function') wireAnalysisTools(); }catch(e){ console.warn('analysis tools init deferred',e); }
+try{ if(typeof wireCartoTools==='function') wireCartoTools(); }catch(e){ console.warn('cartography tools init deferred',e); }
+try{ if(typeof wireProductivityTools==='function') wireProductivityTools(); }catch(e){ console.warn('productivity tools init deferred',e); }
 try{ if(typeof wireLRS==='function') wireLRS(); }catch(e){ console.warn('LRS init deferred',e); }
 try{ if(typeof wireDashboard==='function') wireDashboard(); }catch(e){ console.warn('dashboard init deferred',e); }
 
@@ -7394,7 +7593,7 @@ document.getElementById('refreshBtn').onclick=function(){
   clearActiveDrawListener(); if(activeHandler){try{activeHandler.disable();}catch(e){} activeHandler=null;} hideDigibar();
   ptItems.forEach(function(it){ if(it._dragCleanup){ try{it._dragCleanup();}catch(e){} } });
   ptGroup.clearLayers(); ptItems=[]; ptUndoStack=[]; renderPtList();
-  sketch.clearLayers(); measureLayer.clearLayers(); tempMarkers.clearLayers(); clearRoute(); clearWeatherLayer(); clearAirTraffic();
+  sketch.clearLayers(); measureLayer.clearLayers(); tempMarkers.clearLayers(); clearRoute(); clearWeatherLayer();
   drawnGroup.clearLayers(); drawn={point:[],line:[],polygon:[]}; drawnUndo=[]; renderDrawnList();
   measureOut.textContent='Pick a tool, then draw on the map.';
   if(youAreHere){ map.removeLayer(youAreHere); youAreHere=null; }
@@ -7900,6 +8099,36 @@ document.getElementById('refreshBtn').onclick=function(){
   bindRibbon(); refreshRibbonLayers(); setInterval(updateRibbonState,1500);
   safeToast('Advanced experience ribbon ready — high-frequency GIS tools are grouped at the top');
 })();
+
+/* ================= ATTRIBUTE TABLE ESSENTIALS (ESRI-STYLE) ================= */
+(function installAttributeEssentials(){
+  var history=[],baseline=null,baselineLayerId=null,attributeClipboard=null;
+  function active(){if(!curTbl||!curTbl.geojson){toast('Open an attribute table first',true);return null;}return curTbl;}
+  function clone(v){return JSON.parse(JSON.stringify(v));}
+  function snapshot(){var L0=active();if(!L0)return;if(baselineLayerId!==L0.id){baselineLayerId=L0.id;baseline=clone(L0.geojson);history=[];}}
+  function log(action){history.unshift({time:new Date().toLocaleTimeString(),action:action});if(history.length>60)history.length=60;}
+  function changed(L0,msg){ensureFids(L0.geojson);svBuildLeafletLayer(L0);renderTable();renderLayers();refreshDropdowns();try{window.__svMarkDirty();}catch(e){}log(msg);toast(msg);}
+  function fields(L0){var out={};(L0.geojson.features||[]).forEach(function(f){Object.keys(f.properties||{}).forEach(function(k){if(String(k).indexOf('__sv')!==0)out[k]=1;});});return Object.keys(out);}
+  function askField(L0,promptText){var fs=fields(L0);if(!fs.length){toast('No attribute fields available',true);return null;}var f=prompt(promptText+'\n'+fs.join(', '),fs[0]);return f&&fs.indexOf(f)>=0?f:null;}
+  function selected(L0){return svSelectedFeatures(L0);}
+  function deleteSelected(){var L0=active();if(!L0)return;var sel=selected(L0);if(!sel.length){toast('Select one or more features first',true);return;}if(!confirm('Delete '+sel.length+' selected feature(s)? This change remains pending until Save.'))return;snapshot();var ids={};sel.forEach(function(f){ids[String(f.properties&&f.properties.__sv_fid)]=1;});L0.geojson.features=L0.geojson.features.filter(function(f){return !ids[String(f.properties&&f.properties.__sv_fid)];});svClearLayerSelection(L0.id);changed(L0,'Deleted '+sel.length+' selected feature(s)');}
+  function discard(){var L0=active();if(!L0)return;if(!baseline||baselineLayerId!==L0.id){toast('No table-opening snapshot to restore',true);return;}if(!confirm('Discard all unsaved changes made since this table was opened?'))return;L0.geojson=clone(baseline);window.__svPendingCells={};svSetSaveButtons(false);svBuildLeafletLayer(L0);renderTable();renderLayers();log('Discarded unsaved changes');toast('Unsaved changes discarded');}
+  function addField(){var L0=active();if(!L0)return;var name=(prompt('New field name:','NEW_FIELD')||'').trim();if(!name)return;if(fields(L0).indexOf(name)>=0){toast('Field already exists',true);return;}snapshot();var def=prompt('Default value (leave blank for NULL):','');(L0.geojson.features||[]).forEach(function(f){if(!f.properties)f.properties={};f.properties[name]=def===''?null:def;});changed(L0,'Added field '+name);}
+  function deleteField(){var L0=active();if(!L0)return;var f=askField(L0,'Delete which field?');if(!f)return;if(!confirm('Delete field "'+f+'" and all its values?'))return;snapshot();(L0.geojson.features||[]).forEach(function(x){delete (x.properties||{})[f];});changed(L0,'Deleted field '+f);}
+  function renameField(){var L0=active();if(!L0)return;var old=askField(L0,'Rename which field?');if(!old)return;var name=(prompt('New field name:',old)||'').trim();if(!name||name===old)return;if(fields(L0).indexOf(name)>=0){toast('Target field already exists',true);return;}snapshot();(L0.geojson.features||[]).forEach(function(x){x.properties=x.properties||{};x.properties[name]=x.properties[old];delete x.properties[old];});changed(L0,'Renamed '+old+' to '+name);}
+  function findReplace(){var L0=active();if(!L0)return;var f=askField(L0,'Find and replace in which field?');if(!f)return;var find=prompt('Find text:','');if(find===null)return;var rep=prompt('Replace with:','');if(rep===null)return;var scope=selected(L0),rows=scope.length?scope:L0.geojson.features,n=0;snapshot();rows.forEach(function(x){var v=(x.properties||{})[f];if(v!=null&&String(v).indexOf(find)>=0){x.properties[f]=String(v).split(find).join(rep);n++;}});if(!n){toast('No matching values found',true);return;}changed(L0,'Replaced '+n+' value(s) in '+f);}
+  function duplicate(){var L0=active();if(!L0)return;var sel=selected(L0);if(!sel.length){toast('Select feature(s) to duplicate',true);return;}snapshot();sel.forEach(function(f){var c=clone(f);if(c.properties)delete c.properties.__sv_fid;L0.geojson.features.push(c);});changed(L0,'Duplicated '+sel.length+' feature(s)');}
+  function copyAttrs(){var L0=active();if(!L0)return;var sel=selected(L0);if(sel.length!==1){toast('Select exactly one source feature',true);return;}attributeClipboard=clone(sel[0].properties||{});delete attributeClipboard.__sv_fid;toast('Attributes copied');}
+  function pasteAttrs(){var L0=active();if(!L0)return;if(!attributeClipboard){toast('Copy attributes first',true);return;}var sel=selected(L0);if(!sel.length){toast('Select target feature(s)',true);return;}snapshot();sel.forEach(function(f){var fid=f.properties&&f.properties.__sv_fid;f.properties=Object.assign({},f.properties||{},clone(attributeClipboard));if(fid)f.properties.__sv_fid=fid;});changed(L0,'Pasted attributes to '+sel.length+' feature(s)');}
+  function repairGeometry(){var L0=active();if(!L0)return;var rows=selected(L0);if(!rows.length)rows=L0.geojson.features;var n=0;snapshot();rows.forEach(function(f){try{var cleaned=turf.cleanCoords(f);if(cleaned&&JSON.stringify(cleaned.geometry)!==JSON.stringify(f.geometry)){f.geometry=cleaned.geometry;n++;}}catch(e){}});changed(L0,'Geometry repair completed: '+n+' changed');}
+  function exportTable(fmt){var L0=active();if(!L0)return;var rows=selected(L0);if(!rows.length)rows=svCurrentTableFeatures();var fs=fields(L0),data=rows.map(function(f){var o={};fs.forEach(function(k){o[k]=(f.properties||{})[k];});return o;});if(fmt==='xlsx'&&window.XLSX){var wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(data);XLSX.utils.book_append_sheet(wb,ws,'Attributes');XLSX.writeFile(wb,(L0.name||'attributes')+'.xlsx');}else{var esc=function(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};var csv=fs.map(esc).join(',')+'\n'+data.map(function(r){return fs.map(function(k){return esc(r[k]);}).join(',');}).join('\n');dl(csv,(L0.name||'attributes')+'.csv','text/csv');}log('Exported '+rows.length+' table row(s)');}
+  function showHistory(){var m=document.getElementById('attrHistoryModal');if(!m){m=document.createElement('div');m.id='attrHistoryModal';m.className='modal';m.innerHTML='<div class="modal-card" style="max-width:560px"><div class="modal-head"><b>Edit History</b><span class="grow"></span><button class="topbtn" id="attrHistoryClose">Close</button></div><div class="modal-body" id="attrHistoryBody"></div></div>';document.body.appendChild(m);m.querySelector('#attrHistoryClose').onclick=function(){m.classList.remove('open');};}m.querySelector('#attrHistoryBody').innerHTML=history.length?history.map(function(h){return '<div style="padding:8px;border-bottom:1px solid var(--line)"><b>'+escapeHtml(h.time)+'</b> · '+escapeHtml(h.action)+'</div>';}).join(''):'<p class="hint">No edits recorded in this session.</p>';m.classList.add('open');}
+  function addButton(bar,id,label,title,fn){if(document.getElementById(id))return;var b=document.createElement('button');b.id=id;b.textContent=label;b.title=title;b.onclick=fn;bar.appendChild(b);}
+  function build(){var drawerEl=document.getElementById('attrDrawer'),head=drawerEl&&drawerEl.querySelector('.head');if(!drawerEl||!head)return;var st=document.createElement('style');st.textContent='.attr-essential-bar{display:flex;align-items:center;gap:5px;padding:5px 8px;overflow-x:auto;flex:none;background:var(--bg-2);border-bottom:1px solid var(--line)}.attr-essential-bar button{height:28px;flex:none;border:1px solid var(--line);border-radius:6px;background:var(--chip);color:var(--ink);font-size:10.5px;font-weight:700;padding:0 8px;cursor:pointer}.attr-essential-bar button:hover{border-color:var(--brand);color:var(--brand-2)}';document.head.appendChild(st);var bar=document.createElement('div');bar.className='attr-essential-bar';bar.setAttribute('aria-label','Attribute editing tools');head.insertAdjacentElement('afterend',bar);addButton(bar,'attrDeleteSel','🗑 Delete','Delete selected features',deleteSelected);addButton(bar,'attrDiscard','↩ Discard','Discard unsaved table changes',discard);addButton(bar,'attrAddField','＋ Field','Add field',addField);addButton(bar,'attrRenameField','✎ Field','Rename field',renameField);addButton(bar,'attrDeleteField','− Field','Delete field',deleteField);addButton(bar,'attrFindReplace','⌕ Replace','Find and replace',findReplace);addButton(bar,'attrDuplicate','⧉ Duplicate','Duplicate selected features',duplicate);addButton(bar,'attrCopyAttrs','⧉ Attr','Copy attributes',copyAttrs);addButton(bar,'attrPasteAttrs','▣ Attr','Paste attributes',pasteAttrs);addButton(bar,'attrRepairGeom','⚕ Repair','Repair selected geometries',repairGeometry);addButton(bar,'attrHistory','☷ History','View edit history',showHistory);addButton(bar,'attrExportCsv','CSV','Export visible or selected rows to CSV',function(){exportTable('csv');});addButton(bar,'attrExportXlsx','XLSX','Export visible or selected rows to Excel',function(){exportTable('xlsx');});}
+  var oldOpenTable=openTable;openTable=function(){oldOpenTable.apply(this,arguments);baselineLayerId=null;snapshot();};window.openTable=openTable;
+  build();
+})();
+
 
 };
 </script>
