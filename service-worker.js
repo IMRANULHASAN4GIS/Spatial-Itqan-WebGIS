@@ -1,16 +1,16 @@
-const CACHE_NAME = 'spatial-itqan-shell-v1.1.0-r8';
+const CACHE_NAME = 'spatial-itqan-shell-v1.1.0-r9';
 const APP_SHELL = [
   './',
   './index.html',
   './documentation.html',
   './app.js?v=1.1.0-r8',
-  './mobile-pwa.js?v=1.1.0-r8',
+  './mobile-pwa.js?v=1.1.0-r9',
   './src/security/restricted-expression.js?v=1.1.0-r8',
   './src/storage/indexeddb-storage.js?v=1.1.0-r8',
   './src/workers/geo-worker-client.js?v=1.1.0-r8',
   './src/ui/workspace-controller.js?v=1.1.0-r8',
   './src/api/client.js?v=1.1.0-r8',
-  './src/ui/documentation.js?v=1.1.0-r8',
+  './src/ui/documentation.js?v=1.1.0-r9',
   './src/ui/documentation-page.js?v=1.1.0-r8',
   './workers/geo-worker.js',
   './manifest.webmanifest?v=1.1.0-r8',

@@ -2736,6 +2736,88 @@ body.pwa-standalone .pwa-install-button{display:none!important}
   .attrdrawer{height:70%!important}
   .pwa-device-chip{display:none}
 }
+/* Phone workspace: keep the full toolset in one horizontal rail so the map
+   remains the primary surface instead of allowing desktop groups to stack. */
+@media(max-width:860px){
+  body.device-mobile{overflow:hidden!important}
+  body.device-mobile .topbar{
+    flex:0 0 56px!important;
+    height:56px!important;
+    min-height:56px!important;
+  }
+  body.device-mobile .experience-ribbon{
+    display:grid!important;
+    grid-auto-flow:column!important;
+    grid-auto-columns:max-content!important;
+    grid-template-rows:48px!important;
+    align-items:stretch!important;
+    flex:0 0 52px!important;
+    width:100vw!important;
+    min-width:0!important;
+    min-height:52px!important;
+    max-height:52px!important;
+    padding:2px 6px!important;
+    gap:5px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  body.device-mobile .experience-ribbon .xp-group{
+    display:inline-flex!important;
+    flex-wrap:nowrap!important;
+    height:48px!important;
+    min-height:48px!important;
+    padding:13px 4px 3px!important;
+    scroll-snap-align:start;
+  }
+  body.device-mobile .experience-ribbon .xp-btn,
+  body.device-mobile .experience-ribbon .xp-help{
+    width:38px!important;
+    min-width:38px!important;
+    height:32px!important;
+    min-height:32px!important;
+    padding:0 5px!important;
+  }
+  body.device-mobile .experience-ribbon .xp-btn span{display:none!important}
+  body.device-mobile .experience-ribbon .xp-mini-select{height:32px;max-width:142px}
+  body.device-mobile .experience-ribbon .xp-coord{width:74px;height:32px;font-size:13px}
+  body.device-mobile .main{
+    position:relative!important;
+    flex:1 1 auto!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:220px!important;
+    overflow:hidden!important;
+  }
+  body.device-mobile #map{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+  body.device-mobile .pagefoot{
+    flex:0 0 calc(30px + var(--safe-bottom))!important;
+    height:calc(30px + var(--safe-bottom))!important;
+    min-height:calc(30px + var(--safe-bottom))!important;
+  }
+  body.device-mobile .foot-weather{justify-content:flex-start;width:100%;gap:5px;padding:0 8px}
+  body.device-mobile .foot-weather #fwWind,
+  body.device-mobile .foot-weather #fwPrecip,
+  body.device-mobile .foot-weather .fw-loc,
+  body.device-mobile .foot-weather .fw-sep{display:none!important}
+  body.device-mobile .app-release-stamp{display:none!important}
+  body.device-mobile .pwa-install-button{
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    padding:0!important;
+    border-radius:50%!important;
+    right:calc(10px + var(--safe-right))!important;
+    bottom:calc(40px + var(--safe-bottom))!important;
+  }
+  body.device-mobile .pwa-install-button .pwa-install-label{display:none!important}
+  body.device-mobile .northarrow{top:10px!important}
+  body.device-mobile .coordbar{bottom:38px!important}
+}
 @media(orientation:landscape) and (max-height:520px){
   .topbar{height:50px!important;min-height:50px}
   .experience-ribbon{min-height:42px;max-height:48px}
@@ -2799,8 +2881,8 @@ body[data-theme] .ld-el.selected{border-color:var(--selection);box-shadow:0 0 0 
 body[data-theme] .toast.err{border-color:var(--bad);color:var(--bad);background:var(--panel)}
 body[data-theme] ::selection{background:var(--selection);color:var(--bg)}
 </style>
-<script src="mobile-pwa.js?v=1.1.0-r8"></script>
-<script src="src/ui/documentation.js?v=1.1.0-r8"></script>
+<script src="mobile-pwa.js?v=1.1.0-r9"></script>
+<script src="src/ui/documentation.js?v=1.1.0-r9"></script>
 
 </body>
 </html>

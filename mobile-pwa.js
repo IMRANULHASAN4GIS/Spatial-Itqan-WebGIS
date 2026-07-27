@@ -55,6 +55,29 @@
   addEventListener('resize', syncViewport, { passive: true });
   addEventListener('orientationchange', syncViewport, { passive: true });
   if (window.visualViewport) window.visualViewport.addEventListener('resize', syncViewport, { passive: true });
+  addEventListener('load', function () {
+    [80, 350, 1000].forEach(function (delay) {
+      setTimeout(function () {
+        syncViewport();
+        if (window.map && typeof window.map.invalidateSize === 'function') {
+          window.map.invalidateSize({ pan: false });
+        }
+      }, delay);
+    });
+  });
+  if ('ResizeObserver' in window) {
+    var mapHost = document.querySelector('.main');
+    if (mapHost) {
+      new ResizeObserver(function () {
+        if (window.map && typeof window.map.invalidateSize === 'function') {
+          clearTimeout(syncViewport.resizeObserverTimer);
+          syncViewport.resizeObserverTimer = setTimeout(function () {
+            window.map.invalidateSize({ pan: false });
+          }, 80);
+        }
+      }).observe(mapHost);
+    }
+  }
 
   function addDeviceChip() {
     if (formFactor === 'desktop' || document.querySelector('.pwa-device-chip')) return;
@@ -159,7 +182,7 @@
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     addEventListener('load', function () {
-      navigator.serviceWorker.register('./service-worker.js?v=1.1.0-r8').catch(function (error) {
+      navigator.serviceWorker.register('./service-worker.js?v=1.1.0-r9').catch(function (error) {
         console.warn('Offline support was not registered:', error);
       });
     });
