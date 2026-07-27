@@ -2,10 +2,10 @@
 
 Choose a workspace from the top bar:
 
-- **Data** ? import layers, manage basemaps and navigate.
-- **Edit** ? select features, start an edit session and use geometry tools.
-- **Analyze** ? inspect, select and run analytical tools.
-- **Present** ? maximize the map for review or presentation.
+- **Data** — import layers, manage basemaps and navigate.
+- **Edit** — select features, start an edit session and use geometry tools.
+- **Analyze** — inspect, select and run analytical tools.
+- **Present** — maximize the map for review or presentation.
 
 Projects save to IndexedDB for larger and more durable browser storage. Export
 a project package for backup before clearing browser data.

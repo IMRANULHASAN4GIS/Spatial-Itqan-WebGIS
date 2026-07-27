@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Spatial Itqan WebGIS",
   "short_name": "Spatial Itqan",
-  "description": "Spatial Itqan WebGIS 1.1.0 ? professional mobile and desktop GIS editing, analysis and export suite.",
+  "description": "Spatial Itqan WebGIS 1.1.0 — professional mobile and desktop GIS editing, analysis and export suite.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

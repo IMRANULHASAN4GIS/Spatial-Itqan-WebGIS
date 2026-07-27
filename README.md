@@ -37,7 +37,7 @@ Open the URL printed by Vite. PWA installation works on HTTPS or localhost.
 ## GitHub Pages
 
 The included Pages workflow validates and deploys `dist/` whenever `main` is
-updated. In repository Settings ? Pages, select **GitHub Actions** as the source.
+updated. In repository Settings → Pages, select **GitHub Actions** as the source.
 
 ## Verification
 

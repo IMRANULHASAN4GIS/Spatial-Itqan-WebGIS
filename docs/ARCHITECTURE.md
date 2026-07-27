@@ -2,13 +2,13 @@
 
 ## Client
 
-- `app.js` ? legacy GIS runtime and compatibility layer.
-- `src/security/` ? restricted expression parsing.
-- `src/storage/` ? durable IndexedDB project repository.
-- `src/workers/` and `workers/` ? worker client and background computation.
-- `src/ui/` ? task-oriented workspace controller.
-- `mobile-pwa.js` ? device adaptation and PWA lifecycle.
-- `service-worker.js` ? same-origin application-shell cache.
+- `app.js` — legacy GIS runtime and compatibility layer.
+- `src/security/` — restricted expression parsing.
+- `src/storage/` — durable IndexedDB project repository.
+- `src/workers/` and `workers/` — worker client and background computation.
+- `src/ui/` — task-oriented workspace controller.
+- `mobile-pwa.js` — device adaptation and PWA lifecycle.
+- `service-worker.js` — same-origin application-shell cache.
 
 The modules expose intentionally small frozen APIs on `window` so the legacy
 runtime can adopt them without global implementation details leaking between

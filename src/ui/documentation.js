@@ -26,7 +26,7 @@
     {
       category: 'Navigation',
       title: 'Map navigation and coordinates',
-      text: 'The first launch uses a neutral world extent. Pan, zoom, search or locate the device and the resulting center and zoom are remembered on this device for the next launch. A normal reload preserves the view; Factory reset session clears it. Return Home opens the neutral world extent. Previous/next extent, zoom to all content and Go to XY remain available. Basemaps permit digital overzoom to level 28; raster detail is limited by each provider?s native tile resolution, while vector and CAD content remain sharp. The active CRS controls coordinate display and supported export operations.',
+      text: 'The first launch uses a neutral world extent. Pan, zoom, search or locate the device and the resulting center and zoom are remembered on this device for the next launch. A normal reload preserves the view; Factory reset session clears it. Return Home opens the neutral world extent. Previous/next extent, zoom to all content and Go to XY remain available. Basemaps permit digital overzoom to level 28; raster detail is limited by each provider’s native tile resolution, while vector and CAD content remain sharp. The active CRS controls coordinate display and supported export operations.',
     },
     {
       category: 'Navigation',
@@ -108,7 +108,7 @@
   var WORKFLOWS = [
     {
       category: 'Worked examples',
-      title: 'Example 1 ? Import a CSV of survey points',
+      title: 'Example 1 — Import a CSV of survey points',
       text: 'Load a coordinate table, verify its CRS, inspect the attributes and save it as a GIS layer.',
       requires: 'A CSV containing Easting and Northing, or Longitude and Latitude columns.',
       steps: [
@@ -128,7 +128,7 @@
     },
     {
       category: 'Worked examples',
-      title: 'Example 2 ? Select assets by attribute and export them',
+      title: 'Example 2 — Select assets by attribute and export them',
       text: 'Find a subset of features using field criteria and produce a separate deliverable.',
       requires: 'An active vector layer with attributes such as Status, Type or Inspection_Date.',
       steps: [
@@ -146,7 +146,7 @@
     },
     {
       category: 'Worked examples',
-      title: 'Example 3 ? Create and edit a road centerline',
+      title: 'Example 3 — Create and edit a road centerline',
       text: 'Create a typed line layer, digitize a road, snap it to existing data and correct its vertices.',
       requires: 'A visible reference layer and an appropriate projected CRS for engineering work.',
       steps: [
@@ -165,7 +165,7 @@
     },
     {
       category: 'Worked examples',
-      title: 'Example 4 ? Calculate area and classify parcels',
+      title: 'Example 4 — Calculate area and classify parcels',
       text: 'Calculate geometry-derived values with the restricted expression engine and symbolize the result.',
       requires: 'A polygon layer in a suitable projected CRS.',
       steps: [
@@ -176,7 +176,7 @@
         'Open the Symbol Selector or categorized styling and classify by Size_Class.',
         'Review outliers and run polygon geometry QA before export.',
       ],
-      example: 'Area_m2 = ROUND(AREA, 2). A 1,250.456 m? parcel becomes 1250.46.',
+      example: 'Area_m2 = ROUND(AREA, 2). A 1,250.456 m² parcel becomes 1250.46.',
       expected:
         'Every valid parcel receives an area value and can be displayed by its size category.',
       troubleshooting:
@@ -184,12 +184,12 @@
     },
     {
       category: 'Worked examples',
-      title: 'Example 5 ? QA/QC a contractor submission',
+      title: 'Example 5 — QA/QC a contractor submission',
       text: 'Review geometry and schema problems before accepting a delivered dataset.',
       requires: 'The submission layer, its required field specification and valid domain values.',
       steps: [
         'Import the submission and save an untouched project package as a baseline.',
-        'Open Professional Editing Suite ? Schema and define required field types, nullability, uniqueness and coded domains.',
+        'Open Professional Editing Suite → Schema and define required field types, nullability, uniqueness and coded domains.',
         'Run extended QA for empty geometry, invalid coordinates, duplicates, multipart features, intersections, spikes, slivers and overlaps.',
         'Filter the QA list by issue type and zoom to each affected feature.',
         'Repair only issues with an understood correction; record activity in the audit history.',
@@ -204,7 +204,7 @@
     },
     {
       category: 'Worked examples',
-      title: 'Example 6 ? Produce a presentation map',
+      title: 'Example 6 — Produce a presentation map',
       text: 'Prepare a clean map with a title, legend, north arrow, scale and export-ready layout.',
       requires: 'Styled visible layers and the intended map extent.',
       steps: [
@@ -216,7 +216,7 @@
         'Export PNG for reports or PDF for printing and inspect the result at full size.',
       ],
       example:
-        'A3 landscape, 2? resolution, title ?Critical Water Assets ? July 2026?, legend at lower right.',
+        'A3 landscape, 2× resolution, title “Critical Water Assets — July 2026”, legend at lower right.',
       expected:
         'The exported map has no editing panels, clipped labels or overlapping marginal elements.',
       troubleshooting:
@@ -224,7 +224,7 @@
     },
     {
       category: 'Worked examples',
-      title: 'Example 7 ? Export a georeferenced imagery grid',
+      title: 'Example 7 — Export a georeferenced imagery grid',
       text: 'Create projected raster tiles for an area of interest with sidecar files and a manifest.',
       requires:
         'A visible imagery source, defined AOI, output CRS and a browser supporting folder access.',
@@ -244,7 +244,7 @@
     },
     {
       category: 'Worked examples',
-      title: 'Example 8 ? Save, recover and share a project',
+      title: 'Example 8 — Save, recover and share a project',
       text: 'Use browser recovery during work and create durable deliverables for another user.',
       requires: 'At least one imported or created layer.',
       steps: [
@@ -283,18 +283,18 @@
     if (group) return group.getAttribute('data-title') || 'Ribbon tools';
     var professional = element.closest('[data-pro-pane]');
     if (professional)
-      return 'Professional suite ? ' + (professional.getAttribute('data-pro-pane') || 'Tools');
+      return 'Professional suite — ' + (professional.getAttribute('data-pro-pane') || 'Tools');
     var pane = element.closest('.pane');
     if (pane) {
       var paneName = pane.getAttribute('data-pane') || pane.id || 'Panel';
-      return 'Panel ? ' + paneName.replace(/^pane/i, '');
+      return 'Panel — ' + paneName.replace(/^pane/i, '');
     }
     var modal = element.closest('.modal,.pro-suite-overlay,.sv-symbol-modal,.sba-tool-window');
     if (modal) {
       var heading = modal.querySelector(
         '.modal-head b,.pro-suite-head strong,[role="heading"],h2,h3'
       );
-      return cleanText(heading && heading.textContent) || 'Dialog ? ' + (modal.id || 'Tools');
+      return cleanText(heading && heading.textContent) || 'Dialog — ' + (modal.id || 'Tools');
     }
     if (element.closest('.attrdrawer')) return 'Attribute table';
     if (element.closest('.topbar')) return 'Header and global controls';
@@ -534,7 +534,7 @@
       'small{color:#0284c7;font-weight:700;text-transform:uppercase}h1,h2{line-height:1.2}h2{font-size:19px}</style></head>' +
       '<body><header><h1>Spatial Itqan complete user manual</h1><p>Version ' +
       VERSION +
-      ' ? ' +
+      ' · ' +
       tools.length +
       ' interface controls documented</p></header>' +
       cards +
@@ -568,7 +568,7 @@
     var download = document.getElementById('helpPdf');
     if (!modal || !openButton) return;
     var title = modal.querySelector('.modal-head b');
-    if (title) title.textContent = 'Spatial Itqan 1.1.0 ? Complete Documentation';
+    if (title) title.textContent = 'Spatial Itqan 1.1.0 — Complete Documentation';
     openButton.style.display = '';
     openButton.setAttribute('aria-label', 'Open complete user documentation');
     openButton.title = 'Complete searchable user manual';
@@ -590,7 +590,7 @@
         modal.classList.remove('open');
       };
     if (search) {
-      search.placeholder = 'Search every interface, tool and workflow?';
+      search.placeholder = 'Search every interface, tool and workflow…';
       search.oninput = function () {
         render(search.value, global.__spatialDocsCategory || 'All');
       };
@@ -607,7 +607,7 @@
       }
     }
     if (download) {
-      download.textContent = '? Download Manual';
+      download.textContent = '⬇ Download Manual';
       download.title = 'Download the complete manual as a standalone HTML document';
       download.onclick = downloadManual;
       if (!download.dataset.completeDocsWired) {

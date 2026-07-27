@@ -1,5 +1,5 @@
 /* =====================================================================
-   IH_Map_View ? application (runs after libraries load)
+   IH_Map_View — application (runs after libraries load)
    ===================================================================== */
 window.__startIH = function(failed){
 "use strict";
@@ -29,7 +29,7 @@ function installDynamicGISLogo(){
     host.style.opacity='0';
     setTimeout(function(){
       host.innerHTML=f.svg;
-      host.setAttribute('title','Spatial Itqan ? '+f.name+' mode');
+      host.setAttribute('title','Spatial Itqan — '+f.name+' mode');
       host.style.opacity='1';
     },280);
     i++;
@@ -80,7 +80,7 @@ var CRS = {
   function progress(title,done,total,detail){
     total=Math.max(1,total||1);var pct=Math.max(0,Math.min(100,Math.round((done||0)*100/total))),elapsed=operationStarted?((Date.now()-operationStarted)/1000):0,eta=done>0&&done<total?elapsed*(total-done)/done:0;
     if(!operationStarted)operationStarted=Date.now();
-    $('proProgressTitle').textContent=title;$('proProgressText').textContent=(detail||'')+' ? '+done+'/'+total+' ? elapsed '+elapsed.toFixed(1)+'s'+(eta?' ? remaining '+eta.toFixed(1)+'s':'');$('proProgressBar').value=pct;$('proProgressDock').classList.add('show');
+    $('proProgressTitle').textContent=title;$('proProgressText').textContent=(detail||'')+' · '+done+'/'+total+' · elapsed '+elapsed.toFixed(1)+'s'+(eta?' · remaining '+eta.toFixed(1)+'s':'');$('proProgressBar').value=pct;$('proProgressDock').classList.add('show');
     if($('proActivityCurrent'))$('proActivityCurrent').textContent=$('proProgressText').textContent;if($('proActivityProgress'))$('proActivityProgress').value=pct;
     if(done>=total){setTimeout(function(){$('proProgressDock').classList.remove('show');},2200);operationStarted=0;announce(title+' completed');}
   }
@@ -125,11 +125,11 @@ var CRS = {
   ['proSnapVertex','proSnapEndpoint','proSnapMidpoint','proSnapEdge','proSnapIntersection','proSnapTolerance','proSnapUnits','proSelectionTolerance','proSelectionMode','proAutosaveMinutes','proVersionLimit','proEditorName'].forEach(function(id){$(id).onchange=readSettings;});
 
   function fillLayerSelect(select,current){
-    if(!select)return;var chosen=current||select.value,html='';Object.keys(layers||{}).forEach(function(id){var L0=layers[id];if(L0&&L0.geojson)html+='<option value="'+id+'">'+escapeHtml(L0.name)+'</option>';});select.innerHTML=html||'<option value="">? no vector layers ?</option>';if(chosen&&layers[chosen])select.value=chosen;
+    if(!select)return;var chosen=current||select.value,html='';Object.keys(layers||{}).forEach(function(id){var L0=layers[id];if(L0&&L0.geojson)html+='<option value="'+id+'">'+escapeHtml(L0.name)+'</option>';});select.innerHTML=html||'<option value="">— no vector layers —</option>';if(chosen&&layers[chosen])select.value=chosen;
   }
   function schemaRow(field){
     field=Object.assign({name:'',alias:'',type:'text',length:255,precision:0,scale:0,nullable:true,unique:false,defaultValue:null,domain:[]},field||{});
-    var tr=document.createElement('tr');tr.innerHTML='<td><input data-k="name" class="wide"></td><td><input data-k="alias" class="wide"></td><td><select data-k="type"><option value="text">Text</option><option value="integer">Integer</option><option value="double">Double</option><option value="date">Date</option><option value="boolean">Boolean</option></select></td><td><input data-k="length" type="number" min="1"></td><td><input data-k="precision" type="number" min="0"></td><td><input data-k="scale" type="number" min="0"></td><td><input data-k="nullable" type="checkbox"></td><td><input data-k="unique" type="checkbox"></td><td><input data-k="defaultValue"></td><td><input data-k="domain" class="wide"></td><td><button class="pro-schema-remove">?</button></td>';
+    var tr=document.createElement('tr');tr.innerHTML='<td><input data-k="name" class="wide"></td><td><input data-k="alias" class="wide"></td><td><select data-k="type"><option value="text">Text</option><option value="integer">Integer</option><option value="double">Double</option><option value="date">Date</option><option value="boolean">Boolean</option></select></td><td><input data-k="length" type="number" min="1"></td><td><input data-k="precision" type="number" min="0"></td><td><input data-k="scale" type="number" min="0"></td><td><input data-k="nullable" type="checkbox"></td><td><input data-k="unique" type="checkbox"></td><td><input data-k="defaultValue"></td><td><input data-k="domain" class="wide"></td><td><button class="pro-schema-remove">✕</button></td>';
     ['name','alias','type','length','precision','scale'].forEach(function(k){var el=tr.querySelector('[data-k='+k+']');if(el)el.value=field[k]==null?'':field[k];});
     tr.querySelector('[data-k=nullable]').checked=field.nullable!==false;tr.querySelector('[data-k=unique]').checked=!!field.unique;tr.querySelector('[data-k=defaultValue]').value=field.defaultValue==null?'':field.defaultValue;tr.querySelector('[data-k=domain]').value=Array.isArray(field.domain)?field.domain.join(', '):(field.domain||'');
     tr.querySelector('.pro-schema-remove').onclick=function(){tr.remove();};$('proSchemaRows').appendChild(tr);
@@ -160,14 +160,14 @@ var CRS = {
   $('proSchemaApply').onclick=function(){
     var L0=layers[$('proSchemaLayer').value]||activeLayer();if(!L0){toast('Choose a vector layer',true);return;}var schema;try{schema=collectSchema();}catch(e){toast(e.message,true);return;}
     var issues=[];schema.forEach(function(field){var seen={};(L0.geojson.features||[]).forEach(function(f,index){f.properties=f.properties||{};if(!(field.name in f.properties))f.properties[field.name]=clone(field.defaultValue);var message=validateValue(field,f.properties[field.name]);if(message)issues.push(field.name+' row '+(index+1)+': '+message);if(field.unique&&f.properties[field.name]!=null){var key=String(f.properties[field.name]);if(seen[key])issues.push(field.name+' row '+(index+1)+': duplicate unique value');seen[key]=1;}});});
-    if(issues.length&&!confirm(issues.slice(0,12).join('\n')+(issues.length>12?'\n? '+(issues.length-12)+' more':'')+'\n\nApply schema anyway?'))return;
+    if(issues.length&&!confirm(issues.slice(0,12).join('\n')+(issues.length>12?'\n… '+(issues.length-12)+' more':'')+'\n\nApply schema anyway?'))return;
     L0.editSchema=schema;markChanged(L0,'Schema applied to '+L0.name,schema.length+' fields; '+issues.length+' validation warning(s)');loadSchema();
   };
   ['editorSave','xpSaveEdit','attrSave','editorExportShp','editorExportKml','editorExportGeoJson'].forEach(function(id){var button=$(id);if(button)button.addEventListener('click',function(e){var L0=activeLayer(),issues=schemaIssues(L0);if(!issues.length)return;e.preventDefault();e.stopImmediatePropagation();showTab('schema');openSuite('schema');toast('Save/export blocked by '+issues.length+' schema validation issue(s)',true);$('proProjectStatus').textContent=issues.slice(0,10).join('\n');},true);});
 
   function templateDefaults(){var raw=$('proTemplateDefaults').value.trim();if(!raw)return{};var value=JSON.parse(raw);if(!value||Array.isArray(value)||typeof value!=='object')throw new Error('Default attributes must be a JSON object');return value;}
   function renderTemplates(){
-    var host=$('proTemplateList');host.innerHTML='';templates.forEach(function(template,index){var row=document.createElement('div');row.className='pro-template-item';row.innerHTML='<strong>'+escapeHtml(template.name)+'</strong><span>'+escapeHtml(template.method)+'</span><button>Use</button><button>?</button>';row.children[2].onclick=function(){applyTemplate(template);};row.children[3].onclick=function(){templates.splice(index,1);persist(templateKey,templates);renderTemplates();};host.appendChild(row);});if(!templates.length)host.innerHTML='<p class="pro-note">No saved templates.</p>';
+    var host=$('proTemplateList');host.innerHTML='';templates.forEach(function(template,index){var row=document.createElement('div');row.className='pro-template-item';row.innerHTML='<strong>'+escapeHtml(template.name)+'</strong><span>'+escapeHtml(template.method)+'</span><button>Use</button><button>✕</button>';row.children[2].onclick=function(){applyTemplate(template);};row.children[3].onclick=function(){templates.splice(index,1);persist(templateKey,templates);renderTemplates();};host.appendChild(row);});if(!templates.length)host.innerHTML='<p class="pro-note">No saved templates.</p>';
   }
   function applyTemplate(template){
     var L0=layers[template.layerId]||activeLayer();if(!L0){toast('Template layer is not available',true);return;}if(window.__svSetActiveLayer)window.__svSetActiveLayer(L0.id);L0.featureTemplateDefaults=clone(template.defaults||{});if(template.symbol){L0.color=template.symbol.color||L0.color;L0.pointShape=template.symbol.pointShape||L0.pointShape;L0.lineStyle=template.symbol.lineStyle||L0.lineStyle;L0.fillPattern=template.symbol.fillPattern||L0.fillPattern;svBuildLeafletLayer(L0);renderLayers();renderLegend();}
@@ -224,7 +224,7 @@ var CRS = {
     vertexContext={layer:L0,feature:feature,coords:clone(coords),selected:0};renderVertexRows();$('proVertexModal').classList.add('open');
   }
   function renderVertexRows(){
-    var host=$('proVertexRows');host.innerHTML='';if(!vertexContext)return;vertexContext.coords.forEach(function(coord,index){var display=toCRS(coord[0],coord[1],crsKey),length='?';if(index){try{length=(turf.distance(turf.point(vertexContext.coords[index-1]),turf.point(coord),{units:'kilometers'})*1000).toFixed(3)+' m';}catch(e){}}
+    var host=$('proVertexRows');host.innerHTML='';if(!vertexContext)return;vertexContext.coords.forEach(function(coord,index){var display=toCRS(coord[0],coord[1],crsKey),length='—';if(index){try{length=(turf.distance(turf.point(vertexContext.coords[index-1]),turf.point(coord),{units:'kilometers'})*1000).toFixed(3)+' m';}catch(e){}}
       var tr=document.createElement('tr');tr.innerHTML='<td><input type="radio" name="proVertexPick" '+(index===vertexContext.selected?'checked':'')+'></td><td><input data-axis="x" type="number" step="any" value="'+display.a+'"></td><td><input data-axis="y" type="number" step="any" value="'+display.b+'"></td><td>'+length+'</td><td><button>Delete</button></td>';
       tr.querySelector('input[type=radio]').onchange=function(){vertexContext.selected=index;};tr.querySelector('button').onclick=function(){var min=vertexContext.feature.geometry.type==='Polygon'?4:(vertexContext.feature.geometry.type==='LineString'?2:1);if(vertexContext.coords.length<=min){toast('Geometry requires at least '+min+' vertices',true);return;}vertexContext.coords.splice(index,1);vertexContext.selected=Math.max(0,index-1);renderVertexRows();};host.appendChild(tr);
     });
@@ -245,7 +245,7 @@ var CRS = {
   $('proPlanarize').onclick=function(){
     var L0=activeLayer();if(!L0)return;var rows=selectedFeatures(L0);if(!rows.length)rows=(L0.geojson.features||[]).filter(function(f){return f.geometry&&f.geometry.type==='LineString';});if(rows.length<2){toast('Planarize requires at least two lines',true);return;}if(window.__svAdvSnapshot)window.__svAdvSnapshot();var replacements=[],original={};
     rows.forEach(function(f){original[String(f.properties&&f.properties.__sv_fid)]=1;var cuts=[];rows.forEach(function(other){if(other===f)return;try{(turf.lineIntersect(f,other).features||[]).forEach(function(p){cuts.push(p);});}catch(e){}});var pieces=[f];cuts.forEach(function(point){var next=[];pieces.forEach(function(piece){try{var split=turf.lineSplit(piece,point);if(split.features.length>1)next=next.concat(split.features);else next.push(piece);}catch(e){next.push(piece);}});pieces=next;});pieces.forEach(function(piece,index){piece.properties=Object.assign({},f.properties,{__sv_fid:'PLAN'+Date.now()+'_'+replacements.length,PLANAR_PART:index+1});replacements.push(piece);});});
-    L0.geojson.features=L0.geojson.features.filter(function(f){return !original[String(f.properties&&f.properties.__sv_fid)];}).concat(replacements);markChanged(L0,'Lines planarized',rows.length+' source lines ? '+replacements.length+' planar segments');
+    L0.geojson.features=L0.geojson.features.filter(function(f){return !original[String(f.properties&&f.properties.__sv_fid)];}).concat(replacements);markChanged(L0,'Lines planarized',rows.length+' source lines → '+replacements.length+' planar segments');
   };
   $('proRemoveOverlap').onclick=function(){
     var L0=activeLayer();if(!L0)return;var rows=selectedFeatures(L0).filter(function(f){return f.geometry&&/Polygon/.test(f.geometry.type);});if(rows.length<2){toast('Select at least two polygons',true);return;}if(window.__svAdvSnapshot)window.__svAdvSnapshot();var changed=0;
@@ -254,7 +254,7 @@ var CRS = {
   };
   $('proEliminateGaps').onclick=function(){
     var L0=activeLayer();if(!L0)return;var threshold=Math.max(0,+$('proTopologyThreshold').value||0),rows=targetFeatures(L0).filter(function(f){return f.geometry&&f.geometry.type==='Polygon';}),removed=0;if(window.__svAdvSnapshot)window.__svAdvSnapshot();
-    rows.forEach(function(f){var rings=f.geometry.coordinates;if(rings.length<2)return;f.geometry.coordinates=[rings[0]].concat(rings.slice(1).filter(function(ring){try{var hole=turf.polygon([ring]);if(turf.area(hole)<=threshold){removed++;return false;}}catch(e){}return true;}));});markChanged(L0,'Small polygon gaps eliminated',removed+' interior gap ring(s) removed at ? '+threshold+' m?');
+    rows.forEach(function(f){var rings=f.geometry.coordinates;if(rings.length<2)return;f.geometry.coordinates=[rings[0]].concat(rings.slice(1).filter(function(ring){try{var hole=turf.polygon([ring]);if(turf.area(hole)<=threshold){removed++;return false;}}catch(e){}return true;}));});markChanged(L0,'Small polygon gaps eliminated',removed+' interior gap ring(s) removed at ≤ '+threshold+' m²');
   };
 
   function runExtendedQA(){
@@ -263,12 +263,12 @@ var CRS = {
     var workerCode="self.onmessage=function(e){var fs=e.data.features||[],seen={},issues=[];function walk(c,out){if(!Array.isArray(c))return;if(typeof c[0]==='number')out.push(c);else c.forEach(function(x){walk(x,out);});}fs.forEach(function(f,i){var id=f.properties&&f.properties.__sv_fid||i+1,g=f.geometry;if(!g||!g.coordinates){issues.push({row:i+1,fid:id,issue:'Null or empty geometry',detail:''});return;}var key=JSON.stringify(g);if(seen[key])issues.push({row:i+1,fid:id,issue:'Duplicate geometry',detail:'Matches row '+seen[key]});else seen[key]=i+1;if(/^Multi/.test(g.type))issues.push({row:i+1,fid:id,issue:'Multipart feature',detail:g.type});var coords=[];walk(g.coordinates,coords);for(var n=0;n<coords.length;n++){if(!isFinite(coords[n][0])||!isFinite(coords[n][1]))issues.push({row:i+1,fid:id,issue:'Invalid coordinate',detail:'Vertex '+(n+1)});}if(g.type==='Polygon'){(g.coordinates||[]).forEach(function(ring,r){if(ring.length<4||JSON.stringify(ring[0])!==JSON.stringify(ring[ring.length-1]))issues.push({row:i+1,fid:id,issue:'Invalid ring',detail:'Ring '+(r+1)+' is not closed'});});}});self.postMessage(issues);};";
     function finishWorker(baseIssues){
       qaResults=baseIssues||[];
-      features.forEach(function(f,index){var fid=f.properties&&f.properties.__sv_fid||index+1;if(!f.geometry)return;try{if(/Polygon/.test(f.geometry.type)){var area=turf.area(f);if(area<sliver)qaResults.push({row:index+1,fid:fid,issue:'Sliver polygon',detail:area.toFixed(3)+' m?'});if(turf.kinks){var k=turf.kinks(f);if(k.features.length)qaResults.push({row:index+1,fid:fid,issue:'Self-intersection',detail:k.features.length+' kink(s)'});}}}catch(e){}
+      features.forEach(function(f,index){var fid=f.properties&&f.properties.__sv_fid||index+1;if(!f.geometry)return;try{if(/Polygon/.test(f.geometry.type)){var area=turf.area(f);if(area<sliver)qaResults.push({row:index+1,fid:fid,issue:'Sliver polygon',detail:area.toFixed(3)+' m²'});if(turf.kinks){var k=turf.kinks(f);if(k.features.length)qaResults.push({row:index+1,fid:fid,issue:'Self-intersection',detail:k.features.length+' kink(s)'});}}}catch(e){}
         try{if(/LineString/.test(f.geometry.type)){var coords=f.geometry.type==='LineString'?f.geometry.coordinates:[].concat.apply([],f.geometry.coordinates);for(var c=1;c<coords.length;c++){var len=turf.distance(turf.point(coords[c-1]),turf.point(coords[c]),{units:'kilometers'})*1000;if(len<spike)qaResults.push({row:index+1,fid:fid,issue:'Spike / short segment',detail:len.toFixed(4)+' m'});}}}catch(e){}
         schema.forEach(function(field){var message=validateValue(field,(f.properties||{})[field.name]);if(message)qaResults.push({row:index+1,fid:fid,issue:'Schema: '+field.name,detail:message});});
         progress('Extended QA',index+1,features.length||1,'Geometry and schema checks');
       });
-      if(features.length<500)for(var i=0;i<features.length;i++)for(var j=i+1;j<features.length;j++){var a=features[i],b=features[j];if(!a.geometry||!b.geometry||!/Polygon/.test(a.geometry.type)||!/Polygon/.test(b.geometry.type))continue;try{var over=turf.intersect(a,b);if(over&&turf.area(over)>.001)qaResults.push({row:j+1,fid:b.properties&&b.properties.__sv_fid,issue:'Polygon overlap',detail:'Overlaps row '+(i+1)+' by '+turf.area(over).toFixed(3)+' m?'});}catch(e){}}
+      if(features.length<500)for(var i=0;i<features.length;i++)for(var j=i+1;j<features.length;j++){var a=features[i],b=features[j];if(!a.geometry||!b.geometry||!/Polygon/.test(a.geometry.type)||!/Polygon/.test(b.geometry.type))continue;try{var over=turf.intersect(a,b);if(over&&turf.area(over)>.001)qaResults.push({row:j+1,fid:b.properties&&b.properties.__sv_fid,issue:'Polygon overlap',detail:'Overlaps row '+(i+1)+' by '+turf.area(over).toFixed(3)+' m²'});}catch(e){}}
       renderQA();progress('Extended QA',features.length||1,features.length||1,qaResults.length+' issue(s) found');logAudit('Extended QA completed',qaResults.length+' issue(s)',L0);
     }
     try{var worker=new Worker(URL.createObjectURL(new Blob([workerCode],{type:'application/javascript'})));worker.onmessage=function(e){worker.terminate();finishWorker(e.data);};worker.onerror=function(){worker.terminate();finishWorker([]);};worker.postMessage({features:features});}catch(e){setTimeout(function(){finishWorker([]);},0);}
@@ -294,7 +294,7 @@ var CRS = {
   }
   $('proLabelLayer').onchange=refreshLabelFields;$('proLabelApply').onclick=function(){var L0=layers[$('proLabelLayer').value]||activeLayer();if(!L0)return;L0.proLabelStyle={expression:$('proLabelExpression').value||'{NAME}',placement:$('proLabelPlacement').value,minZoom:+$('proLabelMinZoom').value||0,maxZoom:+$('proLabelMaxZoom').value||24,rotationField:$('proLabelRotation').value,declutter:$('proLabelDeclutter').checked};drawProLabels(L0);logAudit('Professional labels applied',L0.proLabelStyle.expression,L0);toast('Scale-aware labels applied');};
   $('proLabelClear').onclick=function(){var L0=layers[$('proLabelLayer').value]||activeLayer();if(!L0)return;delete L0.proLabelStyle;clearProLabels(L0.id);logAudit('Professional labels cleared','',L0);};map.on('zoomend moveend',function(){Object.keys(layers||{}).forEach(function(id){if(layers[id]&&layers[id].proLabelStyle)drawProLabels(layers[id]);});});
-  function renderRules(){var L0=layers[$('proLabelLayer').value]||activeLayer(),host=$('proRuleList'),rules=L0&&L0.ruleStyles||[];host.innerHTML=rules.length?rules.map(function(rule,index){return '<div class="pro-template-item"><span style="width:13px;height:13px;border-radius:3px;background:'+rule.color+'"></span><strong>'+escapeHtml(rule.field+' '+rule.op+' '+rule.value)+'</strong><button data-rule-remove="'+index+'">?</button></div>';}).join(''):'<p class="pro-note">No rules. Unmatched features use the layer?s default symbol.</p>';host.querySelectorAll('[data-rule-remove]').forEach(function(button){button.onclick=function(){L0.ruleStyles.splice(+button.getAttribute('data-rule-remove'),1);svBuildLeafletLayer(L0);renderLayers();renderRules();};});}
+  function renderRules(){var L0=layers[$('proLabelLayer').value]||activeLayer(),host=$('proRuleList'),rules=L0&&L0.ruleStyles||[];host.innerHTML=rules.length?rules.map(function(rule,index){return '<div class="pro-template-item"><span style="width:13px;height:13px;border-radius:3px;background:'+rule.color+'"></span><strong>'+escapeHtml(rule.field+' '+rule.op+' '+rule.value)+'</strong><button data-rule-remove="'+index+'">✕</button></div>';}).join(''):'<p class="pro-note">No rules. Unmatched features use the layer’s default symbol.</p>';host.querySelectorAll('[data-rule-remove]').forEach(function(button){button.onclick=function(){L0.ruleStyles.splice(+button.getAttribute('data-rule-remove'),1);svBuildLeafletLayer(L0);renderLayers();renderRules();};});}
   $('proRuleAdd').onclick=function(){var L0=layers[$('proLabelLayer').value]||activeLayer();if(!L0)return;var field=$('proRuleField').value;if(!field){toast('Choose a rule field',true);return;}L0.ruleStyles=L0.ruleStyles||[];L0.ruleStyles.push({field:field,op:$('proRuleOperator').value,value:$('proRuleValue').value,color:$('proRuleColor').value});svBuildLeafletLayer(L0);renderLayers();renderLegend();renderRules();logAudit('Symbology rule added',field+' '+$('proRuleOperator').value+' '+$('proRuleValue').value,L0);};
   $('proRuleClear').onclick=function(){var L0=layers[$('proLabelLayer').value]||activeLayer();if(!L0)return;L0.ruleStyles=[];svBuildLeafletLayer(L0);renderLayers();renderLegend();renderRules();logAudit('Symbology rules cleared','',L0);};
 
@@ -303,10 +303,10 @@ var CRS = {
   }
   function saveVersion(name,automatic){
     var project=currentProject(),label=name||((automatic?'Autosave ':'Version ')+new Date().toLocaleString());versions.unshift({id:'ver_'+Date.now(),name:label,time:new Date().toISOString(),project:project});versions=versions.slice(0,state.versionLimit||10);persist(versionKey,versions);renderVersions();if(!automatic){logAudit('Project version saved',label);toast('Version saved: '+label);}}
-  function renderVersions(){var select=$('proVersionList');select.innerHTML=versions.length?versions.map(function(v){return '<option value="'+v.id+'">'+escapeHtml(v.name)+' ? '+new Date(v.time).toLocaleString()+'</option>';}).join(''):'<option value="">? no saved versions ?</option>';}
+  function renderVersions(){var select=$('proVersionList');select.innerHTML=versions.length?versions.map(function(v){return '<option value="'+v.id+'">'+escapeHtml(v.name)+' · '+new Date(v.time).toLocaleString()+'</option>';}).join(''):'<option value="">— no saved versions —</option>';}
   $('proVersionSave').onclick=function(){var name=prompt('Version name:','Checkpoint '+new Date().toLocaleString());if(name)saveVersion(name,false);};
   $('proVersionRestore').onclick=function(){var version=versions.filter(function(v){return v.id===$('proVersionList').value;})[0];if(!version)return;if(!confirm('Restore "'+version.name+'"? Current unsaved work will be replaced.'))return;try{restoreProject(clone(version.project));if(version.project.professional){state=Object.assign({},state,version.project.professional.settings||{});templates=version.project.professional.templates||templates;persist(storageKey,state);persist(templateKey,templates);}refreshAll();logAudit('Project version restored',version.name);toast('Version restored');}catch(e){toast('Restore failed: '+e.message,true);}};
-  $('proVersionCompare').onclick=function(){var version=versions.filter(function(v){return v.id===$('proVersionList').value;})[0];if(!version){toast('Choose a saved version first',true);return;}var current=currentProject(),oldByName={},rows=[];(version.project.layers||[]).forEach(function(l){oldByName[l.name]=l;});(current.layers||[]).forEach(function(layer){var old=oldByName[layer.name],nowFeatures=layer.geojson&&layer.geojson.features||[],oldFeatures=old&&old.geojson&&old.geojson.features||[],changed=JSON.stringify(nowFeatures)!==JSON.stringify(oldFeatures);rows.push({layer:layer.name,before:oldFeatures.length,now:nowFeatures.length,status:old?(changed?'Changed':'Unchanged'):'Added'});delete oldByName[layer.name];});Object.keys(oldByName).forEach(function(name){var old=oldByName[name];rows.push({layer:name,before:(old.geojson&&old.geojson.features||[]).length,now:0,status:'Removed'});});$('proProjectStatus').textContent='Comparison with '+version.name+'\n'+rows.map(function(r){return r.status+' ? '+r.layer+' ? '+r.before+' ? '+r.now;}).join('\n');logAudit('Project version compared',version.name);};
+  $('proVersionCompare').onclick=function(){var version=versions.filter(function(v){return v.id===$('proVersionList').value;})[0];if(!version){toast('Choose a saved version first',true);return;}var current=currentProject(),oldByName={},rows=[];(version.project.layers||[]).forEach(function(l){oldByName[l.name]=l;});(current.layers||[]).forEach(function(layer){var old=oldByName[layer.name],nowFeatures=layer.geojson&&layer.geojson.features||[],oldFeatures=old&&old.geojson&&old.geojson.features||[],changed=JSON.stringify(nowFeatures)!==JSON.stringify(oldFeatures);rows.push({layer:layer.name,before:oldFeatures.length,now:nowFeatures.length,status:old?(changed?'Changed':'Unchanged'):'Added'});delete oldByName[layer.name];});Object.keys(oldByName).forEach(function(name){var old=oldByName[name];rows.push({layer:name,before:(old.geojson&&old.geojson.features||[]).length,now:0,status:'Removed'});});$('proProjectStatus').textContent='Comparison with '+version.name+'\n'+rows.map(function(r){return r.status+' · '+r.layer+' · '+r.before+' → '+r.now;}).join('\n');logAudit('Project version compared',version.name);};
   function scheduleAutosave(){if(autosaveTimer)clearInterval(autosaveTimer);autosaveTimer=setInterval(function(){try{if(window.__svHasUnsavedEdits||(window.__svEditSession&&window.__svEditSession.dirty))saveVersion('',true);}catch(e){}},Math.max(1,state.autosaveMinutes||2)*60000);}
   $('proWorkspaceChoose').onclick=async function(){if(!window.showDirectoryPicker){toast('Folder access requires Chrome/Edge over localhost or HTTPS',true);return;}try{workspaceHandle=await window.showDirectoryPicker({mode:'readwrite'});$('proProjectStatus').textContent='Workspace: '+workspaceHandle.name;logAudit('Project workspace selected',workspaceHandle.name);}catch(e){if(e.name!=='AbortError')toast('Could not open folder: '+e.message,true);}};
   $('proWorkspaceSave').onclick=async function(){if(!workspaceHandle){$('proWorkspaceChoose').click();return;}try{var project=currentProject(),file=await workspaceHandle.getFileHandle('SpatialItqan_Project.svproject',{create:true}),writer=await file.createWritable();await writer.write(JSON.stringify(project,null,2));await writer.close();$('proProjectStatus').textContent='Saved to '+workspaceHandle.name+' at '+new Date().toLocaleTimeString();logAudit('Project saved to workspace folder',workspaceHandle.name);toast('Project saved to selected folder');}catch(e){toast('Folder save failed: '+e.message,true);}};
@@ -341,7 +341,7 @@ var CRS = {
       ['Topology intersection test',function(){try{return turf.lineIntersect(turf.lineString([[0,0],[1,1]]),turf.lineString([[0,1],[1,0]])).features.length===1;}catch(e){return false;}}()],
       ['CRS round-trip test',function(){try{var p=toCRS(55.3,25.2,'utm40'),ll=fromCRS(p.a,p.b,'utm40');return Math.abs(ll[0]-55.3)<1e-6&&Math.abs(ll[1]-25.2)<1e-6;}catch(e){return false;}}()],
       ['Project serialization test',function(){try{return JSON.parse(JSON.stringify(currentProject())).layers instanceof Array;}catch(e){return false;}}()]];
-    var passed=checks.filter(function(c){return c[1];}).length;$('proDiagnosticsResult').innerHTML=checks.map(function(c){return (c[1]?'? ':'? ')+c[0];}).join('\n')+'\n\n'+passed+'/'+checks.length+' checks passed.';logAudit('Diagnostics completed',passed+'/'+checks.length+' checks passed');
+    var passed=checks.filter(function(c){return c[1];}).length;$('proDiagnosticsResult').innerHTML=checks.map(function(c){return (c[1]?'✓ ':'✕ ')+c[0];}).join('\n')+'\n\n'+passed+'/'+checks.length+' checks passed.';logAudit('Diagnostics completed',passed+'/'+checks.length+' checks passed');
   };
 
   function refreshAll(){
@@ -432,7 +432,7 @@ var CRS = {
     function cancelActive(silent){
       if(!active)return;
       var name=active.name;finishCleanup();
-      if(!silent)toast(name+' cancelled ? source geometry was not changed');
+      if(!silent)toast(name+' cancelled — source geometry was not changed');
     }
     function drawAnchor(latlng){
       removeOverlay(anchorLayer);
@@ -461,7 +461,7 @@ var CRS = {
       if(window.__svMarkDirty)window.__svMarkDirty();
       refreshLayer(L0);
       if(window.__svAudit)window.__svAudit(action,detail,L0);
-      toast(action+' ? '+detail);
+      toast(action+' — '+detail);
     }
     function replaceSelectedGeometries(action,detail){
       if(!active||!active.output||!active.output.length)return;
@@ -502,7 +502,7 @@ var CRS = {
     function featureLabel(f,index){
       var p=f.properties||{},fid=p.__sv_fid||('Feature '+(index+1)),name='';
       Object.keys(p).some(function(k){if(k.indexOf('__sv')!==0&&p[k]!=null&&p[k]!==''){name=String(p[k]);return true;}return false;});
-      return fid+(name?' ? '+name:'');
+      return fid+(name?' — '+name:'');
     }
     function pointPixelDistance(a,b){return map.latLngToContainerPoint(a).distanceTo(map.latLngToContainerPoint(b));}
     function featureLines(feature){
@@ -561,7 +561,7 @@ var CRS = {
       active.output=transformed(active.source,function(x,y){var p=mapPoint(x,y);return unmapPoint(p.x+d.x,p.y+d.y);});
       preview(active.output);inputs[0].value=fmt(crs.x,3);inputs[1].value=fmt(crs.y,3);
       var distance=map.distance(active.reference,dest);
-      setStatus('?X '+fmt(crs.x,2)+' ? ?Y '+fmt(crs.y,2)+' ? '+fmt(distance,2)+' m'+(snapped?' ? snapped to '+snapped.kind:''));
+      setStatus('ΔX '+fmt(crs.x,2)+' · ΔY '+fmt(crs.y,2)+' · '+fmt(distance,2)+' m'+(snapped?' · snapped to '+snapped.kind:''));
       finishButton.disabled=false;
     }
     function startMove(){
@@ -618,12 +618,12 @@ var CRS = {
       var L0=currentLayer(),rows=selected(L0);if(!rows.length){toast('Select one or more features to rotate',true);return;}
       if(!begin('Rotate',L0,rows))return;
       active.pivot=selectionCenter(rows);active.phase='reference';active.angle=0;drawAnchor(active.pivot);
-      showBar('Rotate selected features','Click a reference direction from the anchor, then move and click again. Positive values rotate clockwise.',{fields:[{label:'Angle ?',value:0},{label:'Pivot X',value:0},{label:'Pivot Y',value:0}],finishDisabled:true});
+      showBar('Rotate selected features','Click a reference direction from the anchor, then move and click again. Positive values rotate clockwise.',{fields:[{label:'Angle °',value:0},{label:'Pivot X',value:0},{label:'Pivot Y',value:0}],finishDisabled:true});
       updatePivotInputs();
       addMapEvent('click',function(e){
         if(active.phase==='set-pivot'){active.pivot=e.latlng;drawAnchor(e.latlng);updatePivotInputs();active.phase='reference';setStatus('Anchor moved. Click a reference direction.');return;}
         if(active.phase==='reference'){active.reference=e.latlng;active.phase='destination';setStatus('Move around the anchor to preview rotation; click to finish.');return;}
-        if(active.phase==='destination'){updateRotate(e.latlng);replaceSelectedGeometries('Features rotated',rows.length+' feature(s) rotated '+fmt(active.angle,2)+'?');}
+        if(active.phase==='destination'){updateRotate(e.latlng);replaceSelectedGeometries('Features rotated',rows.length+' feature(s) rotated '+fmt(active.angle,2)+'°');}
       });
       addMapEvent('mousemove',function(e){if(active&&active.phase==='destination')updateRotate(e.latlng);});
     }
@@ -631,7 +631,7 @@ var CRS = {
       var p=map.latLngToContainerPoint(active.pivot),a=map.latLngToContainerPoint(active.reference),b=map.latLngToContainerPoint(latlng);
       var a1=Math.atan2(a.y-p.y,a.x-p.x),a2=Math.atan2(b.y-p.y,b.x-p.x);
       active.angle=(a2-a1)*180/Math.PI;inputs[0].value=fmt(active.angle,3);transformAround(active.angle,1);
-      setStatus('Rotation '+fmt(active.angle,2)+'? clockwise ? click or Enter to finish');
+      setStatus('Rotation '+fmt(active.angle,2)+'° clockwise · click or Enter to finish');
     }
     function startScale(){
       var L0=currentLayer(),rows=selected(L0);if(!rows.length){toast('Select one or more features to scale',true);return;}
@@ -648,7 +648,7 @@ var CRS = {
     }
     function updateScale(latlng){
       active.factor=Math.max(.0001,pointPixelDistance(active.pivot,latlng)/active.base);inputs[0].value=fmt(active.factor,4);
-      transformAround(0,active.factor);setStatus('Scale factor '+fmt(active.factor,4)+' ? click or Enter to finish');
+      transformAround(0,active.factor);setStatus('Scale factor '+fmt(active.factor,4)+' · click or Enter to finish');
     }
 
     function startSplit(){
@@ -664,7 +664,7 @@ var CRS = {
           var parts=turf.lineSplit(active.line,near).features;
           if(parts.length<2){active.output=null;finishButton.disabled=true;setStatus('Move away from the line endpoint to create two valid parts.');return;}
           active.cut=near;active.parts=parts;active.output=parts;preview(parts);finishButton.disabled=false;
-          setStatus('Cut creates '+parts.length+' line parts ? click or Enter to finish');
+          setStatus('Cut creates '+parts.length+' line parts · click or Enter to finish');
         }catch(err2){active.output=null;finishButton.disabled=true;}
       }
       active.commit=function(){
@@ -733,8 +733,8 @@ var CRS = {
       active.phase='source';
       showBar('Trace geometry','Click a visible line or polygon boundary to set the trace start. Move along it, then click or Enter to finish.',{values:false,pivot:false,finishDisabled:true});
       function update(e){
-        if(active.phase==='source'){var source=closestTraceLine(e.latlng);if(source){active.hover=source;drawSnap(source.latlng,'trace source');setStatus('Trace source: '+source.layer.name+' ? click to set start');}return;}
-        try{var end=turf.nearestPointOnLine(active.traceLine,turf.point([e.latlng.lng,e.latlng.lat]),{units:'meters'}),c=end.geometry.coordinates;drawSnap(L.latLng(c[1],c[0]),'trace end');var part=turf.lineSlice(active.traceStart,end,active.traceLine);part.properties=Object.assign({},L0.featureTemplateDefaults||{});active.output=[part];preview([part]);active.traceResult=part;finishButton.disabled=false;setStatus('Traced '+fmt(turf.length(part,{units:'meters'}),2)+' m ? click or Enter to finish');}catch(err){}
+        if(active.phase==='source'){var source=closestTraceLine(e.latlng);if(source){active.hover=source;drawSnap(source.latlng,'trace source');setStatus('Trace source: '+source.layer.name+' · click to set start');}return;}
+        try{var end=turf.nearestPointOnLine(active.traceLine,turf.point([e.latlng.lng,e.latlng.lat]),{units:'meters'}),c=end.geometry.coordinates;drawSnap(L.latLng(c[1],c[0]),'trace end');var part=turf.lineSlice(active.traceStart,end,active.traceLine);part.properties=Object.assign({},L0.featureTemplateDefaults||{});active.output=[part];preview([part]);active.traceResult=part;finishButton.disabled=false;setStatus('Traced '+fmt(turf.length(part,{units:'meters'}),2)+' m · click or Enter to finish');}catch(err){}
       }
       active.commit=function(){
         if(!active.traceResult)return;
@@ -799,14 +799,14 @@ var CRS = {
             var line=reshapeLineCandidate(rows[0],sketch);active.candidates=line?[line]:[];
           }else active.candidates=reshapePolygonCandidates(rows[0],sketch);
         }catch(err){active.candidates=[];}
-        if(!active.candidates.length){setStatus('The sketch must cross the selected '+family+' boundary at least twice. Cancel and try again.');toast('No valid reshape result ? the sketch needs two boundary crossings',true);return;}
+        if(!active.candidates.length){setStatus('The sketch must cross the selected '+family+' boundary at least twice. Cancel and try again.');toast('No valid reshape result — the sketch needs two boundary crossings',true);return;}
         active.output=[active.candidates[0]];preview(active.output);finishButton.disabled=false;
         if(active.candidates.length>1){
           targetWrap.classList.add('show');targetWrap.childNodes[0].nodeValue='Retained polygon';
           targetSelect.innerHTML='<option value="0">Keep larger side</option><option value="1">Keep smaller side</option>';
           targetSelect.onchange=function(){if(!active||active.name!=='Reshape')return;active.choice=number(this.value);active.output=[active.candidates[active.choice]];preview(active.output);};
         }
-        setStatus('Reshape preview ready ? choose the retained side if shown, then press Finish or Enter.');
+        setStatus('Reshape preview ready · choose the retained side if shown, then press Finish or Enter.');
       };
       active.commit=function(){
         if(!active.output||!active.output[0])return;
@@ -818,7 +818,7 @@ var CRS = {
 
     function copySelected(){
       var L0=currentLayer(),rows=selected(L0);if(!rows.length){toast('Select one or more features to copy',true);return;}
-      clipboard={features:clone(rows),family:layerFamily(L0),sourceLayer:L0.id};toast(rows.length+' feature(s) copied ? Paste lets you place them interactively');
+      clipboard={features:clone(rows),family:layerFamily(L0),sourceLayer:L0.id};toast(rows.length+' feature(s) copied — Paste lets you place them interactively');
     }
     function startPaste(){
       var L0=currentLayer();if(!clipboard||!clipboard.features.length){toast('Copy one or more selected features first',true);return;}
@@ -843,15 +843,15 @@ var CRS = {
       if(!active)return;
       if(active.commit){active.commit();return;}
       if(active.name==='Move'&&active.output)replaceSelectedGeometries('Features moved',active.features.length+' feature(s) moved');
-      else if(active.name==='Rotate'&&active.output)replaceSelectedGeometries('Features rotated',active.features.length+' feature(s) rotated '+fmt(active.angle,2)+'?');
+      else if(active.name==='Rotate'&&active.output)replaceSelectedGeometries('Features rotated',active.features.length+' feature(s) rotated '+fmt(active.angle,2)+'°');
       else if(active.name==='Scale'&&active.output)replaceSelectedGeometries('Features scaled',active.features.length+' feature(s) scaled by '+fmt(active.factor,3));
     };
     cancelButton.onclick=function(){cancelActive(false);};
     inputs[0].addEventListener('input',function(){
       if(!active)return;
       if(active.name==='Move')updateMoveFromInputs();
-      else if(active.name==='Rotate'){active.angle=number(this.value);transformAround(active.angle,1);setStatus('Rotation '+fmt(active.angle,2)+'? clockwise ? press Enter to finish');}
-      else if(active.name==='Scale'){active.factor=Math.max(.0001,number(this.value,1));transformAround(0,active.factor);setStatus('Scale factor '+fmt(active.factor,4)+' ? press Enter to finish');}
+      else if(active.name==='Rotate'){active.angle=number(this.value);transformAround(active.angle,1);setStatus('Rotation '+fmt(active.angle,2)+'° clockwise · press Enter to finish');}
+      else if(active.name==='Scale'){active.factor=Math.max(.0001,number(this.value,1));transformAround(0,active.factor);setStatus('Scale factor '+fmt(active.factor,4)+' · press Enter to finish');}
     });
     inputs[1].addEventListener('input',function(){if(active&&active.name==='Move')updateMoveFromInputs();else if(active&&(active.name==='Rotate'||active.name==='Scale')){setPivotFromInputs();transformAround(active.name==='Rotate'?active.angle:0,active.name==='Scale'?active.factor:1);}});
     inputs[2].addEventListener('input',function(){if(active&&(active.name==='Rotate'||active.name==='Scale')){setPivotFromInputs();transformAround(active.name==='Rotate'?active.angle:0,active.name==='Scale'?active.factor:1);}});
@@ -905,12 +905,12 @@ function crsLabel(key){ var k=key==='autoutm'?effectiveCrsKey():key; var c=CRS[k
 function toCRS(lng, lat, key){
   var k = (key==='autoutm') ? effectiveCrsKey([lng,lat]) : key;
   var c = CRS[k];
-  if(!c || k==='wgs84' || !hasProj){ return {x:lat, y:lng, key:'wgs84', fmt:'Lat '+lat.toFixed(6)+'?  Lon '+lng.toFixed(6)+'?'}; }
+  if(!c || k==='wgs84' || !hasProj){ return {x:lat, y:lng, key:'wgs84', fmt:'Lat '+lat.toFixed(6)+'°  Lon '+lng.toFixed(6)+'°'}; }
   try{
     var p = proj4('EPSG:4326', c.code, [lng, lat]);
     if(k==='webmerc') return {x:p[1],y:p[0],key:k,fmt:'X '+p[0].toFixed(2)+'  Y '+p[1].toFixed(2)};
     return {x:p[1], y:p[0], key:k, fmt:'E '+p[0].toFixed(2)+'  N '+p[1].toFixed(2)};
-  }catch(e){ return {x:lat,y:lng,key:'wgs84',fmt:'Lat '+lat.toFixed(6)+'?  Lon '+lng.toFixed(6)+'?'}; }
+  }catch(e){ return {x:lat,y:lng,key:'wgs84',fmt:'Lat '+lat.toFixed(6)+'°  Lon '+lng.toFixed(6)+'°'}; }
 }
 /* convert from a CRS coordinate to WGS84 [lng,lat] */
 function fromCRS(a, b, key){
@@ -1017,16 +1017,16 @@ function addTempMarker(latlng, html){
 }
 
 var basemaps={
-  lightgray:{name:'Light Gray',layer:L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{crossOrigin:true,maxNativeZoom:20,maxZoom:MAP_MAX_ZOOM,attribution:'? OpenStreetMap, ? CARTO'}),thumb:'https://a.basemaps.cartocdn.com/light_all/11/1290/843.png'},
-  darkgray:{name:'Dark Gray',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:16,maxZoom:MAP_MAX_ZOOM,attribution:'? Esri'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/11/843/1290'},
-  voyager:{name:'Voyager',layer:L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{crossOrigin:true,maxNativeZoom:20,maxZoom:MAP_MAX_ZOOM,attribution:'? OpenStreetMap, ? CARTO'}),thumb:'https://a.basemaps.cartocdn.com/rastertiles/voyager/11/1290/843.png'},
-  imagery:{name:'Satellite',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'? Esri, Maxar'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/11/843/1290'},
-  streets:{name:'Streets',layer:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'? OpenStreetMap'}),thumb:'https://a.tile.openstreetmap.org/11/1290/843.png'},
-  topo:{name:'Topographic',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'? Esri'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/11/843/1290'},
-  natgeo:{name:'Nat Geo',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:16,maxZoom:MAP_MAX_ZOOM,attribution:'? Esri, National Geographic'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/11/843/1290'},
-  osmhot:{name:'OSM Humanitarian',layer:L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'? OpenStreetMap, HOT'}),thumb:'https://a.tile.openstreetmap.fr/hot/11/1290/843.png'},
-  hillshade:{name:'Terrain Hillshade',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:16,maxZoom:MAP_MAX_ZOOM,attribution:'? Esri'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/8/104/160'},
-  opentopo:{name:'OpenTopoMap',layer:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{crossOrigin:true,maxNativeZoom:17,maxZoom:MAP_MAX_ZOOM,attribution:'? OpenTopoMap, ? OpenStreetMap contributors'}),thumb:'https://a.tile.opentopomap.org/8/167/109'},
+  lightgray:{name:'Light Gray',layer:L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{crossOrigin:true,maxNativeZoom:20,maxZoom:MAP_MAX_ZOOM,attribution:'© OpenStreetMap, © CARTO'}),thumb:'https://a.basemaps.cartocdn.com/light_all/11/1290/843.png'},
+  darkgray:{name:'Dark Gray',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:16,maxZoom:MAP_MAX_ZOOM,attribution:'© Esri'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/11/843/1290'},
+  voyager:{name:'Voyager',layer:L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{crossOrigin:true,maxNativeZoom:20,maxZoom:MAP_MAX_ZOOM,attribution:'© OpenStreetMap, © CARTO'}),thumb:'https://a.basemaps.cartocdn.com/rastertiles/voyager/11/1290/843.png'},
+  imagery:{name:'Satellite',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'© Esri, Maxar'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/11/843/1290'},
+  streets:{name:'Streets',layer:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'© OpenStreetMap'}),thumb:'https://a.tile.openstreetmap.org/11/1290/843.png'},
+  topo:{name:'Topographic',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'© Esri'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/11/843/1290'},
+  natgeo:{name:'Nat Geo',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:16,maxZoom:MAP_MAX_ZOOM,attribution:'© Esri, National Geographic'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/11/843/1290'},
+  osmhot:{name:'OSM Humanitarian',layer:L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{crossOrigin:true,maxNativeZoom:19,maxZoom:MAP_MAX_ZOOM,attribution:'© OpenStreetMap, HOT'}),thumb:'https://a.tile.openstreetmap.fr/hot/11/1290/843.png'},
+  hillshade:{name:'Terrain Hillshade',layer:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',{crossOrigin:true,maxNativeZoom:16,maxZoom:MAP_MAX_ZOOM,attribution:'© Esri'}),thumb:'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/8/104/160'},
+  opentopo:{name:'OpenTopoMap',layer:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{crossOrigin:true,maxNativeZoom:17,maxZoom:MAP_MAX_ZOOM,attribution:'© OpenTopoMap, © OpenStreetMap contributors'}),thumb:'https://a.tile.opentopomap.org/8/167/109'},
   blank:{name:'Blank QA',layer:L.layerGroup(),thumb:''}
 };
 var currentBase=basemaps.lightgray.layer.addTo(map);
@@ -1062,15 +1062,15 @@ function shortCrsTag(k){
 function updateCrsReadout(){
   var ek=effectiveCrsKey();
   var tag=shortCrsTag(ek);
-  document.getElementById('coordCrs').textContent=(crsKey==='autoutm'?'? ':'')+tag;
+  document.getElementById('coordCrs').textContent=(crsKey==='autoutm'?'⊕ ':'')+tag;
   document.getElementById('coordCrs').title=CRS[ek].esri+' ('+CRS[ek].code+')';
 }
 crsSelect.onchange=function(){
   crsKey=crsSelect.value;
   updateCrsReadout();
   refreshCoordReadout();
-  if(!hasProj && crsKey!=='wgs84') toast('Projection library not loaded ? showing Lat/Lng',true);
-  else toast('Coordinate system: '+crsLabel(crsKey)+' ? map readout & exports now use this system');
+  if(!hasProj && crsKey!=='wgs84') toast('Projection library not loaded — showing Lat/Lng',true);
+  else toast('Coordinate system: '+crsLabel(crsKey)+' — map readout & exports now use this system');
   var gx=document.getElementById('gotoX'), gy=document.getElementById('gotoY');
   var ek=effectiveCrsKey();
   if(ek==='wgs84'){ gx.placeholder='Lat 24.2075'; gy.placeholder='Lon 55.7447'; document.getElementById('gotoHint').textContent='Enter Lat, Lon (degrees).'; }
@@ -1117,9 +1117,9 @@ function styleVec(color){return {
   onEachFeature:function(f,l){l.bindPopup(popupFromProps(f.properties));}
 };}
 /* ===== Fast rendering ==========================================================
-   Vector layers draw either with Leaflet's SVG renderer (one DOM node per feature ?
+   Vector layers draw either with Leaflet's SVG renderer (one DOM node per feature —
    rich but slow past a few thousand features) or with a single shared Canvas renderer
-   (one node total ? dramatically faster).
+   (one node total — dramatically faster).
    ONE renderer instance is shared by every vector layer, so layer ordering, bringToFront
    and restacking behave exactly as before. Tools that used to poke at SVG nodes
    (definition query, time slider, blend modes) go through svShowFeature/svLayerElements,
@@ -1139,7 +1139,7 @@ function svUseCanvas(){
   return svTotalFeatures()>SV_FAST_THRESHOLD;
 }
 function svRendererOpt(){ return svUseCanvas()?svCanvas():undefined; }
-/* Show / hide one rendered feature ? works for SVG paths, canvas paths and markers, so
+/* Show / hide one rendered feature — works for SVG paths, canvas paths and markers, so
    filtering and time animation behave identically in both rendering modes. */
 function svShowFeature(ly,show){
   if(!ly)return;
@@ -1185,7 +1185,7 @@ window.__svAutoFastRender=function(){
   svFastBusy=true;
   try{
     svRebuildAllVectors();
-    if(want==='canvas')toast('Fast rendering on ? '+svTotalFeatures().toLocaleString('en-US')+' features drawn on canvas');
+    if(want==='canvas')toast('Fast rendering on — '+svTotalFeatures().toLocaleString('en-US')+' features drawn on canvas');
   }finally{ svFastBusy=false; }
 };
 function geoJsonLayer(gj,color){var s=styleVec(color);
@@ -1273,13 +1273,13 @@ function svColorForFeature(L0,f){
 /* ================= ESRI-STYLE SYMBOL CATALOG ================= */
 var SV_SYMBOL_CATALOG={
   point:[
-    {key:'circle',name:'Circle',glyph:'?'},{key:'square',name:'Square',glyph:'?'},{key:'diamond',name:'Diamond',glyph:'?'},
-    {key:'triangle',name:'Triangle',glyph:'?'},{key:'cross',name:'Cross',glyph:'?'},{key:'x',name:'X Marker',glyph:'?'},
-    {key:'star',name:'Star',glyph:'?'},{key:'asterisk',name:'Asterisk',glyph:'?'},{key:'check',name:'Check',glyph:'?'},
-    {key:'flag',name:'Flag',glyph:'?'},{key:'airport',name:'Airport',glyph:'?'},{key:'hospital',name:'Hospital',glyph:'?'},
-    {key:'information',name:'Information',glyph:'?'},{key:'question',name:'Question',glyph:'?'},{key:'bolt',name:'Bolt',glyph:'?'},
-    {key:'pushpin',name:'Pushpin',glyph:'?'},{key:'school',name:'School',glyph:'?'},{key:'camera',name:'Camera',glyph:'?'},
-    {key:'warning',name:'Warning',glyph:'?'},{key:'tree',name:'Tree',glyph:'?'},{key:'utility',name:'Utility',glyph:'?'}
+    {key:'circle',name:'Circle',glyph:'●'},{key:'square',name:'Square',glyph:'■'},{key:'diamond',name:'Diamond',glyph:'◆'},
+    {key:'triangle',name:'Triangle',glyph:'▲'},{key:'cross',name:'Cross',glyph:'✚'},{key:'x',name:'X Marker',glyph:'✕'},
+    {key:'star',name:'Star',glyph:'★'},{key:'asterisk',name:'Asterisk',glyph:'✱'},{key:'check',name:'Check',glyph:'✓'},
+    {key:'flag',name:'Flag',glyph:'⚑'},{key:'airport',name:'Airport',glyph:'✈'},{key:'hospital',name:'Hospital',glyph:'✚'},
+    {key:'information',name:'Information',glyph:'ⓘ'},{key:'question',name:'Question',glyph:'?'},{key:'bolt',name:'Bolt',glyph:'ϟ'},
+    {key:'pushpin',name:'Pushpin',glyph:'●'},{key:'school',name:'School',glyph:'⚑'},{key:'camera',name:'Camera',glyph:'◉'},
+    {key:'warning',name:'Warning',glyph:'⚠'},{key:'tree',name:'Tree',glyph:'♠'},{key:'utility',name:'Utility',glyph:'⊕'}
   ],
   line:[
     {key:'solid',name:'Solid line'},{key:'dash',name:'Dashed line'},{key:'dot',name:'Dotted line'},
@@ -1389,7 +1389,7 @@ function svSelectionModifier(evt){
   return {add:add,toggle:toggle};
 }
 /* the single canonical function that (re)draws a layer's Leaflet representation from its geojson + symbology + selection state.
-   Used by symbology apply, undo/redo, geometry edits, select-by-attribute, and the attribute table ? so every one of those
+   Used by symbology apply, undo/redo, geometry edits, select-by-attribute, and the attribute table — so every one of those
    stays in sync instead of quietly resetting a layer back to a flat color. */
 function svBuildLeafletLayer(L0){
   if(!L0||!L0.geojson)return;
@@ -1458,7 +1458,7 @@ function ingestVectorLayer(gj,nice,color,name){
   var ratingField=keys.filter(isPciField)[0]||null;
   if(hasColor&&ratingField){
     L0.uniqueField=ratingField; L0.colorMode='categorized'; L0.catColors=deriveCategoryColors(L0,ratingField);
-    svBuildLeafletLayer(L0); toast('Loaded '+feats.length+' feature(s) ? symbolized by '+ratingField);
+    svBuildLeafletLayer(L0); toast('Loaded '+feats.length+' feature(s) — symbolized by '+ratingField);
   } else if(hasColor){
     L0.colorMode='native'; svBuildLeafletLayer(L0); toast('Loaded '+feats.length+' feature(s) with original colors');
   } else {
@@ -1489,8 +1489,8 @@ function geomTypeOf(gj){
   var ks=Object.keys(types); return ks.length===1?ks[0]:(ks.length?'Mixed':'');
 }
 function geomBadge(t){
-  var map={Point:'? Point',LineString:'? Line',Polygon:'? Polygon',Mixed:'? Mixed',Raster:'? Raster'};
-  return map[t]||t||'?';
+  var map={Point:'◍ Point',LineString:'╱ Line',Polygon:'▱ Polygon',Mixed:'✦ Mixed',Raster:'▦ Raster'};
+  return map[t]||t||'—';
 }
 function featureCountOf(L0){
   if(L0.isRaster) return null;
@@ -1548,22 +1548,22 @@ function renderLayers(){
         '<input type="checkbox" '+(L0.visible?'checked':'')+' title="Show / hide"/>'+
         svSymbolSwatchHtml(L0)+
         '<label class="lr-name" title="Single-click to zoom; double-click for Symbol Selector">'+escapeHtml(L0.name)+'</label>'+
-        '<button class="lr-up" title="Move up (draw on top)">?</button>'+
-        '<button class="lr-dn" title="Move down">?</button>'+
-        '<button class="tbl" title="Attribute table"'+(L0.isRaster?' disabled style="opacity:.35"':'')+'>?</button>'+
-        '<button class="lr-menu" title="More">?</button>'+
-        '<button class="x" title="Remove">?</button>'+
+        '<button class="lr-up" title="Move up (draw on top)">▲</button>'+
+        '<button class="lr-dn" title="Move down">▼</button>'+
+        '<button class="tbl" title="Attribute table"'+(L0.isRaster?' disabled style="opacity:.35"':'')+'>▤</button>'+
+        '<button class="lr-menu" title="More">⋯</button>'+
+        '<button class="x" title="Remove">✕</button>'+
       '</div>'+
       '<div class="lr-meta"><span class="lr-badge">'+geomBadge(gt)+'</span>'+
         (cnt!=null?'<span class="lr-badge">'+cnt+' feature'+(cnt===1?'':'s')+'</span>':'')+
         '<span class="lr-op-wrap">Opacity <input type="range" class="lr-op" min="0" max="1" step="0.05" value="'+(L0.opacity!=null?L0.opacity:1)+'"/></span>'+
       '</div>'+
       '<div class="lr-actions" style="display:none">'+
-        '<button class="lr-dup">? Duplicate</button>'+
-        '<button class="lr-ren">? Rename</button>'+
-        (L0.isRaster?'':'<button class="lr-symbol">? Symbol Selector</button>')+
-        '<button class="lr-zoom">? Zoom</button>'+
-        (L0.isRaster?'':'<button class="lr-sel">? Select by attribute</button>')+
+        '<button class="lr-dup">⧉ Duplicate</button>'+
+        '<button class="lr-ren">✎ Rename</button>'+
+        (L0.isRaster?'':'<button class="lr-symbol">▦ Symbol Selector</button>')+
+        '<button class="lr-zoom">⛶ Zoom</button>'+
+        (L0.isRaster?'':'<button class="lr-sel">⌖ Select by attribute</button>')+
       '</div>';
     var cb=row.querySelector('input[type=checkbox]');
     cb.onchange=function(e){L0.visible=e.target.checked;
@@ -1712,7 +1712,7 @@ function openSymbolSelector(layerId){
   var L0=layers[layerId];if(!L0||!L0.geojson){toast('Choose a vector feature layer first',true);return;}
   var family=svGeometryFamily(L0);if(!family){toast('Symbol Selector supports point, line, and polygon layers',true);return;}
   svLoadSavedSymbols();svSymbolState.layerId=layerId;svSymbolState.family=family;svSymbolState.working=svSymbolStyleFromLayer(L0);svSymbolState.selectedKey=svSymbolState.working.key;
-  document.getElementById('svSymbolTitle').textContent='Symbol Selector ? '+L0.name+' ('+(family==='line'?'Line':family.charAt(0).toUpperCase()+family.slice(1))+')';
+  document.getElementById('svSymbolTitle').textContent='Symbol Selector — '+L0.name+' ('+(family==='line'?'Line':family.charAt(0).toUpperCase()+family.slice(1))+')';
   document.getElementById('svSymbolSearch').value='';var all=document.querySelector('input[name=svSymbolScope][value=all]');if(all)all.checked=true;
   svSyncSymbolControls();svRenderSymbolGallery();document.getElementById('svSymbolModal').classList.add('open');
   setTimeout(function(){try{document.getElementById('svSymbolSearch').focus();}catch(e){}},50);
@@ -1796,11 +1796,11 @@ function projectFC(fc,fwd){
 }
 function readZipShp(file,nice,color){
   if(typeof shp==='undefined'){
-    toast('Shapefile reader (shpjs) did not load ? needs internet on first open. Reload with a connection, or check the browser console.',true);
+    toast('Shapefile reader (shpjs) did not load — needs internet on first open. Reload with a connection, or check the browser console.',true);
     return;
   }
   var r=new FileReader();
-  r.onload=function(){toast('Reading shapefile?');
+  r.onload=function(){toast('Reading shapefile…');
     try{ shp(r.result).then(function(gj){
       var cols=Array.isArray(gj)?gj:[gj], total=0, added=0, reprojected=false;
       cols.forEach(function(fc,i){
@@ -1826,7 +1826,7 @@ function readZipShp(file,nice,color){
           total+=fc.features.length; added++;
         }
       });
-      if(total){ toast('Loaded '+total+' feature(s) from shapefile'+(reprojected?' (reprojected from '+CRS[(crsKey==='autoutm'?effectiveCrsKey():crsKey)].esri+' ? include a .prj to avoid guessing)':'')); }
+      if(total){ toast('Loaded '+total+' feature(s) from shapefile'+(reprojected?' (reprojected from '+CRS[(crsKey==='autoutm'?effectiveCrsKey():crsKey)].esri+' — include a .prj to avoid guessing)':'')); }
       else { toast('Shapefile parsed but contained no usable geometry. Ensure the .zip has .shp, .shx and .dbf together (and ideally .prj).',true); }
     }).catch(function(e){
       var msg=e&&e.message?e.message:String(e);
@@ -1839,7 +1839,7 @@ function readZipShp(file,nice,color){
 }
 function readKmz(file,nice,color){
   var r=new FileReader();
-  r.onload=function(){toast('Unzipping KMZ?');
+  r.onload=function(){toast('Unzipping KMZ…');
     JSZip.loadAsync(r.result).then(function(zip){var k=null;zip.forEach(function(p,e){if(!k&&/\.kml$/i.test(p))k=e;});
       if(!k)throw new Error('no .kml inside'); return k.async('string');})
     .then(function(t){var gj=toGeoJSON.kml(new DOMParser().parseFromString(t,'text/xml'));
@@ -1853,9 +1853,9 @@ function readKmz(file,nice,color){
 /* Uses georaster + georaster-layer-for-leaflet (loaded by the library loader). */
 window.__svReadGeoTiff=function(file,nice,color){
   if(typeof parseGeoraster==='undefined' || typeof GeoRasterLayer==='undefined'){
-    toast('Raster libraries not loaded ? check your connection and reload',true); return;
+    toast('Raster libraries not loaded — check your connection and reload',true); return;
   }
-  toast('Reading raster '+nice+'?');
+  toast('Reading raster '+nice+'…');
   var r=new FileReader();
   r.onload=function(){
     parseGeoraster(r.result).then(function(georaster){
@@ -1866,9 +1866,9 @@ window.__svReadGeoTiff=function(file,nice,color){
           resolution:256
         });
         var id=addLayer(layer,nice,color,{isRaster:true,geomType:'Raster',opacity:0.85});
-        toast('Raster loaded: '+nice+' ('+georaster.width+'?'+georaster.height+' px, '+(georaster.numberOfRasters||1)+' band'+((georaster.numberOfRasters||1)===1?'':'s')+')');
+        toast('Raster loaded: '+nice+' ('+georaster.width+'×'+georaster.height+' px, '+(georaster.numberOfRasters||1)+' band'+((georaster.numberOfRasters||1)===1?'':'s')+')');
       }catch(e){ toast('Could not render raster: '+e.message,true); }
-    }).catch(function(e){ toast('Raster parse failed: '+e.message+' ? must be a GeoTIFF',true); });
+    }).catch(function(e){ toast('Raster parse failed: '+e.message+' — must be a GeoTIFF',true); });
   };
   r.onerror=function(){ toast('Could not read raster file',true); };
   r.readAsArrayBuffer(file);
@@ -1892,7 +1892,7 @@ function svClauseText(c){var val=String(c.value==null?'':c.value);return c.field
 function svCurrentSbaClause(){var f=document.getElementById('sbaField'),o=document.getElementById('sbaOp'),v=document.getElementById('sbaValue');return {field:f&&f.value||'',op:o&&o.value||'=',value:v&&v.value||''};}
 function svRenderSbaClauses(){
   var list=document.getElementById('sbaClauseList'),p=document.getElementById('sbaExpressionPreview'),logic=document.getElementById('sbaLogic');if(logic)sbaState.logic=logic.value||'and';
-  if(list){list.innerHTML=sbaState.clauses.map(function(c,i){return '<div class="sba-clause"><span class="join">'+(i?(sbaState.logic==='and'?'AND':'OR'):'WHERE')+'</span><span class="text">'+escapeHtml(svClauseText(c))+'</span><button data-i="'+i+'" title="Remove clause">?</button></div>';}).join('');list.querySelectorAll('button').forEach(function(b){b.onclick=function(){sbaState.clauses.splice(+b.getAttribute('data-i'),1);svRenderSbaClauses();};});}
+  if(list){list.innerHTML=sbaState.clauses.map(function(c,i){return '<div class="sba-clause"><span class="join">'+(i?(sbaState.logic==='and'?'AND':'OR'):'WHERE')+'</span><span class="text">'+escapeHtml(svClauseText(c))+'</span><button data-i="'+i+'" title="Remove clause">✕</button></div>';}).join('');list.querySelectorAll('button').forEach(function(b){b.onclick=function(){sbaState.clauses.splice(+b.getAttribute('data-i'),1);svRenderSbaClauses();};});}
   if(p){var current=svCurrentSbaClause();p.textContent=sbaState.clauses.length?sbaState.clauses.map(svClauseText).join(sbaState.logic==='and'?' AND ':' OR '):svClauseText(current);}
 }
 function svRefreshSbaUniqueValues(){
@@ -1916,7 +1916,7 @@ function openSelectByAttr(layerId,initialTab){
   var fsel=document.getElementById('sbaField');fsel.innerHTML=fields.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('');
   var dl2=document.getElementById('sbaFieldOptions');if(dl2)dl2.innerHTML=fields.map(function(f){return '<option value="'+escapeHtml(f)+'">';}).join('');
   var cf=document.getElementById('sbaCalcField');if(cf&&(changedLayer||!cf.value))cf.value=(L0.uniqueField||fields[0]||'');
-  var ins=document.getElementById('sbaCalcInsertField');if(ins)ins.innerHTML='<option value="">? Insert field ?</option>'+fields.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('');
+  var ins=document.getElementById('sbaCalcInsertField');if(ins)ins.innerHTML='<option value="">— Insert field —</option>'+fields.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('');
   if(changedLayer){sbaState.clauses=[];var v=document.getElementById('sbaValue');if(v)v.value='';var mode=document.getElementById('sbaMode');if(mode)mode.value='new';var ce=document.getElementById('sbaCalcExpr');if(ce)ce.value='';}
   var selN=Object.keys(svSelSet(layerId)).length,res=document.getElementById('sbaResult');if(res)res.textContent=selN?(selN+' feature(s) currently selected.'):'No features currently selected.';
   var cr=document.getElementById('sbaCalcResult');if(cr&&changedLayer)cr.textContent='';
@@ -1979,7 +1979,7 @@ function sbaExportSelection(){
   dl(JSON.stringify(fc,null,2),'selection_wgs84.geojson','application/geo+json');
   toast('Exported '+fc.features.length+' selected feature(s) as standard WGS84 GeoJSON');
 }
-/* Field Calculator ? ESRI-style field references, helpers, geometry values, preview and scope. */
+/* Field Calculator — ESRI-style field references, helpers, geometry values, preview and scope. */
 function sbaExprTokens(expr){ return String(expr||'').match(/\[[^\]]+\]|![^!]+!/g)||[]; }
 function sbaGeomVars(feature){
   var t=feature&&feature.geometry&&feature.geometry.type||'',length=0,area=0,x=null,y=null;
@@ -2035,7 +2035,7 @@ function runFieldCalculator(){
   var field=(document.getElementById('sbaCalcField').value||'').trim(); if(!field){toast('Enter a field name to update',true);return;}
   var expr=document.getElementById('sbaCalcExpr').value; if(expr==null||String(expr).trim()===''){toast('Enter a value or expression',true);return;}
   var scope=document.getElementById('sbaCalcScope').value,type=document.getElementById('sbaCalcType').value,targetFeats=sbaCalcTargets(L0,scope);
-  if(scope==='selected'&&!targetFeats.length){toast('No features selected ? select records or choose another scope',true);return;}
+  if(scope==='selected'&&!targetFeats.length){toast('No features selected — select records or choose another scope',true);return;}
   if(!targetFeats.length){toast('No features to update',true);return;}
   try{if(window.__svAdvSnapshot)window.__svAdvSnapshot();}catch(e){}
   var updated=0,errors=[];
@@ -2047,7 +2047,7 @@ function runFieldCalculator(){
   try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}
   svBuildLeafletLayer(L0);renderLegend();refreshDropdowns();
   if(typeof curTbl!=='undefined'&&curTbl&&curTbl.id===L0.id)renderTable();
-  document.getElementById('sbaCalcResult').textContent='Updated ?'+field+'? on '+updated+' feature(s).'+(errors.length?'\nSkipped errors:\n'+errors.join('\n'):'');
+  document.getElementById('sbaCalcResult').textContent='Updated “'+field+'” on '+updated+' feature(s).'+(errors.length?'\nSkipped errors:\n'+errors.join('\n'):'');
   toast('Updated '+field+' on '+updated+' feature(s)'+(errors.length?' ('+errors.length+'+ errors)':''),!!errors.length);
 }
 function svInsertAtCursor(el,value){
@@ -2081,44 +2081,44 @@ function svInsertAtCursor(el,value){
 var TOOL_HELP={
   data:{title:'Data & Layers',body:[
     ['What it does','Add geographic data to the map and manage every layer you load.'],
-    ['Add Layer','Click <b>? Add Layer</b> to import a file from your computer: Shapefile (.zip), GeoTIFF raster (.tif), Excel/CSV (coordinates auto-detected), KML/KMZ, GPX, or GeoJSON.'],
-    ['Table','Select a layer in the dropdown, then click <b>? Table</b> to open its attribute table ? sort, search, and click a row to highlight the feature.'],
-    ['Layers','Click <b>? Layers</b> to open the side panel where each layer has visibility, opacity, draw-order (??), duplicate, rename, zoom, and "select by attribute".'],
+    ['Add Layer','Click <b>＋ Add Layer</b> to import a file from your computer: Shapefile (.zip), GeoTIFF raster (.tif), Excel/CSV (coordinates auto-detected), KML/KMZ, GPX, or GeoJSON.'],
+    ['Table','Select a layer in the dropdown, then click <b>▤ Table</b> to open its attribute table — sort, search, and click a row to highlight the feature.'],
+    ['Layers','Click <b>☰ Layers</b> to open the side panel where each layer has visibility, opacity, draw-order (▲▼), duplicate, rename, zoom, and "select by attribute".'],
     ['Tip','The dropdown sets the <i>active layer</i> that Table, Editing, and Select tools act on.']
   ]},
   nav:{title:'Map Navigation',body:[
     ['What it does','Move around the map and jump between views.'],
-    ['Zoom','Use <b>? / ?</b> to zoom, or scroll the mouse wheel. <b>? All</b> fits every visible layer in view.'],
-    ['Previous / Next','<b>? Prev</b> and <b>? Next</b> step back and forward through extents you have viewed ? like back/forward in a browser.'],
-    ['Home & Locate','<b>? Home</b> returns to the start view. <b>? Locate</b> uses your device GPS to center on where you are (allow location permission).']
+    ['Zoom','Use <b>＋ / －</b> to zoom, or scroll the mouse wheel. <b>⛶ All</b> fits every visible layer in view.'],
+    ['Previous / Next','<b>↶ Prev</b> and <b>↷ Next</b> step back and forward through extents you have viewed — like back/forward in a browser.'],
+    ['Home & Locate','<b>⌂ Home</b> returns to the start view. <b>◎ Locate</b> uses your device GPS to center on where you are (allow location permission).']
   ]},
   select:{title:'Select & Identify',body:[
     ['What it does','Inspect features and choose which ones to work with.'],
-    ['Identify','Click <b>? Identify</b>, then click anywhere on the map to list every feature at that point plus the nearest address.'],
-    ['Select','Click <b>? Select</b>, then drag a rectangle on the map to select all features inside it. Selected features use a prominent cyan outline with yellow fill. Shift adds to selection and Ctrl toggles features across visible feature classes.'],
-    ['Select by Attribute','In the Layers panel open a layer\'s ? menu and choose <b>Select by attribute</b> to select by a field value (e.g. POP &gt; 1000).'],
-    ['Clear','<b>? Clear</b> removes the current selection.']
+    ['Identify','Click <b>ⓘ Identify</b>, then click anywhere on the map to list every feature at that point plus the nearest address.'],
+    ['Select','Click <b>▭ Select</b>, then drag a rectangle on the map to select all features inside it. Selected features use a prominent cyan outline with yellow fill. Shift adds to selection and Ctrl toggles features across visible feature classes.'],
+    ['Select by Attribute','In the Layers panel open a layer\'s ⋯ menu and choose <b>Select by attribute</b> to select by a field value (e.g. POP &gt; 1000).'],
+    ['Clear','<b>⊘ Clear</b> removes the current selection.']
   ]},
   edit:{title:'Editing',body:[
     ['What it does','Create and change features, then save your edits in the browser.'],
-    ['Start editing','Pick the active layer, then click <b>? Edit</b> to enter edit mode.'],
-    ['Add feature','Click <b>? Feature</b>, then click on the map to place points or draw vertices. Double-click to finish a line/polygon.'],
-    ['Edit shape','Select a feature, click <b>? Shape</b>, then drag the vertices to reshape it.'],
-    ['Save','Click <b>? Save</b> to keep your edits (stored in this browser). Use Export to write them to a file.'],
-    ['Tip','Edits live in your browser only until you export them ? export regularly to avoid losing work.']
+    ['Start editing','Pick the active layer, then click <b>✎ Edit</b> to enter edit mode.'],
+    ['Add feature','Click <b>＋ Feature</b>, then click on the map to place points or draw vertices. Double-click to finish a line/polygon.'],
+    ['Edit shape','Select a feature, click <b>⬓ Shape</b>, then drag the vertices to reshape it.'],
+    ['Save','Click <b>✓ Save</b> to keep your edits (stored in this browser). Use Export to write them to a file.'],
+    ['Tip','Edits live in your browser only until you export them — export regularly to avoid losing work.']
   ]},
   output:{title:'QA & Output',body:[
     ['What it does','Check data quality and export your results.'],
-    ['Run QA','<b>? QA</b> scans the active layer for common problems (empty geometry, missing attributes, invalid shapes) and reports them.'],
-    ['Export data','<b>? Data</b> exports the selected/edited features. The file is written in the coordinate system shown in the top CRS box ? Shapefile exports include a matching Esri .prj.'],
-    ['Export PDF','<b>?? PDF</b> produces a print-style map image with title, north arrow, scale, and CRS stamp.'],
-    ['Tip','Set your coordinate system in the top-right CRS dropdown <i>before</i> exporting ? every export follows it.']
+    ['Run QA','<b>✓ QA</b> scans the active layer for common problems (empty geometry, missing attributes, invalid shapes) and reports them.'],
+    ['Export data','<b>⬇ Data</b> exports the selected/edited features. The file is written in the coordinate system shown in the top CRS box — Shapefile exports include a matching Esri .prj.'],
+    ['Export PDF','<b>📄 PDF</b> produces a print-style map image with title, north arrow, scale, and CRS stamp.'],
+    ['Tip','Set your coordinate system in the top-right CRS dropdown <i>before</i> exporting — every export follows it.']
   ]},
   experience:{title:'Experience',body:[
     ['What it does','Live data layers and presentation modes.'],
-    ['Live','<b>? Live</b> opens weather radar (RainViewer), NASA satellite imagery, live ? most work with no API key.'],
-    ['Theme','<b>? Theme</b> cycles through the visual themes. You can also pick one in the top Theme dropdown.'],
-    ['Focus','<b>? Focus</b> hides the panels for a clean, full-screen map ? good for presenting. Press Esc to exit.']
+    ['Live','<b>☁ Live</b> opens weather radar (RainViewer), NASA satellite imagery, live — most work with no API key.'],
+    ['Theme','<b>⚡ Theme</b> cycles through the visual themes. You can also pick one in the top Theme dropdown.'],
+    ['Focus','<b>◱ Focus</b> hides the panels for a clean, full-screen map — good for presenting. Press Esc to exit.']
   ]}
 };
 function openToolHelp(key){
@@ -2138,9 +2138,9 @@ function openToolHelp(key){
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){var mm=document.getElementById('toolHelpModal'); if(mm)mm.classList.remove('open');} });
 })();
 /* ================= LiDAR (.LAS) SUPPORT =================
-   Self-contained LAS 1.0?1.4 reader for point formats 0?3 (the common ones).
+   Self-contained LAS 1.0–1.4 reader for point formats 0–3 (the common ones).
    Renders points on the map colored by ELEVATION with a color ramp.
-   .LAZ (compressed) needs a decompressor that isn't bundled ? we detect and advise. */
+   .LAZ (compressed) needs a decompressor that isn't bundled — we detect and advise. */
 function elevColor(t){ // t in 0..1 -> blue->cyan->green->yellow->red ramp
   t=Math.max(0,Math.min(1,t));
   var stops=[[49,54,149],[69,117,180],[116,173,209],[171,217,233],[224,243,248],[254,224,144],[253,174,97],[244,109,67],[215,48,39],[165,0,38]];
@@ -2153,7 +2153,7 @@ function readLAS(file,nice,color){
     toast('.LAZ is compressed LiDAR. Please decompress to .LAS first (e.g. LAStools "laszip", or QGIS export), then load.',true);
     return;
   }
-  toast('Reading LiDAR '+nice+'?');
+  toast('Reading LiDAR '+nice+'…');
   var r=new FileReader();
   r.onload=function(){
     try{
@@ -2172,7 +2172,7 @@ function readLAS(file,nice,color){
       var scaleX=dv.getFloat64(131,true),scaleY=dv.getFloat64(139,true),scaleZ=dv.getFloat64(147,true);
       var offX=dv.getFloat64(155,true),offY=dv.getFloat64(163,true),offZ=dv.getFloat64(171,true);
       var maxZ=dv.getFloat64(179,true),minZ=dv.getFloat64(187,true);
-      if(pointFormat>5){ toast('LAS point format '+pointFormat+' not supported in browser. Use format 0?3 or export as LAS 1.2.',true); return; }
+      if(pointFormat>5){ toast('LAS point format '+pointFormat+' not supported in browser. Use format 0–3 or export as LAS 1.2.',true); return; }
       // subsample for performance: cap rendered points
       var CAP=120000;
       var step=Math.max(1,Math.ceil(numPoints/CAP));
@@ -2200,13 +2200,13 @@ function readLAS(file,nice,color){
       });
       var id=addLayer(grp,nice+' (LiDAR)',color,{isRaster:false,geomType:'Point',opacity:.85});
       try{var b=grp.getBounds&&grp.getBounds(); if(b&&b.isValid())map.fitBounds(b.pad(.1));}catch(e){}
-      toast('LiDAR loaded: '+read.toLocaleString()+' of '+numPoints.toLocaleString()+' points (LAS '+verMajor+'.'+verMinor+', fmt '+pointFormat+'), colored by elevation '+minZ.toFixed(1)+'?'+maxZ.toFixed(1)+' m'+(step>1?' ? subsampled 1:'+step:''));
+      toast('LiDAR loaded: '+read.toLocaleString()+' of '+numPoints.toLocaleString()+' points (LAS '+verMajor+'.'+verMinor+', fmt '+pointFormat+'), colored by elevation '+minZ.toFixed(1)+'–'+maxZ.toFixed(1)+' m'+(step>1?' · subsampled 1:'+step:''));
     }catch(err){ toast('LAS read error: '+err.message,true); }
   };
   r.onerror=function(){ toast('Could not read LiDAR file',true); };
   r.readAsArrayBuffer(file);
 }
-/* ECW is a proprietary, patented format with no browser decoder ? advise conversion. */
+/* ECW is a proprietary, patented format with no browser decoder — advise conversion. */
 function handleECW(file,nice){
   toast('ECW is a proprietary format that browsers cannot read. Convert it to GeoTIFF or Cloud-Optimized GeoTIFF (COG) in QGIS or GDAL (gdal_translate input.ecw output.tif), then load the .tif here.',true);
 }
@@ -2214,18 +2214,18 @@ function handleECW(file,nice){
    Parses DXF entities (LINE, LWPOLYLINE, POLYLINE, POINT, CIRCLE, ARC, TEXT) into
    GeoJSON. CAD files are usually in a projected/local CRS, so we reproject from the
    active CRS when coordinates look projected. */
-/* ================= CAD (DXF) ? ESRI / ArcGIS-style import =================
+/* ================= CAD (DXF) — ESRI / ArcGIS-style import =================
    Mirrors how ArcMap / ArcGIS Pro add a CAD drawing:
-     ? the drawing is split into CAD feature classes: Point, Polyline, Polygon, Annotation
-     ? every entity carries the standard ESRI CAD attributes (Layer, Entity, Handle, Color,
-       Linetype, Elevation, RefName, DocName ?)
-     ? drawing layers can be switched on/off before loading (ArcMap "Drawing Layers" tab)
-     ? symbology honours the AutoCAD layer colours (ArcGIS "use CAD layer colours")
-     ? the drawing is georeferenced by assigning its coordinate system on import
+     • the drawing is split into CAD feature classes: Point, Polyline, Polygon, Annotation
+     • every entity carries the standard ESRI CAD attributes (Layer, Entity, Handle, Color,
+       Linetype, Elevation, RefName, DocName …)
+     • drawing layers can be switched on/off before loading (ArcMap "Drawing Layers" tab)
+     • symbology honours the AutoCAD layer colours (ArcGIS "use CAD layer colours")
+     • the drawing is georeferenced by assigning its coordinate system on import
    Everything produced is a normal vector layer, so all edit/select/table tools apply.        */
 
-/* AutoCAD Color Index ? hex. 1?9 and 250?255 are the fixed AutoCAD values; 10?249 follow the
-   documented 24-hue ? 5-brightness ? (full/pale) rule, so the palette matches AutoCAD/ArcGIS. */
+/* AutoCAD Color Index → hex. 1–9 and 250–255 are the fixed AutoCAD values; 10–249 follow the
+   documented 24-hue × 5-brightness × (full/pale) rule, so the palette matches AutoCAD/ArcGIS. */
 var CAD_ACI=(function(){
   var t={0:'#000000',1:'#FF0000',2:'#FFFF00',3:'#00FF00',4:'#00FFFF',5:'#0000FF',6:'#FF00FF',
          7:'#000000',8:'#808080',9:'#C0C0C0',
@@ -2248,7 +2248,7 @@ function cadAciHex(idx){ var c=CAD_ACI[idx]; return c||'#000000'; }
 function cadIntToHex(n){ if(n==null||isNaN(n))return null; var s=(n>>>0).toString(16); while(s.length<6)s='0'+s; return ('#'+s.slice(-6)).toUpperCase(); }
 
 /* ---- geometry helpers ---- */
-/* AutoCAD bulge ? arc points. bulge = tan(includedAngle/4); positive = counter-clockwise. */
+/* AutoCAD bulge → arc points. bulge = tan(includedAngle/4); positive = counter-clockwise. */
 function cadBulgePts(p1,p2,bulge){
   var theta=4*Math.atan(bulge);
   var dx=p2[0]-p1[0], dy=p2[1]-p1[1], chord=Math.sqrt(dx*dx+dy*dy);
@@ -2263,7 +2263,7 @@ function cadBulgePts(p1,p2,bulge){
   for(var i=1;i<n;i++){ var a=a1+theta*(i/n); out.push([cx+R*Math.cos(a), cy+R*Math.sin(a)]); }
   return out;
 }
-/* compose an INSERT (block reference) transform: scale ? rotate ? translate */
+/* compose an INSERT (block reference) transform: scale → rotate → translate */
 function cadInsTx(ins,parent){
   var rot=((ins.rotation||0)*Math.PI/180), sx=(ins.xScale==null?1:ins.xScale), sy=(ins.yScale==null?1:ins.yScale);
   var px=(ins.position&&ins.position.x)||0, py=(ins.position&&ins.position.y)||0;
@@ -2275,7 +2275,7 @@ function cadInsTx(ins,parent){
   };
 }
 
-/* ---- main converter: DXF ? ESRI-style CAD feature classes ---- */
+/* ---- main converter: DXF → ESRI-style CAD feature classes ---- */
 function cadParse(dxf,docName){
   var lyrTable={};
   try{
@@ -2446,10 +2446,10 @@ function openCadDialog(parsed,fileName,color){
 
   document.getElementById('cadFileName').textContent=fileName;
   document.getElementById('cadSummary').innerHTML=
-    '<b>'+total.toLocaleString('en-US')+'</b> entities ? '+lyrNames.length+' drawing layer(s)'+
-    (isFinite(minX)?('<br>Extent: X '+minX.toFixed(2)+' ? '+maxX.toFixed(2)+'  |  Y '+minY.toFixed(2)+' ? '+maxY.toFixed(2)):'')+
+    '<b>'+total.toLocaleString('en-US')+'</b> entities · '+lyrNames.length+' drawing layer(s)'+
+    (isFinite(minX)?('<br>Extent: X '+minX.toFixed(2)+' … '+maxX.toFixed(2)+'  |  Y '+minY.toFixed(2)+' … '+maxY.toFixed(2)):'')+
     (looksGeo?'<br><span style="color:var(--good)">Coordinates look like longitude/latitude.</span>'
-             :'<br><span style="color:var(--accent)">Coordinates look projected (local/grid) ? choose the drawing\'s coordinate system below.</span>');
+             :'<br><span style="color:var(--accent)">Coordinates look projected (local/grid) — choose the drawing\'s coordinate system below.</span>');
 
   var skips=Object.keys(parsed.skipped||{});
   document.getElementById('cadSkipped').innerHTML = skips.length
@@ -2494,7 +2494,7 @@ function cadLoad(){
 
   var fwd=null;
   if(srcKey!=='wgs84'){
-    if(!hasProj){ toast('proj4 is not loaded ? cannot georeference this drawing.',true); return; }
+    if(!hasProj){ toast('proj4 is not loaded — cannot georeference this drawing.',true); return; }
     fwd=function(xy){ try{ return proj4(CRS[srcKey].code,'EPSG:4326',xy); }catch(e){ return xy; } };
   }
   document.getElementById('cadModal').classList.remove('open');
@@ -2507,7 +2507,7 @@ function cadLoad(){
     var fc={type:'FeatureCollection',features:feats.map(function(f){return {type:'Feature',properties:JSON.parse(JSON.stringify(f.properties)),geometry:JSON.parse(JSON.stringify(f.geometry))};})};
     if(fwd)fc=projectFC(fc,fwd);
     var col=useCad?'#3B82F6':(palette[made%palette.length]);
-    var nm=fileName.replace(/\.[^.]+$/,'')+' ? '+kind;
+    var nm=fileName.replace(/\.[^.]+$/,'')+' — '+kind;
     var id=addLayer(geoJsonLayer(fc,col),nm,col,{geojson:fc,zoom:false});
     var L0=layers[id]; if(!L0)return;
     if(firstId===null)firstId=id;
@@ -2529,13 +2529,13 @@ function cadLoad(){
   renderLegend(); refreshDropdowns(); renderLayers();
   try{ if(firstId&&layers[firstId].leaflet.getBounds){ var b=layers[firstId].leaflet.getBounds(); if(b.isValid())map.fitBounds(b.pad(.15)); } }catch(e){}
   try{ if(window.__svAutoFastRender)window.__svAutoFastRender(); }catch(e){}
-  toast(made?('CAD loaded: '+totalF.toLocaleString('en-US')+' entities in '+made+' feature class(es)'+(srcKey!=='wgs84'?(' ? georeferenced from '+CRS[srcKey].esri):'')):'Nothing matched the chosen filters',!made);
+  toast(made?('CAD loaded: '+totalF.toLocaleString('en-US')+' entities in '+made+' feature class(es)'+(srcKey!=='wgs84'?(' — georeferenced from '+CRS[srcKey].esri):'')):'Nothing matched the chosen filters',!made);
 }
 function readDXF(file,nice,color){
-  if(typeof DxfParser==='undefined'){ toast('DXF parser did not load ? needs internet on first open. Reload with a connection.',true); return; }
+  if(typeof DxfParser==='undefined'){ toast('DXF parser did not load — needs internet on first open. Reload with a connection.',true); return; }
   var r=new FileReader();
   r.onload=function(){
-    toast('Reading CAD drawing?');
+    toast('Reading CAD drawing…');
     setTimeout(function(){
       try{
         var parser=new DxfParser();
@@ -2549,10 +2549,10 @@ function readDXF(file,nice,color){
   };
   r.readAsText(file);
 }
-/* DWG is AutoCAD's proprietary binary ? no browser decoder exists. Advise conversion (as ArcGIS
+/* DWG is AutoCAD's proprietary binary — no browser decoder exists. Advise conversion (as ArcGIS
    itself requires a DWG-capable reader; browsers have none). */
 function handleDWG(file,nice){
-  toast('DWG is a proprietary binary format that browsers cannot read. Convert it to DXF first (free: ODA File Converter, or AutoCAD/BricsCAD "Save As DXF", or QGIS "Save As DXF"), then load the .dxf here ? it will import with full CAD layers, colours and annotation.',true);
+  toast('DWG is a proprietary binary format that browsers cannot read. Convert it to DXF first (free: ODA File Converter, or AutoCAD/BricsCAD "Save As DXF", or QGIS "Save As DXF"), then load the .dxf here — it will import with full CAD layers, colours and annotation.',true);
 }
 /* CAD dialog wiring */
 (function(){
@@ -2579,7 +2579,7 @@ function handleDWG(file,nice){
 /* ================= CARTOGRAPHY TOOLS ================= */
 function cgLayerList(){
   var sel=document.getElementById('cgLayer'); if(!sel)return; var cur=sel.value;
-  sel.innerHTML='<option value="">? choose a layer ?</option>'+Object.keys(layers).map(function(id){return '<option value="'+id+'">'+escapeHtml(layers[id].name)+'</option>';}).join('');
+  sel.innerHTML='<option value="">— choose a layer —</option>'+Object.keys(layers).map(function(id){return '<option value="'+id+'">'+escapeHtml(layers[id].name)+'</option>';}).join('');
   if(cur&&layers[cur])sel.value=cur;
 }
 function cgActive(){ var sel=document.getElementById('cgLayer'); var id=sel&&sel.value; if(!id||!layers[id]){toast('Choose a layer first',true);return null;} return layers[id]; }
@@ -2590,7 +2590,7 @@ function cgSetBlend(){
   function apply(el){ if(el)el.style.mixBlendMode=(mode==='normal'?'':mode); }
   try{ svLayerElements(L0).forEach(apply); }catch(e){}
   var shared=svUseCanvas()&&!L0.isRaster;
-  toast('Blend mode ?'+mode+'? applied to '+L0.name+(shared?' (fast rendering shares one canvas, so this affects all vector layers)':''));
+  toast('Blend mode “'+mode+'” applied to '+L0.name+(shared?' (fast rendering shares one canvas, so this affects all vector layers)':''));
 }
 function cgProportional(){
   var L0=cgActive(); if(!L0||!L0.geojson)return;
@@ -2601,18 +2601,18 @@ function cgProportional(){
   var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rng=(mx-mn)||1;
   var n=0;
   L0.leaflet.eachLayer(function(ly){ if(ly.feature&&ly.setRadius){var v=parseFloat((ly.feature.properties||{})[field]); if(!isNaN(v)){ly.setRadius(4+((v-mn)/rng)*22);n++;}} });
-  if(n) { cgShow('Proportional symbols: '+n+' points sized by <b>'+field+'</b> ('+mn+'?'+mx+')'); toast('Proportional symbols applied'); }
+  if(n) { cgShow('Proportional symbols: '+n+' points sized by <b>'+field+'</b> ('+mn+'–'+mx+')'); toast('Proportional symbols applied'); }
   else toast('This layer has no point markers to size',true);
 }
 function cgLegend(){
   var L0=cgActive(); if(!L0)return;
-  var html='<b>Legend ? '+escapeHtml(L0.name)+'</b><br><div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:'+L0.color+'"></span>'+escapeHtml(L0.name)+'</div>';
+  var html='<b>Legend — '+escapeHtml(L0.name)+'</b><br><div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:'+L0.color+'"></span>'+escapeHtml(L0.name)+'</div>';
   if(L0.uniqueClasses){ html+=Object.keys(L0.uniqueClasses).map(function(k){return '<div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:'+L0.uniqueClasses[k]+'"></span>'+escapeHtml(k)+'</div>';}).join(''); }
   cgShow(html);
 }
 function cgIcon(){
   var L0=cgActive(); if(!L0)return;
-  var emoji=prompt('Enter an emoji or 1?2 characters to use as the point icon (e.g. ??, ?, ?):','??'); if(!emoji)return;
+  var emoji=prompt('Enter an emoji or 1–2 characters to use as the point icon (e.g. 📍, ⛽, ★):','📍'); if(!emoji)return;
   var n=0;
   L0.leaflet.eachLayer(function(ly){ if(ly.getLatLng){ try{ ly.setIcon(L.divIcon({html:'<div style="font-size:20px;line-height:20px">'+emoji+'</div>',className:'sv-emoji-icon',iconSize:[22,22],iconAnchor:[11,11]})); n++; }catch(e){} } });
   if(n)toast('Custom icon applied to '+n+' points'); else toast('This layer has no point markers (icons apply to points)',true);
@@ -2632,12 +2632,12 @@ function pdShow(h){ var o=document.getElementById('pdOut'); if(o){o.style.displa
 function pdToggleSwipe(){
   var sel=document.getElementById('cgLayer'); var id=sel&&sel.value;
   if(swipeState.on){ pdEndSwipe(); return; }
-  if(!id||!layers[id]){ toast('Choose a layer in Cartography first ? it will be revealed by the swipe',true); return; }
+  if(!id||!layers[id]){ toast('Choose a layer in Cartography first — it will be revealed by the swipe',true); return; }
   var L0=layers[id]; var el=(L0.leaflet.getContainer&&L0.leaflet.getContainer())||L0.leaflet._image||(L0.leaflet._path);
   if(!el){ toast('This layer type cannot be swiped (works best on raster/tile layers)',true); return; }
   swipeState.on=true; swipeState.el=el;
   var div=document.createElement('div'); div.id='swipeDivider'; div.style.cssText='position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--brand);z-index:700;cursor:ew-resize;box-shadow:0 0 8px rgba(0,0,0,.4)';
-  div.innerHTML='<div style="position:absolute;top:50%;left:-13px;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;transform:translateY(-50%)">?</div>';
+  div.innerHTML='<div style="position:absolute;top:50%;left:-13px;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;transform:translateY(-50%)">⇆</div>';
   document.getElementById('map').appendChild(div);
   function setClip(x){ var w=document.getElementById('map').clientWidth; var pct=Math.max(0,Math.min(100,x/w*100)); el.style.clipPath='inset(0 '+(100-pct)+'% 0 0)'; div.style.left=pct+'%'; }
   setClip(document.getElementById('map').clientWidth/2);
@@ -2646,7 +2646,7 @@ function pdToggleSwipe(){
   document.addEventListener('mousemove',swipeState.move=function(e){ if(!drag)return; var r=document.getElementById('map').getBoundingClientRect(); setClip(e.clientX-r.left); });
   document.addEventListener('mouseup',swipeState.up=function(){drag=false;});
   swipeState.div=div;
-  toast('Swipe active ? drag the divider. Click Swipe again to turn off.');
+  toast('Swipe active — drag the divider. Click Swipe again to turn off.');
 }
 function pdEndSwipe(){
   swipeState.on=false;
@@ -2662,7 +2662,7 @@ function pdConvertRun(){
   if(isNaN(lat)||isNaN(lon)){ toast('Enter valid Lat and Lon',true); return; }
   var c=toCRS(lon,lat,crsKey);
   var ek=effectiveCrsKey([lon,lat]);
-  pdShow('<b>'+lat.toFixed(6)+'?, '+lon.toFixed(6)+'?</b> ?<br>'+CRS[ek].esri+' ('+CRS[ek].code+')<br><b>'+c.fmt+'</b>');
+  pdShow('<b>'+lat.toFixed(6)+'°, '+lon.toFixed(6)+'°</b> →<br>'+CRS[ek].esri+' ('+CRS[ek].code+')<br><b>'+c.fmt+'</b>');
 }
 /* Bearing between two clicked points */
 var bearingState={on:false,first:null};
@@ -2678,7 +2678,7 @@ function pdBearing(){
         var p1=turf.point(bearingState.first), p2=turf.point([b.latlng.lng,b.latlng.lat]);
         var br=turf.bearing(p1,p2); if(br<0)br+=360;
         var dist=turf.distance(p1,p2,{units:'kilometers'});
-        pdShow('<b>Bearing:</b> '+br.toFixed(1)+'?<br><b>Distance:</b> '+(dist<1?(dist*1000).toFixed(1)+' m':dist.toFixed(3)+' km'));
+        pdShow('<b>Bearing:</b> '+br.toFixed(1)+'°<br><b>Distance:</b> '+(dist<1?(dist*1000).toFixed(1)+' m':dist.toFixed(3)+' km'));
         L.polyline([[bearingState.first[1],bearingState.first[0]],[b.latlng.lat,b.latlng.lng]],{color:'#F59E0B',weight:2,dashArray:'6 5'}).addTo(map);
       }catch(e){ toast('Bearing error: '+e.message,true); }
       bearingState.on=false;
@@ -2694,7 +2694,7 @@ function pdShareLink(){
   try{ navigator.clipboard.writeText(url); }catch(e){}
   history.replaceState(null,'',hash);
   var isFile=location.protocol==='file:';
-  pdShow('<b>Share link copied to clipboard.</b><br><span style="font-size:11px;word-break:break-all">'+escapeHtml(url)+'</span>'+(isFile?'<br><span style="color:var(--bad);font-size:11px">Note: this is a local file path ? the link restores your view on this PC only. Host the file on a server to share with others.</span>':''));
+  pdShow('<b>Share link copied to clipboard.</b><br><span style="font-size:11px;word-break:break-all">'+escapeHtml(url)+'</span>'+(isFile?'<br><span style="color:var(--bad);font-size:11px">Note: this is a local file path — the link restores your view on this PC only. Host the file on a server to share with others.</span>':''));
   toast('Share link copied');
 }
 function pdRestoreFromHash(){
@@ -2714,12 +2714,12 @@ function pdShowKeys(){
     m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});
     return;
   }
-  toast('Ctrl+S save ? Delete remove ? Esc cancel ? Scroll zoom ? Drag pan');
+  toast('Ctrl+S save · Delete remove · Esc cancel · Scroll zoom · Drag pan');
 }
 /* One-click PNG of current map view */
 function pdPngView(){
-  if(typeof leafletImage==='undefined'){ toast('Map image library not loaded ? use Output ? Export PNG',true); return; }
-  toast('Capturing current view?');
+  if(typeof leafletImage==='undefined'){ toast('Map image library not loaded — use Output → Export PNG',true); return; }
+  toast('Capturing current view…');
   leafletImage(map,function(err,canvas){
     if(err||!canvas){ toast('Could not capture map view',true); return; }
     canvas.toBlob(function(blob){ var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='SpatialItqan_View.png'; a.click(); toast('Current view exported as PNG'); });
@@ -2742,7 +2742,7 @@ function wireProductivityTools(){
 /* ================= DASHBOARD, STATISTICS & REPORTS ================= */
 function dashLayerList(){
   var sel=document.getElementById('dashLayer'); if(!sel)return; var cur=sel.value;
-  sel.innerHTML='<option value="">? choose a layer ?</option>'+Object.keys(layers).map(function(id){return '<option value="'+id+'">'+escapeHtml(layers[id].name)+'</option>';}).join('');
+  sel.innerHTML='<option value="">— choose a layer —</option>'+Object.keys(layers).map(function(id){return '<option value="'+id+'">'+escapeHtml(layers[id].name)+'</option>';}).join('');
   if(cur&&layers[cur])sel.value=cur; dashFieldList();
 }
 function dashFields(L0){
@@ -2759,10 +2759,10 @@ function dashFieldList(){
   var sel=document.getElementById('dashLayer'); var L0=sel&&layers[sel.value]; 
   var fsel=document.getElementById('dashField'), gsel=document.getElementById('dashGroup');
   if(!fsel||!gsel)return;
-  if(!L0){ fsel.innerHTML='<option value="">? no layer ?</option>'; gsel.innerHTML='<option value="">? none ?</option>'; return; }
+  if(!L0){ fsel.innerHTML='<option value="">— no layer —</option>'; gsel.innerHTML='<option value="">— none —</option>'; return; }
   var fl=dashFields(L0);
-  fsel.innerHTML=fl.num.length?fl.num.map(function(k){return '<option>'+escapeHtml(k)+'</option>';}).join(''):'<option value="">? no numeric field ?</option>';
-  gsel.innerHTML='<option value="">? none ?</option>'+fl.num.concat(fl.cat).map(function(k){return '<option>'+escapeHtml(k)+'</option>';}).join('');
+  fsel.innerHTML=fl.num.length?fl.num.map(function(k){return '<option>'+escapeHtml(k)+'</option>';}).join(''):'<option value="">— no numeric field —</option>';
+  gsel.innerHTML='<option value="">— none —</option>'+fl.num.concat(fl.cat).map(function(k){return '<option>'+escapeHtml(k)+'</option>';}).join('');
 }
 function statsOf(arr){
   var v=arr.filter(function(x){return !isNaN(x)&&isFinite(x);}).sort(function(a,b){return a-b;});
@@ -2772,7 +2772,7 @@ function statsOf(arr){
   var variance=v.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/n;
   return {n:n,sum:sum,min:v[0],max:v[n-1],mean:mean,median:med,std:Math.sqrt(variance)};
 }
-function fmtNum(x){ if(x==null)return '?'; var a=Math.abs(x); return (a>=1000||a===0||a>=1?x.toFixed(2):x.toPrecision(3)).replace(/\.00$/,''); }
+function fmtNum(x){ if(x==null)return '—'; var a=Math.abs(x); return (a>=1000||a===0||a>=1?x.toFixed(2):x.toPrecision(3)).replace(/\.00$/,''); }
 /* lightweight SVG charts (no external lib) */
 function svgBar(data,opts){ // data: [{label,value}]
   opts=opts||{}; var w=opts.w||300,h=opts.h||150,pad=24,bw=(w-pad*2)/data.length;
@@ -2818,7 +2818,7 @@ function dashCompute(forReport){
 function dashRender(res){
   if(!res||!res.overall){ document.getElementById('dashOut').innerHTML='<div class="hint">No statistics.</div>'; return; }
   var o=res.overall;
-  var html='<div class="measure-out" style="display:block"><b>'+escapeHtml(res.layer)+'</b> ? field <b>'+escapeHtml(res.field)+'</b><br>'+
+  var html='<div class="measure-out" style="display:block"><b>'+escapeHtml(res.layer)+'</b> — field <b>'+escapeHtml(res.field)+'</b><br>'+
     '<table style="width:100%;font-size:11.5px;margin-top:6px;border-collapse:collapse">'+
     [['Count',o.n],['Sum',fmtNum(o.sum)],['Min',fmtNum(o.min)],['Max',fmtNum(o.max)],['Mean',fmtNum(o.mean)],['Median',fmtNum(o.median)],['Std dev',fmtNum(o.std)]]
       .map(function(r){return '<tr><td style="padding:2px 0;color:var(--ink-dim)">'+r[0]+'</td><td style="text-align:right;font-weight:700">'+r[1]+'</td></tr>';}).join('')+
@@ -2834,19 +2834,19 @@ function dashProjectOverview(){
   var ids=Object.keys(layers);
   if(!ids.length){ document.getElementById('dashOut').innerHTML='<div class="hint">No layers loaded.</div>'; toast('No layers to summarize',true); return; }
   var rows=ids.map(function(id){
-    var L0=layers[id]; var cnt=featureCountOf(L0); var gt=L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||'?');
+    var L0=layers[id]; var cnt=featureCountOf(L0); var gt=L0.isRaster?'Raster':(L0.geomType||geomTypeOf(L0.geojson)||'—');
     var meas='';
     if(L0.geojson&&L0.geojson.features&&typeof turf!=='undefined'){
       try{
-        if(gt==='Polygon'){ var ar=0; L0.geojson.features.forEach(function(f){try{ar+=turf.area(f);}catch(e){}}); meas=(ar/1e6).toFixed(3)+' km?'; }
+        if(gt==='Polygon'){ var ar=0; L0.geojson.features.forEach(function(f){try{ar+=turf.area(f);}catch(e){}}); meas=(ar/1e6).toFixed(3)+' km²'; }
         else if(gt==='LineString'){ var ln=0; L0.geojson.features.forEach(function(f){try{ln+=turf.length(f,{units:'kilometers'});}catch(e){}}); meas=ln.toFixed(2)+' km'; }
       }catch(e){}
     }
-    return {name:L0.name,type:gt,count:(cnt==null?'?':cnt),meas:meas,vis:L0.visible?'on':'off'};
+    return {name:L0.name,type:gt,count:(cnt==null?'—':cnt),meas:meas,vis:L0.visible?'on':'off'};
   });
   var ek=effectiveCrsKey();
   var html='<div class="measure-out" style="display:block"><b>Project overview</b><br>'+
-    'Layers: <b>'+ids.length+'</b> ? CRS: <b>'+CRS[ek].esri+'</b> ('+CRS[ek].code+')<br>'+
+    'Layers: <b>'+ids.length+'</b> · CRS: <b>'+CRS[ek].esri+'</b> ('+CRS[ek].code+')<br>'+
     '<table style="width:100%;font-size:11px;margin-top:6px;border-collapse:collapse">'+
     '<tr style="color:var(--ink-dim)"><td>Layer</td><td>Type</td><td style="text-align:right">Count</td><td style="text-align:right">Size</td><td>Vis</td></tr>'+
     rows.map(function(r){return '<tr><td style="padding:2px 0">'+escapeHtml(r.name).slice(0,18)+'</td><td>'+r.type+'</td><td style="text-align:right">'+r.count+'</td><td style="text-align:right">'+r.meas+'</td><td>'+r.vis+'</td></tr>';}).join('')+
@@ -2857,13 +2857,13 @@ function dashProjectOverview(){
 function dashReportHTML(){
   var ov=dashProjectOverview(); var st=dashCompute(true);
   var when=new Date().toLocaleString();
-  var body='<h1>Spatial Itqan ? Analysis Report</h1><p style="color:#666">Generated '+when+'</p>';
-  body+='<h2>Project overview</h2><p>Layers: <b>'+ov.count+'</b> ? CRS: '+escapeHtml(ov.crs)+'</p>';
+  var body='<h1>Spatial Itqan — Analysis Report</h1><p style="color:#666">Generated '+when+'</p>';
+  body+='<h2>Project overview</h2><p>Layers: <b>'+ov.count+'</b> · CRS: '+escapeHtml(ov.crs)+'</p>';
   body+='<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;font-size:13px"><tr><th>Layer</th><th>Type</th><th>Count</th><th>Size</th></tr>'+
     ov.layers.map(function(r){return '<tr><td>'+escapeHtml(r.name)+'</td><td>'+r.type+'</td><td>'+r.count+'</td><td>'+r.meas+'</td></tr>';}).join('')+'</table>';
   if(st&&st.overall){
     var o=st.overall;
-    body+='<h2>Statistics ? '+escapeHtml(st.layer)+' ? '+escapeHtml(st.field)+'</h2>';
+    body+='<h2>Statistics — '+escapeHtml(st.layer)+' · '+escapeHtml(st.field)+'</h2>';
     body+='<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;font-size:13px">'+
       [['Count',o.n],['Sum',fmtNum(o.sum)],['Min',fmtNum(o.min)],['Max',fmtNum(o.max)],['Mean',fmtNum(o.mean)],['Median',fmtNum(o.median)],['Std dev',fmtNum(o.std)]].map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join('')+'</table>';
     if(st.groups&&st.groups.length){ body+='<h3>By '+escapeHtml(st.group)+'</h3>'+svgBar(st.groups.slice(0,12).map(function(g){return {label:g.label,value:g.sum};}),{w:560,h:240}); }
@@ -2877,7 +2877,7 @@ function dashReportPDF(){
   if(!(window.jspdf&&window.jspdf.jsPDF)){ toast('PDF library not loaded',true); return; }
   var ov=dashProjectOverview(); var st=dashCompute(true);
   var doc=new window.jspdf.jsPDF({unit:'pt',format:'a4'}); var y=48;
-  doc.setFontSize(18); doc.setTextColor(37,99,235); doc.text('Spatial Itqan ? Analysis Report',40,y); y+=18;
+  doc.setFontSize(18); doc.setTextColor(37,99,235); doc.text('Spatial Itqan — Analysis Report',40,y); y+=18;
   doc.setFontSize(9); doc.setTextColor(120); doc.text('Generated '+new Date().toLocaleString(),40,y); y+=24;
   doc.setTextColor(30); doc.setFontSize(13); doc.text('Project overview',40,y); y+=16;
   doc.setFontSize(10); doc.text('Layers: '+ov.count+'   CRS: '+ov.crs,40,y); y+=18;
@@ -2888,7 +2888,7 @@ function dashReportPDF(){
   function finishPdf(){ doc.save('SpatialItqan_Analysis_Report.pdf'); toast('PDF analysis report exported'); }
   if(st&&st.overall){ y+=14; if(y>740){doc.addPage();y=48;}
     var o=st.overall;
-    doc.setFontSize(13); doc.text('Statistics ? '+st.layer+' ? '+st.field,40,y); y+=18; doc.setFontSize(10);
+    doc.setFontSize(13); doc.text('Statistics — '+st.layer+' · '+st.field,40,y); y+=18; doc.setFontSize(10);
     [['Count',o.n],['Sum',fmtNum(o.sum)],['Min',fmtNum(o.min)],['Max',fmtNum(o.max)],['Mean',fmtNum(o.mean)],['Median',fmtNum(o.median)],['Std dev',fmtNum(o.std)]].forEach(function(r){ doc.text(r[0],40,y); doc.text(String(r[1]),200,y); y+=14; });
     // embed chart image if grouped
     if(st.groups&&st.groups.length){
@@ -2926,7 +2926,7 @@ function wireDashboard(){
 function gpLists(){
   ['gpLayer','gpTargetLayer'].forEach(function(id){
     var sel=document.getElementById(id); if(!sel)return; var cur=sel.value;
-    sel.innerHTML='<option value="">? layer ?</option>'+Object.keys(layers).filter(function(k){return layers[k].geojson;}).map(function(k){return '<option value="'+k+'">'+escapeHtml(layers[k].name)+'</option>';}).join('');
+    sel.innerHTML='<option value="">— layer —</option>'+Object.keys(layers).filter(function(k){return layers[k].geojson;}).map(function(k){return '<option value="'+k+'">'+escapeHtml(layers[k].name)+'</option>';}).join('');
     if(cur&&layers[cur])sel.value=cur;
   });
 }
@@ -2950,7 +2950,7 @@ function gpFieldCalc(){
   var L0=gpInput(); if(!L0)return;
   var fl=dashFields(L0); var allF=fl.num.concat(fl.cat);
   var newField=prompt('New field name:','calc'); if(!newField)return;
-  var expr=prompt('Expression ? use field names, +,-,*,/, and helpers AREA, LENGTH.\nExamples:\n  POP / AREA\n  price * 1.05\n  AREA','AREA');
+  var expr=prompt('Expression — use field names, +,-,*,/, and helpers AREA, LENGTH.\nExamples:\n  POP / AREA\n  price * 1.05\n  AREA','AREA');
   if(!expr)return;
   var n=0;
   L0.geojson.features.forEach(function(f){
@@ -2969,7 +2969,7 @@ function gpFieldCalc(){
   gpShow('Field <b>'+escapeHtml(newField)+'</b> computed for '+n+' feature(s).');
   toast('Field calculator: '+n+' value(s) set'); refreshDropdowns();
 }
-/* Definition query / filter ? hide non-matching features */
+/* Definition query / filter — hide non-matching features */
 function gpDefQuery(){
   var L0=gpInput(); if(!L0)return;
   var fl=dashFields(L0); var fields=fl.num.concat(fl.cat);
@@ -2985,7 +2985,7 @@ function gpDefQuery(){
     keep?shown++:hidden++;
   });
   L0.defQuery={field:field,op:op,val:val};
-  gpShow('Filter applied: <b>'+escapeHtml(field+' '+op+' '+val)+'</b> ? '+shown+' shown, '+hidden+' hidden.');
+  gpShow('Filter applied: <b>'+escapeHtml(field+' '+op+' '+val)+'</b> · '+shown+' shown, '+hidden+' hidden.');
   toast('Filter: '+shown+' shown / '+hidden+' hidden');
 }
 function gpClearFilter(){
@@ -3018,7 +3018,7 @@ function gpSelectByLocation(){
   toast(matches.length+' feature(s) selected by location');
   window.__gpSelection={layer:L0,matches:matches};
 }
-/* Spatial join ? copy first matching target attributes onto input features */
+/* Spatial join — copy first matching target attributes onto input features */
 function gpSpatialJoin(){
   var L0=gpInput(); if(!L0)return;
   var ts=document.getElementById('gpTargetLayer'); var T=ts&&layers[ts.value];
@@ -3047,15 +3047,15 @@ function wireGeoprocessing(){
   b('gpSlope',gpSlopeDEM);
   if(typeof wireDataTools==='function')wireDataTools();
 }
-/* Slope/DEM ? honest: full raster watershed/viewshed needs desktop GDAL.
+/* Slope/DEM — honest: full raster watershed/viewshed needs desktop GDAL.
    What we CAN do: slope between elevation points (TIN-style) if the layer has a Z/elev field. */
 function gpSlopeDEM(){
   var L0=gpInput(); if(!L0||!L0.geojson){ toast('Choose a point layer that has an elevation field',true); return; }
   var fl=dashFields(L0);
   var zField=fl.num.find(function(k){return /elev|height|^z$|dem|alt/i.test(k);})||fl.num[0];
   if(!zField){
-    gpShow('Slope/Watershed/Viewshed from a raster DEM needs desktop GDAL/QGIS (Raster ? Analysis ? Slope, or r.watershed). Browsers cannot process DEM pixels.<br>If your layer has elevation <i>points</i> with a height field, I can compute point-to-point slope ? but no numeric field was found.');
-    toast('No elevation field ? DEM raster analysis needs QGIS/GDAL',true); return;
+    gpShow('Slope/Watershed/Viewshed from a raster DEM needs desktop GDAL/QGIS (Raster → Analysis → Slope, or r.watershed). Browsers cannot process DEM pixels.<br>If your layer has elevation <i>points</i> with a height field, I can compute point-to-point slope — but no numeric field was found.');
+    toast('No elevation field — DEM raster analysis needs QGIS/GDAL',true); return;
   }
   // compute average slope between each point and its nearest neighbor
   var pts=L0.geojson.features.filter(function(f){return f.geometry&&f.geometry.type==='Point';});
@@ -3071,14 +3071,14 @@ function gpSlopeDEM(){
   if(!slopes.length){ gpShow('Could not compute slopes.'); return; }
   var avg=slopes.reduce(function(a,b){return a+b;},0)/slopes.length;
   var mx=Math.max.apply(null,slopes);
-  gpShow('<b>Point slope (field: '+escapeHtml(zField)+')</b><br>Average slope: '+avg.toFixed(1)+'?<br>Max slope: '+mx.toFixed(1)+'?<br><span style="font-size:10px;color:var(--ink-dim)">For continuous slope/aspect/watershed/viewshed from a raster DEM, use QGIS (Raster ? Analysis) or GDAL.</span>');
-  toast('Point slope computed: avg '+avg.toFixed(1)+'?');
+  gpShow('<b>Point slope (field: '+escapeHtml(zField)+')</b><br>Average slope: '+avg.toFixed(1)+'°<br>Max slope: '+mx.toFixed(1)+'°<br><span style="font-size:10px;color:var(--ink-dim)">For continuous slope/aspect/watershed/viewshed from a raster DEM, use QGIS (Raster → Analysis) or GDAL.</span>');
+  toast('Point slope computed: avg '+avg.toFixed(1)+'°');
 }
 
 /* ================= DATA TOOLS (18 refinements) ================= */
 var dtSelection=[];
 function dtLists(){ var sel=document.getElementById('dtLayer'); if(!sel)return; var cur=sel.value;
-  sel.innerHTML='<option value="">? layer ?</option>'+Object.keys(layers).filter(function(k){return layers[k].geojson;}).map(function(k){return '<option value="'+k+'">'+escapeHtml(layers[k].name)+'</option>';}).join('');
+  sel.innerHTML='<option value="">— layer —</option>'+Object.keys(layers).filter(function(k){return layers[k].geojson;}).map(function(k){return '<option value="'+k+'">'+escapeHtml(layers[k].name)+'</option>';}).join('');
   if(cur&&layers[cur])sel.value=cur; }
 function dtInput(){ var s=document.getElementById('dtLayer'); var L0=s&&layers[s.value]; if(!L0||!L0.geojson){toast('Choose a layer',true);return null;} return L0; }
 function dtShow(h){ var o=document.getElementById('dtOut'); if(o){o.style.display='block';o.innerHTML=h;} }
@@ -3101,7 +3101,7 @@ function dtCopyAttr(){ var L0=dtInput(); if(!L0)return; toast('Click the SOURCE 
   pick(function(s){ if(!s){toast('No source',true);return;} toast('Now click the TARGET.'); pick(function(t){ if(!t){toast('No target',true);return;} t.feature.properties=Object.assign({},s.feature.properties); dtShow('Copied '+Object.keys(s.feature.properties||{}).length+' attribute(s) to target.'); toast('Attributes copied'); }); }); }
 function dtSelectAll(){ var L0=dtInput(); if(!L0)return; dtSelection=[]; L0.leaflet.eachLayer(function(ly){ if(ly.setStyle)ly.setStyle({color:'#FACC15',weight:3,fillColor:'#FACC15',fillOpacity:.4}); dtSelection.push(ly); }); dtShow('Selected all '+dtSelection.length+' feature(s).'); toast('All selected'); }
 function dtInvert(){ var L0=dtInput(); if(!L0)return; var sel=dtSelection.slice(),inv=[]; L0.leaflet.eachLayer(function(ly){ if(sel.indexOf(ly)<0){ if(ly.setStyle)ly.setStyle({color:'#FACC15',weight:3,fillColor:'#FACC15',fillOpacity:.4}); inv.push(ly); } else { if(ly.setStyle)ly.setStyle({color:L0.color,weight:2,fillOpacity:.2}); } }); dtSelection=inv; dtShow('Inverted: '+inv.length+' now selected.'); toast('Selection inverted'); }
-function dtExportSel(){ if(!dtSelection.length){toast('Nothing selected ? use Select all first',true);return;}
+function dtExportSel(){ if(!dtSelection.length){toast('Nothing selected — use Select all first',true);return;}
   var fc={type:'FeatureCollection',features:dtSelection.map(function(ly){try{return ly.toGeoJSON();}catch(e){return null;}}).filter(Boolean)};
   dl(JSON.stringify(fc,null,2),'selected_wgs84.geojson','application/geo+json');
   toast('Exported '+fc.features.length+' selected feature(s) as standard WGS84 GeoJSON'); }
@@ -3112,11 +3112,11 @@ function dtReverse(){ var L0=dtInput(); if(!L0)return; var n=0; L0.geojson.featu
   var c=L0.color; map.removeLayer(L0.leaflet); var nl=geoJsonLayer(L0.geojson,c); L0.leaflet=nl; if(L0.visible)nl.addTo(map); dtShow('Reversed '+n+' line(s).'); toast(n+' reversed'); }
 var dtCapture={on:false,pts:[]};
 function dtCoordCapture(){ dtCapture.on=!dtCapture.on;
-  if(dtCapture.on){ dtCapture.pts=[]; toast('Capture ON ? click map to drop points. Click again to finish.');
+  if(dtCapture.on){ dtCapture.pts=[]; toast('Capture ON — click map to drop points. Click again to finish.');
     dtCapture.handler=function(e){ dtCapture.pts.push([e.latlng.lng,e.latlng.lat]); L.circleMarker(e.latlng,{radius:4,color:'#2563EB',fillColor:'#2563EB',fillOpacity:.9}).addTo(map); var c=toCRS(e.latlng.lng,e.latlng.lat,crsKey); dtShow('Captured '+dtCapture.pts.length+' point(s). Last: '+c.fmt); };
     map.on('click',dtCapture.handler);
   } else { map.off('click',dtCapture.handler);
-    if(dtCapture.pts.length){ var fc={type:'FeatureCollection',features:dtCapture.pts.map(function(p,i){return {type:'Feature',properties:{id:i+1},geometry:{type:'Point',coordinates:p}};})}; var c=nextColor(); addLayer(geoJsonLayer(fc,c),'Captured points',c,{geojson:fc}); toast(dtCapture.pts.length+' captured ? new layer'); } else toast('Capture off'); } }
+    if(dtCapture.pts.length){ var fc={type:'FeatureCollection',features:dtCapture.pts.map(function(p,i){return {type:'Feature',properties:{id:i+1},geometry:{type:'Point',coordinates:p}};})}; var c=nextColor(); addLayer(geoJsonLayer(fc,c),'Captured points',c,{geojson:fc}); toast(dtCapture.pts.length+' captured → new layer'); } else toast('Capture off'); } }
 function dtCoordsToGeom(){ var txt=prompt('Paste "lon,lat" per line (auto-detects lat,lon). 2+ lines=line; first=last=polygon:',''); if(!txt)return;
   var rows=txt.trim().split(/\n+/).map(function(l){return l.split(/[,\s]+/).map(parseFloat).filter(function(x){return !isNaN(x);});}).filter(function(a){return a.length>=2;});
   if(!rows.length){toast('No valid coordinates',true);return;}
@@ -3125,17 +3125,17 @@ function dtCoordsToGeom(){ var txt=prompt('Paste "lon,lat" per line (auto-detect
   var fc={type:'FeatureCollection',features:[{type:'Feature',properties:{source:'pasted'},geometry:geom}]};
   var c=nextColor(); addLayer(geoJsonLayer(fc,c),'Pasted geometry',c,{geojson:fc}); toast('Created '+geom.type+' from '+coords.length+' point(s)'); }
 function dtClipboard(){ if(typeof leafletImage==='undefined'){toast('Map capture not loaded',true);return;}
-  toast('Capturing map?'); leafletImage(map,function(err,canvas){ if(err||!canvas){toast('Capture failed',true);return;}
-    canvas.toBlob(function(blob){ try{ navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(function(){toast('Map copied to clipboard');},function(){toast('Clipboard blocked ? use PNG export',true);}); }catch(e){ toast('Clipboard not supported ? use PNG export',true); } }); }); }
+  toast('Capturing map…'); leafletImage(map,function(err,canvas){ if(err||!canvas){toast('Capture failed',true);return;}
+    canvas.toBlob(function(blob){ try{ navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(function(){toast('Map copied to clipboard');},function(){toast('Clipboard blocked — use PNG export',true);}); }catch(e){ toast('Clipboard not supported — use PNG export',true); } }); }); }
 function dtBookmarkIO(){ var act=prompt('Type "export" to save bookmarks to a file, or "import" to load:',''); if(!act)return;
   if(act==='export'){ var bm=[]; try{bm=JSON.parse(localStorage.getItem('SpatialViewBookmarks')||'[]');}catch(e){} if(!bm.length){toast('No bookmarks to export',true);return;} dl(JSON.stringify(bm,null,2),'bookmarks.json','application/json'); toast('Bookmarks exported'); }
   else if(act==='import'){ var inp=document.createElement('input'); inp.type='file'; inp.accept='.json'; inp.onchange=function(e){ var f=e.target.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ var bm=JSON.parse(r.result); localStorage.setItem('SpatialViewBookmarks',JSON.stringify(bm)); toast('Imported '+bm.length+' bookmark(s)'); }catch(x){toast('Invalid file',true);} }; r.readAsText(f); }; inp.click(); } }
 var scaleVisHandler=null;
 function setupScaleVis(){ var L0=dtInput(); if(!L0){toast('Choose a layer first',true);var cb=document.getElementById('dtScaleVis');if(cb)cb.checked=false;return;}
-  var min=parseInt(prompt('Show "'+L0.name+'" from zoom (min):','0')); var max=parseInt(prompt('?to zoom (max):','22'));
+  var min=parseInt(prompt('Show "'+L0.name+'" from zoom (min):','0')); var max=parseInt(prompt('…to zoom (max):','22'));
   if(isNaN(min)||isNaN(max))return; L0.scaleVis={min:min,max:max};
   scaleVisHandler=function(){ Object.keys(layers).forEach(function(id){ var L=layers[id]; if(L.scaleVis){ var z=map.getZoom(),vis=z>=L.scaleVis.min&&z<=L.scaleVis.max; if(vis&&!map.hasLayer(L.leaflet)&&L.visible)L.leaflet.addTo(map); else if(!vis&&map.hasLayer(L.leaflet))map.removeLayer(L.leaflet); } }); };
-  map.on('zoomend',scaleVisHandler); scaleVisHandler(); toast(L0.name+' visible z'+min+'?'+max); }
+  map.on('zoomend',scaleVisHandler); scaleVisHandler(); toast(L0.name+' visible z'+min+'–'+max); }
 function teardownScaleVis(){ if(scaleVisHandler)map.off('zoomend',scaleVisHandler); Object.keys(layers).forEach(function(id){ var L=layers[id]; if(L.scaleVis){delete L.scaleVis; if(L.visible&&!map.hasLayer(L.leaflet))L.leaflet.addTo(map);} }); toast('Scale visibility off'); }
 function wireDataTools(){
   dtLists();
@@ -3167,7 +3167,7 @@ function gpGeomOp(kind){
   gpShow(kind.charAt(0).toUpperCase()+kind.slice(1)+' applied to '+n+' feature(s).');
   toast(kind+' complete');
 }
-/* Time slider ? animate by a date field */
+/* Time slider — animate by a date field */
 var timeState={layer:null,field:null,dates:[]};
 function gpTimeSlider(){
   var L0=gpInput(); if(!L0||!L0.geojson){toast('Choose a layer with a date field',true);return;}
@@ -3194,15 +3194,15 @@ function gpTimeSlider(){
     L0.leaflet.eachLayer(function(ly){ if(!ly.feature)return; var d=Date.parse((ly.feature.properties||{})[timeState.field]); var keep=isNaN(d)||d<=cut; svShowFeature(ly,keep); if(keep)shown++; });
   }
   fsel.onchange=rebuild; document.getElementById('timeRange').oninput=apply;
-  rebuild(); toast('Time slider active ? drag to animate by date');
+  rebuild(); toast('Time slider active — drag to animate by date');
 }
-/* COGO ? coordinate geometry: traverse by bearing + distance */
+/* COGO — coordinate geometry: traverse by bearing + distance */
 function gpCOGO(){
   toast('COGO: click a start point on the map.');
   map.once('click',function(e){
     var pts=[[e.latlng.lng,e.latlng.lat]]; var cur=e.latlng;
     function step(){
-      var inp=prompt('Enter bearing? and distance(m) as "bearing,distance" (blank to finish):\nExample: 45,100',''); 
+      var inp=prompt('Enter bearing° and distance(m) as "bearing,distance" (blank to finish):\nExample: 45,100',''); 
       if(!inp){ finish(); return; }
       var parts=inp.split(','); var brg=parseFloat(parts[0]), dist=parseFloat(parts[1]);
       if(isNaN(brg)||isNaN(dist)){ finish(); return; }
@@ -3224,7 +3224,7 @@ function gpNetworkPath(){
   if(!lines.length){toast('Layer has no line features',true);return;}
   if(typeof turf==='undefined'||!turf.shortestPath){ 
     // fallback: use point-to-point straight path along nearest lines
-    toast('Click start point, then end point ? path follows the network approximately.');
+    toast('Click start point, then end point — path follows the network approximately.');
   }
   var fc={type:'FeatureCollection',features:lines};
   toast('Click the START point near the network.');
@@ -3236,7 +3236,7 @@ function gpNetworkPath(){
           var path=turf.shortestPath([a.latlng.lng,a.latlng.lat],[b.latlng.lng,b.latlng.lat],{obstacles:turf.featureCollection([])});
           var c=nextColor(); addLayer(geoJsonLayer({type:'FeatureCollection',features:[path]},c),'Shortest path',c,{geojson:{type:'FeatureCollection',features:[path]}});
           toast('Path computed');
-        } else { toast('Network routing not available in this Turf build ? use the Route tab for road routing.',true); }
+        } else { toast('Network routing not available in this Turf build — use the Route tab for road routing.',true); }
       }catch(e){ toast('Path error: '+e.message,true); }
     });
   });
@@ -3295,7 +3295,7 @@ var mgrsOn=false, mgrsHandler=null;
 function pdToggleMGRS(){
   mgrsOn=!mgrsOn;
   if(mgrsOn){
-    toast('MGRS readout on ? move over the map. Click MGRS again to turn off.');
+    toast('MGRS readout on — move over the map. Click MGRS again to turn off.');
     mgrsHandler=function(e){ var m=toMGRS(e.latlng.lng,e.latlng.lat); var el=document.getElementById('coordText'); if(m&&el){ el.setAttribute('data-mgrs','1'); el.textContent='MGRS '+m; } };
     map.on('mousemove',mgrsHandler);
   } else {
@@ -3314,7 +3314,7 @@ function pdToggleLoupe(){
     if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom){ el.style.display='none'; return; }
     el.style.display='block'; el.style.left=(e.clientX-80)+'px'; el.style.top=(e.clientY-80)+'px';
     el.style.background='var(--panel)';
-    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--ink-dim);text-align:center;padding:8px">Magnifier<br>'+map.getZoom()+'?'+(map.getZoom()+2)+'<br><b style="font-size:13px;color:var(--brand)">'+map.containerPointToLatLng(L.point(e.clientX-r.left,e.clientY-r.top)).lat.toFixed(5)+'</b></div>';
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--ink-dim);text-align:center;padding:8px">Magnifier<br>'+map.getZoom()+'→'+(map.getZoom()+2)+'<br><b style="font-size:13px;color:var(--brand)">'+map.containerPointToLatLng(L.point(e.clientX-r.left,e.clientY-r.top)).lat.toFixed(5)+'</b></div>';
   };
   document.addEventListener('mousemove',move);
   loupe={el:el,move:move};
@@ -3349,17 +3349,17 @@ function pdAnnotate(){
     map.once('click',function(e){ L.marker(e.latlng,{icon:L.divIcon({className:'redline-text',html:'<span style="background:rgba(255,255,0,.8);padding:2px 5px;border-radius:3px;font-size:12px;font-weight:700;color:#900">'+escapeHtml(t)+'</span>',iconSize:[1,1]})}).addTo(redlineLayer); toast('Text placed'); });
   } else if(kind==='arrow'){
     toast('Click start then end of the arrow.');
-    map.once('click',function(a){ map.once('click',function(b){ L.polyline([a.latlng,b.latlng],{color:'#E11D48',weight:3}).addTo(redlineLayer); L.marker(b.latlng,{icon:L.divIcon({className:'redline-arr',html:'<span style="color:#E11D48;font-size:18px">?</span>',iconSize:[1,1]})}).addTo(redlineLayer); toast('Arrow drawn'); }); });
+    map.once('click',function(a){ map.once('click',function(b){ L.polyline([a.latlng,b.latlng],{color:'#E11D48',weight:3}).addTo(redlineLayer); L.marker(b.latlng,{icon:L.divIcon({className:'redline-arr',html:'<span style="color:#E11D48;font-size:18px">➤</span>',iconSize:[1,1]})}).addTo(redlineLayer); toast('Arrow drawn'); }); });
   } else {
-    toast('Freehand: use the Editing ? Feature ? Line tool for freehand drawing.');
+    toast('Freehand: use the Editing → Feature → Line tool for freehand drawing.');
   }
 }
 /* Recent files (names persisted) */
 function recentAdd(name){ try{ var r=JSON.parse(localStorage.getItem('SpatialItqanRecent')||'[]'); r=r.filter(function(x){return x!==name;}); r.unshift(name); r=r.slice(0,12); localStorage.setItem('SpatialItqanRecent',JSON.stringify(r)); }catch(e){} }
 function pdRecent(){
   var r=[]; try{ r=JSON.parse(localStorage.getItem('SpatialItqanRecent')||'[]'); }catch(e){}
-  if(!r.length){ toast('No recent files yet ? loaded files will be listed here',true); return; }
-  pdShow('<b>Recently loaded files:</b><br>'+r.map(function(n){return '? '+escapeHtml(n);}).join('<br>')+'<br><span style="font-size:10px;color:var(--ink-dim)">(re-add via Add data)</span>');
+  if(!r.length){ toast('No recent files yet — loaded files will be listed here',true); return; }
+  pdShow('<b>Recently loaded files:</b><br>'+r.map(function(n){return '• '+escapeHtml(n);}).join('<br>')+'<br><span style="font-size:10px;color:var(--ink-dim)">(re-add via Add data)</span>');
 }
 /* Layer groups (visual grouping by toggling sets) */
 function pdGroups(){
@@ -3367,7 +3367,7 @@ function pdGroups(){
   pdShow('<b>Layer groups</b><br>'+
     '<button class="btn" style="margin:4px 0;font-size:10px" onclick="layerGroupSet(true)">Show all layers</button>'+
     '<button class="btn" style="margin:4px 0;font-size:10px" onclick="layerGroupSet(false)">Hide all layers</button><br>'+
-    '<span style="font-size:10px;color:var(--ink-dim)">Tip: use the Layers panel ? menu on each layer for ordering &amp; visibility.</span>');
+    '<span style="font-size:10px;color:var(--ink-dim)">Tip: use the Layers panel ⋯ menu on each layer for ordering &amp; visibility.</span>');
 }
 function layerGroupSet(vis){
   Object.keys(layers).forEach(function(id){ var L0=layers[id]; L0.visible=vis; if(vis)L0.leaflet.addTo(map); else map.removeLayer(L0.leaflet); });
@@ -3386,7 +3386,7 @@ function lrsUnitAbbr(){ return lrs.unit==='kilometers'?'km':(lrs.unit==='miles'?
 function lrsLayerList(){
   var sel=document.getElementById('lrsLayer'); if(!sel)return; var cur=sel.value;
   var lines=Object.keys(layers).filter(function(id){ var L0=layers[id]; var gt=L0.geomType||(L0.geojson&&geomTypeOf(L0.geojson)); return gt==='LineString'||gt==='Mixed'; });
-  sel.innerHTML='<option value="">? choose a line layer ?</option>'+lines.map(function(id){return '<option value="'+id+'">'+escapeHtml(layers[id].name)+'</option>';}).join('');
+  sel.innerHTML='<option value="">— choose a line layer —</option>'+lines.map(function(id){return '<option value="'+id+'">'+escapeHtml(layers[id].name)+'</option>';}).join('');
   if(cur&&layers[cur])sel.value=cur;
 }
 function lrsShow(h){ var o=document.getElementById('lrsOut'); if(o){o.style.display='block';o.innerHTML=h;} }
@@ -3408,7 +3408,7 @@ function lrsCalibrate(){
   lrs.totalM=turf.length(line,{units:lrs.unit});
   lrs.events=[]; lrsRenderEvents();
   var endM=lrs.startM+lrs.totalM;
-  document.getElementById('lrsStatus').innerHTML='<b>Route calibrated:</b> '+escapeHtml(lrs.name)+'<br>Measures '+lrs.startM.toFixed(2)+' ? '+endM.toFixed(2)+' '+lrsUnitAbbr()+' (length '+lrs.totalM.toFixed(2)+' '+lrsUnitAbbr()+')';
+  document.getElementById('lrsStatus').innerHTML='<b>Route calibrated:</b> '+escapeHtml(lrs.name)+'<br>Measures '+lrs.startM.toFixed(2)+' → '+endM.toFixed(2)+' '+lrsUnitAbbr()+' (length '+lrs.totalM.toFixed(2)+' '+lrsUnitAbbr()+')';
   toast('Route calibrated: '+lrs.totalM.toFixed(2)+' '+lrsUnitAbbr());
 }
 function lrsCheck(){ if(!lrs.route){ toast('Calibrate a route first',true); return false; } return true; }
@@ -3418,7 +3418,7 @@ function lrsMeasureToPoint(){
   var m=parseFloat(document.getElementById('lrsMeasure').value);
   if(isNaN(m)){ toast('Enter a measure value',true); return; }
   var along=m-lrs.startM;
-  if(along<0||along>lrs.totalM){ toast('Measure '+m+' is outside the route ('+lrs.startM.toFixed(2)+'?'+(lrs.startM+lrs.totalM).toFixed(2)+')',true); return; }
+  if(along<0||along>lrs.totalM){ toast('Measure '+m+' is outside the route ('+lrs.startM.toFixed(2)+'–'+(lrs.startM+lrs.totalM).toFixed(2)+')',true); return; }
   var pt=turf.along(lrs.route,along,{units:lrs.unit});
   var ll=[pt.geometry.coordinates[1],pt.geometry.coordinates[0]];
   var mk=L.marker(ll).addTo(map).bindPopup('Station '+m.toFixed(2)+' '+lrsUnitAbbr()).openPopup();
@@ -3456,8 +3456,8 @@ function lrsRenderEvents(){
   var el=document.getElementById('lrsEventList'); if(!el)return;
   if(!lrs.events.length){ el.innerHTML='<div>No events yet.</div>'; if(lrs.eventLayer){map.removeLayer(lrs.eventLayer);lrs.eventLayer=null;} return; }
   el.innerHTML=lrs.events.map(function(ev,i){
-    var type=ev.to==null?'point @ '+ev.from:'line '+ev.from+'?'+ev.to;
-    return '<div class="layerrow" style="padding:6px 8px"><label style="flex:1;font-size:11.5px">'+escapeHtml(ev.name)+' <span style="color:var(--ink-dim)">('+type+' '+lrsUnitAbbr()+')</span></label><button class="x" data-i="'+i+'">?</button></div>';
+    var type=ev.to==null?'point @ '+ev.from:'line '+ev.from+'→'+ev.to;
+    return '<div class="layerrow" style="padding:6px 8px"><label style="flex:1;font-size:11.5px">'+escapeHtml(ev.name)+' <span style="color:var(--ink-dim)">('+type+' '+lrsUnitAbbr()+')</span></label><button class="x" data-i="'+i+'">✕</button></div>';
   }).join('');
   el.querySelectorAll('.x').forEach(function(b){ b.onclick=function(){ lrs.events.splice(+b.getAttribute('data-i'),1); lrsRenderEvents(); }; });
   lrsDrawEvents();
@@ -3472,7 +3472,7 @@ function lrsDrawEvents(){
         L.circleMarker([p.geometry.coordinates[1],p.geometry.coordinates[0]],{radius:6,color:'#7C3AED',fillColor:'#7C3AED',fillOpacity:.9}).bindTooltip(ev.name).addTo(lrs.eventLayer);
       } else {
         var seg=lrsSlice(ev.from,ev.to); if(!seg)return;
-        L.geoJSON(seg,{style:{color:'#F0653A',weight:5,opacity:.85}}).bindTooltip(ev.name+' ('+ev.from+'?'+ev.to+')').addTo(lrs.eventLayer);
+        L.geoJSON(seg,{style:{color:'#F0653A',weight:5,opacity:.85}}).bindTooltip(ev.name+' ('+ev.from+'→'+ev.to+')').addTo(lrs.eventLayer);
       }
     }catch(e){}
   });
@@ -3499,7 +3499,7 @@ function lrsStationing(){
 /* split route at a measure -> add two new line layers */
 function lrsSplit(){
   if(!lrsCheck())return;
-  var m=parseFloat(prompt('Split route at which measure ('+lrs.startM.toFixed(2)+'?'+(lrs.startM+lrs.totalM).toFixed(2)+' '+lrsUnitAbbr()+')?',''));
+  var m=parseFloat(prompt('Split route at which measure ('+lrs.startM.toFixed(2)+'–'+(lrs.startM+lrs.totalM).toFixed(2)+' '+lrsUnitAbbr()+')?',''));
   if(isNaN(m))return;
   var a=m-lrs.startM; if(a<=0||a>=lrs.totalM){ toast('Measure must be inside the route',true); return; }
   var s1=turf.lineSliceAlong(lrs.route,0,a,{units:lrs.unit}), s2=turf.lineSliceAlong(lrs.route,a,lrs.totalM,{units:lrs.unit});
@@ -3542,7 +3542,7 @@ function wireLRS(){
   b('lrsSplit',lrsSplit);
   b('lrsExport',lrsExport);
 }
-/* GPX incl. waypoints (wpt) ? togeojson handles wpt/trk/rte */
+/* GPX incl. waypoints (wpt) — togeojson handles wpt/trk/rte */
 function readGpx(text){
   var dom=new DOMParser().parseFromString(text,'text/xml');
   var gj=toGeoJSON.gpx(dom);
@@ -3572,8 +3572,8 @@ function readExcel(file,nice,color){
   };
   r.readAsArrayBuffer(file);
 }
-/* ================= SMART TABLE READER (CSV/Excel ? points, lines, polygons) =================
-   Detects coordinate columns by header name (any of x/y, lat/lon, easting/northing, E/N?),
+/* ================= SMART TABLE READER (CSV/Excel → points, lines, polygons) =================
+   Detects coordinate columns by header name (any of x/y, lat/lon, easting/northing, E/N…),
    auto-detects Lat/Lng vs projected by value range, and recognises 4 geometry structures:
    (A) a WKT or GeoJSON geometry column, (B) start/end coordinate columns (2-point lines),
    (C) grouped vertices (shared id + order column), (D) plain points. Shows a preview to confirm. */
@@ -3629,7 +3629,7 @@ function smartDetectTable(rows){
   }
   function avg(idx){var v=colNums(idx).filter(function(x){return !isNaN(x);}); return v.length? v.reduce(function(a,b){return a+b;},0)/v.length : NaN;}
 
-  // ---- (B) start/end ? 2-point lines (require 4 DISTINCT columns) ----
+  // ---- (B) start/end → 2-point lines (require 4 DISTINCT columns) ----
   if(sxI>=0&&syI>=0&&exI>=0&&eyI>=0 && sxI!==exI && syI!==eyI && !(sxI===syI)){
     out.ok=true; out.mode='startend';
     out.columns={sx:sxI,sy:syI,ex:exI,ey:eyI};
@@ -3637,7 +3637,7 @@ function smartDetectTable(rows){
     return out;
   }
 
-  // ---- (C) grouped vertices ? lines/polygons ----
+  // ---- (C) grouped vertices → lines/polygons ----
   // need an id column + a coordinate pair, multiple rows per id
   var hasXY = (lngPure>=0&&latPure>=0) || (eI>=0&&nI>=0) || (find(['x'])>=0&&find(['y'])>=0);
   if(idI>=0 && hasXY){
@@ -3694,7 +3694,7 @@ function resolveTableCRS(crsGuess){
   if(xlsCrs==='utm39') return {key:'utm39',proj:true};
   // auto
   if(crsGuess==='wgs84') return {key:'wgs84',proj:false};
-  return {key:'utm40',proj:true,assumed:true}; // projected but zone unknown ? assume 40N
+  return {key:'utm40',proj:true,assumed:true}; // projected but zone unknown → assume 40N
 }
 
 /* project an [x,y] from a projected key to [lng,lat]; identity if wgs84 */
@@ -3740,7 +3740,7 @@ function buildFromPlan(rows, plan, crs){
       var coords=[];
       grp.rows.forEach(function(o){ var ll=tableXYtoLngLat(parseFloat(o.r[g.x]),parseFloat(o.r[g.y]),crs); if(ll&&!isNaN(ll[0]))coords.push(ll); });
       if(coords.length<2)return;
-      // closed ring (first==last, or ?4 pts and ends near start) ? polygon, else line
+      // closed ring (first==last, or ≥4 pts and ends near start) → polygon, else line
       var first=coords[0], last=coords[coords.length-1];
       var closed=(coords.length>=4)&&Math.abs(first[0]-last[0])<1e-7&&Math.abs(first[1]-last[1])<1e-7;
       var geom = closed ? {type:'Polygon',coordinates:[coords]} : {type:'LineString',coordinates:coords};
@@ -3759,7 +3759,7 @@ function buildFromPlan(rows, plan, crs){
   return fc;
 }
 
-/* minimal WKT ? GeoJSON geometry */
+/* minimal WKT → GeoJSON geometry */
 function wktToGeom(wkt){
   wkt=wkt.trim(); var m=/^(\w+)\s*(.*)$/.exec(wkt); if(!m)return null;
   var type=m[1].toUpperCase(), rest=m[2];
@@ -3777,7 +3777,7 @@ function wktToGeom(wkt){
   return null;
 }
 
-/* Orchestrator: detect ? preview dialog ? build & load */
+/* Orchestrator: detect → preview dialog → build & load */
 function smartTableLoad(rows, name, color){
   var plan=smartDetectTable(rows);
   if(!plan.ok){ toast(plan.reason||'No coordinates detected in '+name, true); return; }
@@ -3792,7 +3792,7 @@ function showImportPreview(plan, rows, name, color){
   if(!dlg){
     dlg=document.createElement('div'); dlg.id='importPreview'; dlg.className='modal'; document.body.appendChild(dlg);
   }
-  function opt(sel,idx){ var o=''; o+='<option value="-1"'+(idx<0?' selected':'')+'>? none ?</option>'; header.forEach(function(h,i){ o+='<option value="'+i+'"'+(i===idx?' selected':'')+'>'+escapeHtml(h||('Column '+(i+1)))+'</option>'; }); return o; }
+  function opt(sel,idx){ var o=''; o+='<option value="-1"'+(idx<0?' selected':'')+'>— none —</option>'; header.forEach(function(h,i){ o+='<option value="'+i+'"'+(i===idx?' selected':'')+'>'+escapeHtml(h||('Column '+(i+1)))+'</option>'; }); return o; }
   var c=plan.columns;
   var colRows='';
   if(plan.mode==='points'){
@@ -3810,7 +3810,7 @@ function showImportPreview(plan, rows, name, color){
            +'<div class="ip-row"><label>Y / Lat / Northing</label><select id="ipY">'+opt(0,c.y)+'</select></div>';
   } else if(plan.mode==='wkt'){
     colRows='<div class="ip-row"><label>Geometry column (WKT / GeoJSON)</label><select id="ipGEOM">'+opt(0,c.geom)+'</select></div>'
-           +'<div class="ip-note">Sample: <code>'+escapeHtml(plan.sample)+'?</code></div>';
+           +'<div class="ip-note">Sample: <code>'+escapeHtml(plan.sample)+'…</code></div>';
   }
   var crsRow='';
   if(plan.mode!=='wkt'){
@@ -3818,18 +3818,18 @@ function showImportPreview(plan, rows, name, color){
     crsRow='<div class="ip-note">Detected coordinates '+guessTxt+'. The active CRS dropdown in the Data tab controls how projected values are interpreted (Auto assumes UTM 40N).</div>';
   }
   dlg.innerHTML='<div class="modal-card" style="max-width:520px">'
-    +'<div class="modal-head"><b>?? Import preview ? '+escapeHtml(name)+'</b><span class="grow"></span><button class="topbtn" id="ipCancel">? Cancel</button></div>'
+    +'<div class="modal-head"><b>📥 Import preview — '+escapeHtml(name)+'</b><span class="grow"></span><button class="topbtn" id="ipCancel">✕ Cancel</button></div>'
     +'<div class="modal-body" style="padding:16px">'
-    +'<div class="ip-detected">Detected: <b>'+modeLabel+'</b> ? '+plan.rowCount+' row(s) ? '+header.length+' column(s)</div>'
+    +'<div class="ip-detected">Detected: <b>'+modeLabel+'</b> · '+plan.rowCount+' row(s) · '+header.length+' column(s)</div>'
     +'<div class="ip-mode-row"><label>Geometry type</label><select id="ipMode">'
       +'<option value="points"'+(plan.mode==='points'?' selected':'')+'>Points</option>'
-      +'<option value="startend"'+(plan.mode==='startend'?' selected':'')+'>Lines ? start/end columns</option>'
-      +'<option value="grouped"'+(plan.mode==='grouped'?' selected':'')+'>Lines/Polygons ? grouped vertices</option>'
+      +'<option value="startend"'+(plan.mode==='startend'?' selected':'')+'>Lines — start/end columns</option>'
+      +'<option value="grouped"'+(plan.mode==='grouped'?' selected':'')+'>Lines/Polygons — grouped vertices</option>'
       +'<option value="wkt"'+(plan.mode==='wkt'?' selected':'')+'>Geometry column (WKT/GeoJSON)</option>'
     +'</select></div>'
     +'<div id="ipCols">'+colRows+'</div>'
     +crsRow
-    +'<div class="ip-actions"><button class="btn accent" id="ipLoad">? Load on map</button><button class="btn" id="ipCancel2">Cancel</button></div>'
+    +'<div class="ip-actions"><button class="btn accent" id="ipLoad">✓ Load on map</button><button class="btn" id="ipCancel2">Cancel</button></div>'
     +'</div></div>';
   dlg.classList.add('open');
   function close(){ dlg.classList.remove('open'); }
@@ -3854,7 +3854,7 @@ function showImportPreview(plan, rows, name, color){
     var crs=resolveTableCRS(plan.crsGuess);
     var gj;
     try{ gj=buildFromPlan(rows, finalPlan, crs); }catch(e){ toast('Build failed: '+e.message,true); return; }
-    if(!gj||!gj.features.length){ toast('No valid geometry built ? check the column choices',true); return; }
+    if(!gj||!gj.features.length){ toast('No valid geometry built — check the column choices',true); return; }
     close();
     addLayer(geoJsonLayer(gj,color),name,color);
     var types={}; gj.features.forEach(function(f){var t=f.geometry&&f.geometry.type;types[t]=(types[t]||0)+1;});
@@ -3898,13 +3898,13 @@ document.getElementById('locateBtn').onclick=function(){
     if(youAreHere){ map.removeLayer(youAreHere); youAreHere=null; }
     if(geoWatchId!==null && navigator.geolocation){ navigator.geolocation.clearWatch(geoWatchId); geoWatchId=null; }
     locEl.className='ts-loc'; locEl.textContent='Location: off';
-    this.textContent='? Locate'; this.classList.remove('accent');
+    this.textContent='◎ Locate'; this.classList.remove('accent');
     toast('Live location turned off');
     return;
   }
   if(!navigator.geolocation){ toast('Geolocation not supported by this browser',true); return; }
   var btn=this;
-  toast('Locating? (allow location access if prompted)');
+  toast('Locating… (allow location access if prompted)');
   startLocationWatch();
   navigator.geolocation.getCurrentPosition(function(pos){
     var la=pos.coords.latitude, lo=pos.coords.longitude, acc=pos.coords.accuracy||0;
@@ -3913,13 +3913,13 @@ document.getElementById('locateBtn').onclick=function(){
     youAreHere=L.layerGroup([
       L.circle([la,lo],{radius:Math.max(acc,15),color:'#2563EB',weight:1,fillColor:'#2563EB',fillOpacity:.12}),
       L.circleMarker([la,lo],{radius:7,color:'#fff',weight:2,fillColor:'#2563EB',fillOpacity:1})
-        .bindPopup('You are here<br/>Accuracy ?'+Math.round(acc)+' m')
+        .bindPopup('You are here<br/>Accuracy ±'+Math.round(acc)+' m')
     ]).addTo(map);
     youAreHere.eachLayer(function(l){if(l.openPopup)l.openPopup();});
-    locationOn=true; btn.textContent='?'; btn.classList.add('accent'); btn.title='Location ON ? click to turn off';
-    toast('Location found (?'+Math.round(acc)+' m) ? click again to turn off');
+    locationOn=true; btn.textContent='◉'; btn.classList.add('accent'); btn.title='Location ON — click to turn off';
+    toast('Location found (±'+Math.round(acc)+' m) — click again to turn off');
   },function(err){
-    var m={1:'Permission denied ? allow location for this site/file',2:'Position unavailable',3:'Timed out'};
+    var m={1:'Permission denied — allow location for this site/file',2:'Position unavailable',3:'Timed out'};
     toast('Locate failed: '+(m[err.code]||err.message),true);
   },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
 };
@@ -3932,7 +3932,7 @@ function startLocationWatch(){
     var la=pos.coords.latitude, lo=pos.coords.longitude;
     var c=toCRS(lo,la,crsKey);
     locEl.className='ts-loc live';
-    locEl.textContent='? '+c.fmt+(lastGeoName?(' ? '+lastGeoName):'');
+    locEl.textContent='● '+c.fmt+(lastGeoName?(' · '+lastGeoName):'');
     var now=Date.now();
     if(now-lastGeoFetch>20000){
       lastGeoFetch=now;
@@ -3940,7 +3940,7 @@ function startLocationWatch(){
         .then(function(r){return r.json();}).then(function(d){
           var a=d.address||{};
           lastGeoName=a.suburb||a.neighbourhood||a.village||a.town||a.city||a.county||d.name||(d.display_name||'').split(',')[0]||'';
-          locEl.textContent='? '+toCRS(lo,la,crsKey).fmt+(lastGeoName?(' ? '+lastGeoName):'');
+          locEl.textContent='● '+toCRS(lo,la,crsKey).fmt+(lastGeoName?(' · '+lastGeoName):'');
           if(lastGeoName && !titleManual){ mapTitleSetLive(lastGeoName); }
         }).catch(function(){});
     }
@@ -4011,7 +4011,7 @@ function enableDraw(type,intoMeasure){
   activeCreateHandler=once;
   map.on(L.Draw.Event.CREATED,once);
   h.enable();
-  if(type!=='marker'){ showDigibar(type==='polyline'?'Digitizing line ? click to add vertices':(type==='rectangle'?'Drag to draw rectangle':'Digitizing polygon ? click to add vertices')); }
+  if(type!=='marker'){ showDigibar(type==='polyline'?'Digitizing line — click to add vertices':(type==='rectangle'?'Drag to draw rectangle':'Digitizing polygon — click to add vertices')); }
 }
 /* toolbar controls */
 function finishConstruction(e){
@@ -4091,12 +4091,12 @@ function addDrawnFeature(layer,type){
   // drag for points
   if(kind==='point'){ if(layer.on)layer.on('dragend',function(){try{var nl=layer.getLatLng();rec.props.lng=+nl.lng.toFixed(6);rec.props.lat=+nl.lat.toFixed(6);layer.setPopupContent(drawnPopup(rec));}catch(e){}}); }
   drawn[kind].push(rec); drawnUndo.push(rec); drawnRedo=[]; renderDrawnList();
-  toast(kind+' added ? click it to edit, or use the list');
+  toast(kind+' added — click it to edit, or use the list');
 }
 window.__toggleEditGeom=function(id){
   var rec=findDrawn(id); if(!rec||!rec.layer.editing)return;
   rec.editing=!rec.editing;
-  try{ if(rec.editing){rec.layer.editing.enable();toast('Vertex editing ON ? drag vertices, then toggle off');}else{rec.layer.editing.disable();
+  try{ if(rec.editing){rec.layer.editing.enable();toast('Vertex editing ON — drag vertices, then toggle off');}else{rec.layer.editing.disable();
     // recompute measurements after edit
     try{var gj=rec.layer.toGeoJSON();
       if(rec.kind==='line')rec.props.length_m=+(turf.length(gj,{units:'kilometers'})*1000).toFixed(2);
@@ -4137,14 +4137,14 @@ function renderDrawnList(){
   var total=drawn.point.length+drawn.line.length+drawn.polygon.length;
   el.innerHTML='';
   var hdr=document.createElement('div');
-  hdr.innerHTML='<p class="hint" style="margin:8px 0">Points: '+drawn.point.length+' ? Lines: '+drawn.line.length+' ? Polygons: '+drawn.polygon.length+'</p>';
+  hdr.innerHTML='<p class="hint" style="margin:8px 0">Points: '+drawn.point.length+' · Lines: '+drawn.line.length+' · Polygons: '+drawn.polygon.length+'</p>';
   el.appendChild(hdr);
   if(total){
     var ctl=document.createElement('div'); ctl.className='row2';
-    ctl.innerHTML='<button class="btn" id="digiUndoF" style="margin:0">? Undo</button><button class="btn" id="digiRedoF" style="margin:0">? Redo</button>';
+    ctl.innerHTML='<button class="btn" id="digiUndoF" style="margin:0">↶ Undo</button><button class="btn" id="digiRedoF" style="margin:0">↷ Redo</button>';
     el.appendChild(ctl);
     var ctl2=document.createElement('div');
-    ctl2.innerHTML='<button class="btn" id="digiClearF" style="margin:6px 0 0">? Clear all</button>';
+    ctl2.innerHTML='<button class="btn" id="digiClearF" style="margin:6px 0 0">✕ Clear all</button>';
     el.appendChild(ctl2);
     ctl.querySelector('#digiUndoF').onclick=function(){var rec=drawnUndo.pop();if(!rec){toast('Nothing to undo',true);return;}
       // remove from map but keep for redo
@@ -4159,10 +4159,10 @@ function renderDrawnList(){
   ['point','line','polygon'].forEach(function(kind){
     drawn[kind].forEach(function(rec){
       var row=document.createElement('div'); row.className='layerrow';
-      var canVtx=rec.layer.editing?'<button class="vtx" title="Edit vertices">?</button>':'';
+      var canVtx=rec.layer.editing?'<button class="vtx" title="Edit vertices">⬓</button>':'';
       row.innerHTML='<span class="sw" style="background:'+rec.style.fill+'"></span>'+
         '<label style="flex:1;cursor:pointer">'+escapeHtml(rec.props.name||kind)+'</label>'+
-        canVtx+'<button class="ed" title="Edit attributes">?</button><button class="x" title="Delete">?</button>';
+        canVtx+'<button class="ed" title="Edit attributes">✎</button><button class="x" title="Delete">✕</button>';
       row.querySelector('label').onclick=function(){ try{ if(rec.layer.getBounds)map.fitBounds(rec.layer.getBounds(),{maxZoom:17}); else map.panTo(rec.layer.getLatLng()); }catch(e){} rec.layer.openPopup&&rec.layer.openPopup(); };
       if(rec.layer.editing){ row.querySelector('.vtx').onclick=function(){ window.__toggleEditGeom(rec.id); }; }
       row.querySelector('.ed').onclick=function(){ window.__editDrawn(rec.id); };
@@ -4172,7 +4172,7 @@ function renderDrawnList(){
   });
 }
 function fmtDist(km){ return km<1 ? (km*1000).toFixed(1)+' m' : km.toFixed(3)+' km'; }
-function fmtArea(m2){ return m2<1e6 ? m2.toFixed(1)+' m?' : (m2/1e6).toFixed(4)+' km?'; }
+function fmtArea(m2){ return m2<1e6 ? m2.toFixed(1)+' m²' : (m2/1e6).toFixed(4)+' km²'; }
 var showMeasureLabels=true;
 function showMeasure(layer,type){try{var gj=layer.toGeoJSON();var txt;
   if(type==='polyline'){var km=turf.length(gj,{units:'kilometers'});txt=fmtDist(km);measureOut.innerHTML='Distance\n<span>'+txt+'</span>';}
@@ -4258,7 +4258,7 @@ function toGPX(fc){
   });
   return '<?xml version="1.0"?>\n<gpx version="1.1" creator="Spatial Itqan">'+wpts+trks+'</gpx>';
 }
-/* Get a representative [lng,lat] (WGS84) for a feature ? first vertex. */
+/* Get a representative [lng,lat] (WGS84) for a feature — first vertex. */
 function firstLngLat(geom){
   if(!geom||!geom.coordinates) return null;
   var c=geom.coordinates; while(c&&typeof c[0]!=='number') c=c[0];
@@ -4304,7 +4304,7 @@ var legacyDrawExport=document.getElementById('drawExport');if(legacyDrawExport)l
     // RFC 7946 GeoJSON is always longitude/latitude WGS84. Projected
     // coordinates and the deprecated "crs" member are not interoperable.
     dl(JSON.stringify(rawFc,null,2),'spatialitqan_features.geojson','application/geo+json');
-    toast('Exported '+rawFc.features.length+' feature(s) ? standard GeoJSON in WGS84 (EPSG:4326)');
+    toast('Exported '+rawFc.features.length+' feature(s) — standard GeoJSON in WGS84 (EPSG:4326)');
   }
   else if(fmt==='kml'){
     // KML coordinates must be longitude/latitude WGS84.
@@ -4313,12 +4313,12 @@ var legacyDrawExport=document.getElementById('drawExport');if(legacyDrawExport)l
   }
   else if(fmt==='csv'){ dl(toCSV(fc,crsNote),'spatialitqan_features'+suffix+'.csv','text/csv'); toast('Exported CSV/WKT in '+crsNote); }
   else if(fmt==='gpx'){
-    // GPX is always WGS84 by spec ? export the unprojected data, warn if CRS differs
+    // GPX is always WGS84 by spec — export the unprojected data, warn if CRS differs
     dl(toGPX(rawFc),'spatialitqan_features.gpx','application/gpx+xml');
     toast('Exported GPX (always WGS84 per GPX spec)');
   }
   else if(fmt==='shp'){
-    if(typeof shpwrite==='undefined'){ toast('Shapefile library not loaded ? use GeoJSON or KML',true); return; }
+    if(typeof shpwrite==='undefined'){ toast('Shapefile library not loaded — use GeoJSON or KML',true); return; }
     exportShapefile(fc, exKey, crs);
     return;
   }
@@ -4336,7 +4336,7 @@ function exportShapefile(fc, exKey, crs,baseName){
       shpwrite.download(fc,opts);
       toast('Shapefile exported in '+crs.esri+' ('+crs.code+')');
     }catch(e){
-      toast('Shapefile export failed: '+(e&&e.message?e.message:e)+' ? try GeoJSON/KML',true);
+      toast('Shapefile export failed: '+(e&&e.message?e.message:e)+' — try GeoJSON/KML',true);
     }
   }
   if(!shpwrite.zip){fallback();return;}
@@ -4418,7 +4418,7 @@ function enableCircleDrag(marker,it){
 }
 var legacyPtAdd=document.getElementById('ptAdd');if(legacyPtAdd)legacyPtAdd.onclick=function(){
   ptAddMode=!ptAddMode;
-  this.textContent=ptAddMode?'? Click map to place?':'? Add point';
+  this.textContent=ptAddMode?'● Click map to place…':'＋ Add point';
   this.classList.toggle('accent',!ptAddMode);
   map.getContainer().style.cursor=ptAddMode?'crosshair':'';
 };
@@ -4445,9 +4445,9 @@ function renderPtList(){
     var row=document.createElement('div'); row.className='layerrow';
     row.innerHTML='<span class="sw" style="background:'+it.color+'"></span>'+
       '<label style="flex:1;cursor:pointer">'+escapeHtml(it.text||'(no label)')+'</label>'+
-      '<button class="lbl" title="Toggle label">'+(it.labelOn?'??':'?')+'</button>'+
-      '<button class="ed" title="Edit text">?</button>'+
-      '<button class="x" title="Delete">?</button>';
+      '<button class="lbl" title="Toggle label">'+(it.labelOn?'🏷':'⬚')+'</button>'+
+      '<button class="ed" title="Edit text">✎</button>'+
+      '<button class="x" title="Delete">✕</button>';
     row.querySelector('label').onclick=function(){ try{map.panTo(it.marker.getLatLng());}catch(e){} };
     row.querySelector('.lbl').onclick=function(){ it.labelOn=!it.labelOn; ptRefreshLabel(it); renderPtList(); };
     row.querySelector('.ed').onclick=function(){ editPoint(it.id); };
@@ -4463,7 +4463,7 @@ function numericFields(l){return fieldsOf(l).filter(function(k){return l.geojson
 function fillSel(sel,items,vf,tf,ph){sel.innerHTML=ph?'<option value="">'+ph+'</option>':'';items.forEach(function(it){var o=document.createElement('option');o.value=vf(it);o.textContent=tf(it);sel.appendChild(o);});}
 function refreshDropdowns(){var vs=vectorLayers();
   ['sLayer','eLayer'].forEach(function(id){var sel=document.getElementById(id);if(!sel)return;var prev=sel.value;
-    fillSel(sel,vs,function(l){return l.id;},function(l){return l.name;},vs.length?null:'? no layers ?');if(prev)sel.value=prev;});
+    fillSel(sel,vs,function(l){return l.id;},function(l){return l.name;},vs.length?null:'— no layers —');if(prev)sel.value=prev;});
   syncS();}
 /* attribute table */
 var drawer=document.getElementById('attrDrawer'),attrWrap=document.getElementById('attrTableWrap'),curTbl=null,sortc={key:null,dir:1};
@@ -4487,7 +4487,7 @@ function svFormatNumber(value,decimals){
   return n.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:decimals==null?2:decimals});
 }
 function svFormatLengthDual(m){return svFormatNumber(m,2)+' m / '+svFormatNumber(m/1000,3)+' km';}
-function svFormatAreaDual(m2){return svFormatNumber(m2,2)+' m? / '+svFormatNumber(m2/1000000,6)+' km?';}
+function svFormatAreaDual(m2){return svFormatNumber(m2,2)+' m² / '+svFormatNumber(m2/1000000,6)+' km²';}
 function svSelectedFeatures(L0){
   if(!L0||!L0.geojson)return [];
   var set=svSelSet(L0.id);
@@ -4513,10 +4513,10 @@ function svSelectionText(L0){
   var m=svSelectionMetrics(L0); if(!m.count)return '';
   var p=[m.count+' selected'];
   if(m.points)p.push('Points: '+m.points);
-  if(m.lines)p.push('Lines: '+m.lines+' ? Length: '+svFormatLengthDual(m.lengthM));
-  if(m.polygons)p.push('Polygons: '+m.polygons+' ? Area: '+svFormatAreaDual(m.areaM2));
+  if(m.lines)p.push('Lines: '+m.lines+' · Length: '+svFormatLengthDual(m.lengthM));
+  if(m.polygons)p.push('Polygons: '+m.polygons+' · Area: '+svFormatAreaDual(m.areaM2));
   if(m.other)p.push('Other: '+m.other);
-  return p.join(' ? ');
+  return p.join(' · ');
 }
 function svSelectionMetricsAll(){
   var total={count:0,points:0,lines:0,polygons:0,other:0,lengthM:0,areaM2:0,layers:[]};
@@ -4531,19 +4531,19 @@ function svUpdateSelectionSummary(){
   var box=document.getElementById('selectionSummary'); if(!box)return;
   var m=svSelectionMetricsAll();
   if(!m.count){box.classList.remove('show');box.innerHTML='';return;}
-  var html='<span class="ss-title">Selected ? '+m.layers.length+' feature class'+(m.layers.length===1?'':'es')+'</span>';
+  var html='<span class="ss-title">Selected · '+m.layers.length+' feature class'+(m.layers.length===1?'':'es')+'</span>';
   html+='<span class="ss-item">Count <b>'+m.count+'</b></span>';
   if(m.points)html+='<span class="ss-item">Points <b>'+m.points+'</b></span>';
   if(m.lines){html+='<span class="ss-item">Lines <b>'+m.lines+'</b></span>';html+='<span class="ss-item">Length <b>'+escapeHtml(svFormatLengthDual(m.lengthM))+'</b></span>';}
   if(m.polygons){html+='<span class="ss-item">Polygons <b>'+m.polygons+'</b></span>';html+='<span class="ss-item">Area <b>'+escapeHtml(svFormatAreaDual(m.areaM2))+'</b></span>';}
   if(m.other)html+='<span class="ss-item">Other <b>'+m.other+'</b></span>';
-  html+='<span class="ss-layer">'+m.layers.map(function(x){return escapeHtml(x.name)+' ('+x.count+')';}).join(' ? ')+'</span>';
+  html+='<span class="ss-layer">'+m.layers.map(function(x){return escapeHtml(x.name)+' ('+x.count+')';}).join(' · ')+'</span>';
   box.innerHTML=html;box.classList.add('show');
 }
 function svSetAttrCount(visibleCount){
   if(!curTbl)return;
   var t=visibleCount+' row'+(visibleCount===1?'':'s'),s=svSelectionText(curTbl);
-  document.getElementById('attrCount').textContent=t+(s?(' ? '+s):'');
+  document.getElementById('attrCount').textContent=t+(s?(' · '+s):'');
 }
 var svTableSelectedOnly=false,svTableEditMode=true,svTableAnchorFid=null;
 function svCurrentTableFeatures(){
@@ -4561,13 +4561,13 @@ function svStatsSource(){
 }
 function svFreqRows(values,limit){
   var freq={};values.forEach(function(v){var k=String(v);freq[k]=(freq[k]||0)+1;});
-  return Object.keys(freq).sort(function(a,b){return freq[b]-freq[a]||a.localeCompare(b);}).slice(0,limit||10).map(function(k){return escapeHtml(k)+' ('+freq[k]+')';}).join('<br>')||'?';
+  return Object.keys(freq).sort(function(a,b){return freq[b]-freq[a]||a.localeCompare(b);}).slice(0,limit||10).map(function(k){return escapeHtml(k)+' ('+freq[k]+')';}).join('<br>')||'—';
 }
 function svStatRow(name,value){return '<tr><th>'+escapeHtml(name)+'</th><td>'+value+'</td></tr>';}
 function svEnsureStatsOverlay(){
   var o=document.getElementById('attrStatsOverlay');if(o)return o;
   o=document.createElement('div');o.id='attrStatsOverlay';o.className='attr-stats-overlay';
-  o.innerHTML='<div class="attr-stats-card"><div class="attr-stats-head"><b id="attrStatsTitle">Field Statistics</b><span></span><button id="attrStatsClose">? Close</button></div><div class="attr-stats-body" id="attrStatsBody"></div></div>';
+  o.innerHTML='<div class="attr-stats-card"><div class="attr-stats-head"><b id="attrStatsTitle">Field Statistics</b><span></span><button id="attrStatsClose">✕ Close</button></div><div class="attr-stats-body" id="attrStatsBody"></div></div>';
   document.body.appendChild(o);
   document.getElementById('attrStatsClose').onclick=function(){o.classList.remove('open');};
   o.onclick=function(e){if(e.target===o)o.classList.remove('open');};
@@ -4584,7 +4584,7 @@ function svShowFieldStats(field){
     });
     rows+=svStatRow('Feature count',svFormatNumber(feats.length,0));
     rows+=svStatRow('Null geometry',svFormatNumber(nullGeom,0));
-    rows+=svStatRow('Geometry types',Object.keys(counts).sort().map(function(k){return escapeHtml(k)+': '+counts[k];}).join('<br>')||'?');
+    rows+=svStatRow('Geometry types',Object.keys(counts).sort().map(function(k){return escapeHtml(k)+': '+counts[k];}).join('<br>')||'—');
     rows+=svStatRow('Total line length',svFormatLengthDual(totalLength));
     rows+=svStatRow('Total polygon area',svFormatAreaDual(totalArea));
   }else{
@@ -4610,7 +4610,7 @@ function svShowFieldStats(field){
     }
   }
   var o=svEnsureStatsOverlay();
-  document.getElementById('attrStatsTitle').textContent='Statistics ? '+label;
+  document.getElementById('attrStatsTitle').textContent='Statistics — '+label;
   document.getElementById('attrStatsBody').innerHTML='<div class="attr-stats-scope">Scope: '+escapeHtml(src.label)+'</div><table class="attr-stats-grid">'+rows+'</table><div class="attr-stats-note">Statistics use selected records when a selection exists; otherwise they use the currently visible/filtered table rows.</div>';
   o.classList.add('open');
 }
@@ -4648,8 +4648,8 @@ function svEnsureFieldMenu(){
   var m=document.getElementById('attrFieldMenu');if(m)return m;
   m=document.createElement('div');m.id='attrFieldMenu';m.className='attr-field-menu';
   m.innerHTML='<div class="afm-title" id="afmTitle">Field</div>'+
-    '<button data-a="asc">? Sort Ascending</button><button data-a="desc">? Sort Descending</button><button data-a="clear">? Clear Sort</button><div class="afm-sep"></div>'+
-    '<button data-a="stats">? Statistics / Summarize</button><button data-a="calc">? Calculate Field / Geometry?</button><div class="afm-sep"></div><button data-a="selectall">? Select All Visible Rows</button><button data-a="switch">? Switch Selection</button><button data-a="selected">? Show Selected Only</button>';
+    '<button data-a="asc">▲ Sort Ascending</button><button data-a="desc">▼ Sort Descending</button><button data-a="clear">↕ Clear Sort</button><div class="afm-sep"></div>'+
+    '<button data-a="stats">Σ Statistics / Summarize</button><button data-a="calc">ƒ Calculate Field / Geometry…</button><div class="afm-sep"></div><button data-a="selectall">✓ Select All Visible Rows</button><button data-a="switch">⇄ Switch Selection</button><button data-a="selected">★ Show Selected Only</button>';
   document.body.appendChild(m);
   document.addEventListener('click',function(){m.classList.remove('open');document.querySelectorAll('table.grid th.field-menu-active').forEach(function(th){th.classList.remove('field-menu-active');});});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){m.classList.remove('open');var o=document.getElementById('attrStatsOverlay');if(o)o.classList.remove('open');}});
@@ -4660,7 +4660,7 @@ function svOpenFieldMenu(e,field,th){
   var m=svEnsureFieldMenu(),label=svTableFieldLabel(field);
   document.getElementById('afmTitle').textContent=label;
   document.querySelectorAll('table.grid th.field-menu-active').forEach(function(x){x.classList.remove('field-menu-active');});th.classList.add('field-menu-active');
-  m.querySelector('[data-a="calc"]').textContent=field===SV_SHAPE_FIELD?'? Calculate Geometry?':'? Calculate Field?';
+  m.querySelector('[data-a="calc"]').textContent=field===SV_SHAPE_FIELD?'⌗ Calculate Geometry…':'ƒ Calculate Field…';
   m.querySelectorAll('button').forEach(function(b){b.onclick=function(ev){ev.stopPropagation();var a=b.getAttribute('data-a');m.classList.remove('open');th.classList.remove('field-menu-active');
     if(a==='asc'){sortc.key=field;sortc.dir=1;renderTable();}
     else if(a==='desc'){sortc.key=field;sortc.dir=-1;renderTable();}
@@ -4723,7 +4723,7 @@ function svBeginCellEdit(td,feature,field){
   if(field===SV_SHAPE_FIELD||td.classList.contains('attr-editing'))return;var old=svTableFieldValue(feature,field),def=(curTbl.editSchema||[]).filter(function(item){return item.name===field;})[0],domain=def&&Array.isArray(def.domain)?def.domain:[];
   var input;if(domain.length||def&&def.type==='boolean'){input=document.createElement('select');var values=domain.length?domain:['true','false'];input.innerHTML=(def&&def.nullable!==false?'<option value="">(blank)</option>':'')+values.map(function(value){return '<option value="'+escapeHtml(value)+'">'+escapeHtml(value)+'</option>';}).join('');input.value=old==null?'':String(old);}else{input=document.createElement('input');input.type=def&&def.type==='date'?'date':'text';input.value=old==null?'':String(old);}
   td.classList.add('attr-editing');td.innerHTML='';td.appendChild(input);input.focus();if(input.select)input.select();var done=false;
-  function finish(save){if(done)return;done=true;var shown=old,changed=false;if(save){var next=svParseCellValue(input.value,old,field,curTbl);shown=next;if(!svValuesEqual(next,old)){changed=true;try{if(window.__svAdvSnapshot)window.__svAdvSnapshot();}catch(e){}if(!feature.properties)feature.properties={};feature.properties[field]=next;window.__svPendingCells[svPendingCellKey(curTbl.id,feature,field)]=true;try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}if(curTbl.uniqueField===field)curTbl.catColors=deriveCategoryColors(curTbl,field);svBuildLeafletLayer(curTbl);toast(field+' updated ? click Save to commit');}}
+  function finish(save){if(done)return;done=true;var shown=old,changed=false;if(save){var next=svParseCellValue(input.value,old,field,curTbl);shown=next;if(!svValuesEqual(next,old)){changed=true;try{if(window.__svAdvSnapshot)window.__svAdvSnapshot();}catch(e){}if(!feature.properties)feature.properties={};feature.properties[field]=next;window.__svPendingCells[svPendingCellKey(curTbl.id,feature,field)]=true;try{if(window.__svMarkDirty)window.__svMarkDirty();}catch(e){}if(curTbl.uniqueField===field)curTbl.catColors=deriveCategoryColors(curTbl,field);svBuildLeafletLayer(curTbl);toast(field+' updated — click Save to commit');}}
     td.classList.remove('attr-editing');if(changed||window.__svPendingCells[svPendingCellKey(curTbl.id,feature,field)])td.classList.add('attr-pending');td.textContent=shown==null?'':String(shown);
   }
   input.onkeydown=function(e){e.stopPropagation();if(e.key==='Enter'){e.preventDefault();finish(true);}else if(e.key==='Escape'){e.preventDefault();finish(false);}};input.onblur=function(){finish(true);};input.onclick=function(e){e.stopPropagation();};
@@ -4793,7 +4793,7 @@ function renderTable(){if(!curTbl)return;var feats=svCurrentTableFeatures(),cols
   var hasPending=!!Object.keys(window.__svPendingCells||{}).length;
   var token=svRenderToken, i=0;
   function chunk(n){
-    if(token!==svRenderToken)return;                // a newer render started ? abandon this one
+    if(token!==svRenderToken)return;                // a newer render started — abandon this one
     var end=Math.min(i+n,total), buf='';
     for(;i<end;i++)buf+=svRowHtml(feats[i],i,cols,selSet,hasPending,layerId);
     if(buf)tbody.insertAdjacentHTML('beforeend',buf);
@@ -4852,7 +4852,7 @@ document.getElementById('attrZoomSel').onclick=function(){
   var modal=document.getElementById('attrEditModal');if(!modal)return;var close=function(){modal.classList.remove('open');};var c=document.getElementById('attrEditClose'),x=document.getElementById('attrEditCancel'),a=document.getElementById('attrEditApply');if(c)c.onclick=close;if(x)x.onclick=close;if(a)a.onclick=svApplyAttributeEditor;modal.onclick=function(e){if(e.target===modal)close();};
 })();
 svSetSaveButtons(false);
-/* persistent bottom horizontal scrollbar for the attribute table ? lets you page left/right across wide tables (e.g. KML style columns) */
+/* persistent bottom horizontal scrollbar for the attribute table — lets you page left/right across wide tables (e.g. KML style columns) */
 (function(){
   var wrap=document.getElementById('attrTableWrap'),track=document.getElementById('attrHScrollTrack'),thumb=document.getElementById('attrHScrollThumb'),
       lBtn=document.getElementById('attrScrollL'),rBtn=document.getElementById('attrScrollR');
@@ -4994,10 +4994,10 @@ document.getElementById('sApply').onclick=function(){
 /* identify */
 var identifyOn=false;
 document.getElementById('identifyToggle').onclick=function(){identifyOn=!identifyOn;
-  this.textContent=identifyOn?'? Identify ? ON (click map)':'? Identify ? click to enable';
+  this.textContent=identifyOn?'◉ Identify — ON (click map)':'◎ Identify — click to enable';
   this.classList.toggle('on',identifyOn);
   map.getContainer().style.cursor=identifyOn?'help':'';
-  if(identifyOn) toast('Identify on ? click any feature on the map');};
+  if(identifyOn) toast('Identify on — click any feature on the map');};
 map.on('click',function(e){if(!identifyOn || ptAddMode)return;var pt=turf.point([e.latlng.lng,e.latlng.lat]),hits=[];
   function featureHit(f){
     var g=f.geometry;if(!g)return false;
@@ -5008,8 +5008,8 @@ map.on('click',function(e){if(!identifyOn || ptAddMode)return;var pt=turf.point(
   }
   vectorLayers().forEach(function(L0){L0.geojson.features.forEach(function(f){try{if(featureHit(f))hits.push([L0.name,f]);}catch(err){}});});
   var html='<b>Identify</b><br/>';if(hits.length){hits.slice(0,5).forEach(function(h){html+='<div style="margin-top:6px"><b>'+escapeHtml(h[0])+'</b>'+popupFromProps(h[1].properties)+'</div>';});}else html+='<span style="color:#888">No visible features here.</span>';
-  var pop=L.popup({maxWidth:300}).setLatLng(e.latlng).setContent(html+'<div style="margin-top:6px;color:#888">Looking up address?</div>').openOn(map);
-  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+e.latlng.lat+'&lon='+e.latlng.lng).then(function(r){return r.json();}).then(function(d){pop.setContent(html+'<div style="margin-top:6px"><b>Address</b><br/>'+escapeHtml(d.display_name||'?')+'</div>');}).catch(function(){});});
+  var pop=L.popup({maxWidth:300}).setLatLng(e.latlng).setContent(html+'<div style="margin-top:6px;color:#888">Looking up address…</div>').openOn(map);
+  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+e.latlng.lat+'&lon='+e.latlng.lng).then(function(r){return r.json();}).then(function(d){pop.setContent(html+'<div style="margin-top:6px"><b>Address</b><br/>'+escapeHtml(d.display_name||'—')+'</div>');}).catch(function(){});});
 /* bookmarks */
 var bookmarks=[];
 document.getElementById('bmAdd').onclick=function(){var name=document.getElementById('bmName').value.trim()||('View '+(bookmarks.length+1));bookmarks.push({name:name,c:map.getCenter(),z:map.getZoom()});document.getElementById('bmName').value='';renderBm();};
@@ -5053,7 +5053,7 @@ document.getElementById('layTitle').oninput=function(){
   mapTitleEl.textContent=this.value;
   mapTitleEl.style.display=this.value.trim()?'':'none';
 };
-document.getElementById('legendToggle').onclick=function(){document.getElementById('legendBox').classList.toggle('collapsed');this.textContent=document.getElementById('legendBox').classList.contains('collapsed')?'?':'?';};
+document.getElementById('legendToggle').onclick=function(){document.getElementById('legendBox').classList.toggle('collapsed');this.textContent=document.getElementById('legendBox').classList.contains('collapsed')?'▸':'▾';};
 /* free-drag the legend anywhere over the map view */
 (function(){
   var box=document.getElementById('legendBox'); if(!box)return;
@@ -5089,7 +5089,7 @@ document.getElementById('showLegend').onchange=function(){document.getElementByI
 /* populate zoom-override dropdown */
 (function(){var z=document.getElementById('exZoom');for(var i=3;i<=19;i++){var o=document.createElement('option');o.value=i;o.textContent='Zoom '+i;z.appendChild(o);}})();
 
-/* page sizes at 96 dpi base (px) ? scaled by resolution */
+/* page sizes at 96 dpi base (px) — scaled by resolution */
 var PAGES={a4:{l:[1123,794],p:[794,1123]},a3:{l:[1587,1123],p:[1123,1587]},a2:{l:[2245,1587],p:[1587,2245]},a1:{l:[3179,2245],p:[2245,3179]},a0:{l:[4494,3179],p:[3179,4494]},letter:{l:[1056,816],p:[816,1056]},tabloid:{l:[1632,1056],p:[1056,1632]}};
 
 function styleColors(style){
@@ -5100,7 +5100,7 @@ function styleColors(style){
 
 /* Paint all visible vector layers + labels straight onto a captured map canvas.
    Engine-independent: works whether the base was captured by leaflet-image (which drops SVG vectors)
-   or html2canvas ? data always appears in exports with correct categorized/graduated symbology. */
+   or html2canvas — data always appears in exports with correct categorized/graduated symbology. */
 function svPaintOverlaysOnMapCanvas(canvas){
   if(!canvas)return canvas;
   try{
@@ -5172,22 +5172,22 @@ function buildLayoutCanvas(cb){
     // temporarily remove the live-location marker so it isn't baked into the layout
     var hadYAH = youAreHere && map.hasLayer(youAreHere);
     if(hadYAH){ map.removeLayer(youAreHere); }
-    // temporarily remove DOM label groups ? labels are redrawn as crisp vector text at export resolution in doRender
+    // temporarily remove DOM label groups — labels are redrawn as crisp vector text at export resolution in doRender
     var labelGroups=[], lg=(window.__svAdvLabelGroups?window.__svAdvLabelGroups():{});
     Object.keys(lg||{}).forEach(function(id){ var fg=lg[id]; if(fg&&map.hasLayer(fg)){ labelGroups.push(fg); map.removeLayer(fg); } });
     function restore(){ hidden.forEach(function(h){ h[0].style.display=h[1]; }); if(hadYAH){ youAreHere.addTo(map); } labelGroups.forEach(function(fg){ try{fg.addTo(map);}catch(e){} }); }
     var done=false;
     function finishCb(cv){ if(done)return; done=true; try{svPaintOverlaysOnMapCanvas(cv);}catch(e){} restore(); cb(cv); }
-    // Fallback: html2canvas ? captures tiles/markers from the DOM; SVG vector panes are skipped (the painter draws vectors from data)
+    // Fallback: html2canvas — captures tiles/markers from the DOM; SVG vector panes are skipped (the painter draws vectors from data)
     function h2cFallback(reason){
       if(done)return;
       if(typeof html2canvas==='undefined'){ done=true; restore(); toast('Export failed: '+reason+' (no fallback available)',true); if(zoomOverride)map.setZoom(prevZoom); return; }
-      toast('Using fallback capture?');
+      toast('Using fallback capture…');
       html2canvas(document.getElementById('map'),{useCORS:true,allowTaint:false,logging:false,backgroundColor:null,ignoreElements:function(el){return (el.classList&&(el.classList.contains('leaflet-control-container')||el.classList.contains('leaflet-control-attribution')))||(el.tagName&&String(el.tagName).toLowerCase()==='svg');}})
         .then(function(cv){ try{ cv.getContext('2d').getImageData(0,0,1,1); finishCb(cv); }catch(taint){ done=true; restore(); toast('Export failed: cross-origin tiles',true); if(zoomOverride)map.setZoom(prevZoom); } })
         .catch(function(e){ done=true; restore(); toast('Export failed: '+(e&&e.message||'capture error'),true); if(zoomOverride)map.setZoom(prevZoom); });
     }
-    // Primary: leaflet-image ? renders tiles + vector layers directly from Leaflet's data (reliable). DOM labels are hidden and redrawn as crisp vector text in doRender.
+    // Primary: leaflet-image — renders tiles + vector layers directly from Leaflet's data (reliable). DOM labels are hidden and redrawn as crisp vector text in doRender.
     if(typeof leafletImage!=='undefined'){
       try{
         leafletImage(map,function(err,canvas){
@@ -5201,7 +5201,7 @@ function buildLayoutCanvas(cb){
     } else { h2cFallback('leaflet-image not loaded'); }
   }
   function doRender(){
-    toast('Rendering layout?');
+    toast('Rendering layout…');
     withCanvas(function(canvas){
       // target dimensions
       var tw,th;
@@ -5209,7 +5209,7 @@ function buildLayoutCanvas(cb){
       else { var dim=PAGES[page][orient==='portrait'?'p':'l']; tw=dim[0]*res; th=dim[1]*res; }
       var out=document.createElement('canvas'); out.width=tw; out.height=th;
       var ctx=out.getContext('2d');
-      // ===== ArcGIS Pro?style page =====
+      // ===== ArcGIS Pro–style page =====
       var isLight = style!=='dark';
       var pageBg = isLight ? '#FFFFFF' : '#0B1220';
       var frameLine = isLight ? '#3A3A3A' : '#9fb2cf';
@@ -5357,7 +5357,7 @@ function buildLayoutCanvas(cb){
         var cw=ctx.measureText(crsTxt).width; ctx.fillStyle=C.panel; roundRect(ctx,tw-cw-28*S,th-32*S,cw+16*S,22*S,6*S); ctx.fill();
         ctx.fillStyle=C.accent; ctx.fillText(crsTxt,tw-cw-20*S,th-17*S);
       }
-      // Scale text (1:N) ? computed from the map view and how it was fitted onto the page
+      // Scale text (1:N) — computed from the map view and how it was fitted onto the page
       if(document.getElementById('exScaleTxt')&&document.getElementById('exScaleTxt').checked){
         try{
           var _ctr=map.getCenter(), _z=map.getZoom();
@@ -5457,7 +5457,7 @@ function saveBlob(blob, fname, mime){
 function fallbackDownload(blob,fname){
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);},1500);
-  toast('Exported '+fname+' ? your browser will ask where to save');
+  toast('Exported '+fname+' — your browser will ask where to save');
 }
 /* layout marginalia wiring: author input visibility + logo image loading */
 (function(){
@@ -5468,7 +5468,7 @@ function fallbackDownload(blob,fname){
     var f=this.files&&this.files[0];
     if(!f){window.__svExLogoImg=null;return;}
     var r=new FileReader();
-    r.onload=function(){ var im=new Image(); im.onload=function(){window.__svExLogoImg=im;toast('Logo loaded ? it will appear top-left on the layout');}; im.src=r.result; };
+    r.onload=function(){ var im=new Image(); im.onload=function(){window.__svExLogoImg=im;toast('Logo loaded — it will appear top-left on the layout');}; im.src=r.result; };
     r.readAsDataURL(f);
   };
 })();
@@ -5478,7 +5478,7 @@ document.getElementById('exportPNG').onclick=function(){
 var _jpgBtn=document.getElementById('exportJPG');
 if(_jpgBtn)_jpgBtn.onclick=function(){
   buildLayoutCanvas(function(canvas){
-    // JPG has no transparency ? flatten onto white so the page stays clean (not black)
+    // JPG has no transparency — flatten onto white so the page stays clean (not black)
     var flat=document.createElement('canvas'); flat.width=canvas.width; flat.height=canvas.height;
     var fx=flat.getContext('2d'); fx.fillStyle='#FFFFFF'; fx.fillRect(0,0,flat.width,flat.height); fx.drawImage(canvas,0,0);
     flat.toBlob(function(blob){ saveBlob(blob, exportFileName('jpg'), 'image/jpeg'); },'image/jpeg',0.92);
@@ -5488,7 +5488,7 @@ if(_jpgBtn)_jpgBtn.onclick=function(){
 
 /* ============ HIGH-RESOLUTION TILE-FETCH CAPTURE ENGINE ============
    Renders the AOI at a user-chosen zoom by fetching raw basemap tiles and
-   stitching them at full resolution ? independent of screen size. Used by both
+   stitching them at full resolution — independent of screen size. Used by both
    the single georeferenced image and the tiled mosaic exports. */
 var TILE_SIZE=256;
 function activeTileTemplate(){
@@ -5522,7 +5522,7 @@ function renderAOIHiRes(bounds,z,statusCb,cb){
   var fy=lat2tile(bounds.getNorth(),z), fyS=lat2tile(bounds.getSouth(),z);
   var x0=Math.floor(fx), x1=Math.ceil(fxE), y0=Math.floor(fy), y1=Math.ceil(fyS);
   var nx=x1-x0, ny=y1-y0, total=nx*ny;
-  if(total>900){ cb('That area at z'+z+' needs '+total+' tiles ? too many. Lower the zoom or draw a smaller area.'); return; }
+  if(total>900){ cb('That area at z'+z+' needs '+total+' tiles — too many. Lower the zoom or draw a smaller area.'); return; }
   var fullW=nx*TILE_SIZE, fullH=ny*TILE_SIZE;
   var big=document.createElement('canvas'); big.width=fullW; big.height=fullH;
   var bx=big.getContext('2d'); bx.fillStyle='#fff'; bx.fillRect(0,0,fullW,fullH);
@@ -5556,24 +5556,24 @@ function lngLatToXY(crsObj,lng,lat){ if(!hasProj||crsObj.key==='wgs84')return [l
 /* ================= GEOREFERENCED IMAGE EXPORT (hi-res) ================= */
 function geoRefShow(h){ var o=document.getElementById('geoRefOut'); if(o){o.style.display='block';o.innerHTML=h;} }
 (function(){ var e=document.getElementById('geoEstimate'); if(e)e.onclick=function(){
-  toast('Draw an area to estimate?');
+  toast('Draw an area to estimate…');
   var d=new L.Draw.Rectangle(map,{shapeOptions:{color:'#0EA5A4',weight:2,dashArray:'4 4',fillOpacity:.04}}); d.enable();
   map.once(L.Draw.Event.CREATED,function(ev){ map.addLayer(ev.layer); var z=+document.getElementById('geoZoom').value; var s=aoiPixelSize(ev.layer.getBounds(),z);
-    var el=document.getElementById('geoEst'); el.style.display='block'; el.innerHTML='At z'+z+': <b>'+s.w+' ? '+s.h+' px</b> ? ~'+s.tiles+' tiles to fetch'+(s.tiles>900?' <span style="color:var(--bad)">(too many ? lower zoom)</span>':'');
+    var el=document.getElementById('geoEst'); el.style.display='block'; el.innerHTML='At z'+z+': <b>'+s.w+' × '+s.h+' px</b> · ~'+s.tiles+' tiles to fetch'+(s.tiles>900?' <span style="color:var(--bad)">(too many — lower zoom)</span>':'');
     setTimeout(function(){try{map.removeLayer(ev.layer);}catch(e){}},1500);
   });
 };})();
 function startGeoRefExport(){
   if(typeof L.Draw==='undefined'||!L.Draw.Rectangle){ toast('Draw library not loaded',true); return; }
-  if(typeof JSZip==='undefined'){ toast('Zip library not loaded ? reload',true); return; }
+  if(typeof JSZip==='undefined'){ toast('Zip library not loaded — reload',true); return; }
   var z=+document.getElementById('geoZoom').value;
-  toast('Draw the area to export at z'+z+'?');
+  toast('Draw the area to export at z'+z+'…');
   geoRefShow('Draw a rectangle to define the export area.');
   var drawer=new L.Draw.Rectangle(map,{shapeOptions:{color:'#F59E0B',weight:2,dashArray:'6 5',fillOpacity:.05}}); drawer.enable();
   map.once(L.Draw.Event.CREATED,function(e){
     var layer=e.layer; map.addLayer(layer); var b=layer.getBounds();
-    geoRefShow('Fetching tiles at z'+z+'? 0%');
-    renderAOIHiRes(b,z,function(d,t){ geoRefShow('Fetching tiles at z'+z+'? '+Math.round(d/t*100)+'%'); },function(err,res){
+    geoRefShow('Fetching tiles at z'+z+'… 0%');
+    renderAOIHiRes(b,z,function(d,t){ geoRefShow('Fetching tiles at z'+z+'… '+Math.round(d/t*100)+'%'); },function(err,res){
       try{map.removeLayer(layer);}catch(e){}
       if(err){ toast(err,true); geoRefShow('<span style="color:var(--bad)">'+err+'</span>'); return; }
       finishGeoRef(b,res);
@@ -5665,11 +5665,11 @@ function buildGeoTIFF(canvas, originX, originY, pxSizeX, pxSizeY, epsgCode){
   dv.setUint32(e,0,true); // next IFD = 0
   // BitsPerSample
   dv.setUint16(BPS_OFF,8,true); dv.setUint16(BPS_OFF+2,8,true); dv.setUint16(BPS_OFF+4,8,true);
-  // ModelPixelScale (x,y,z) ? pixel size; y positive magnitude
+  // ModelPixelScale (x,y,z) — pixel size; y positive magnitude
   dv.setFloat64(scale_OFF,Math.abs(pxSizeX),true);
   dv.setFloat64(scale_OFF+8,Math.abs(pxSizeY),true);
   dv.setFloat64(scale_OFF+16,0,true);
-  // ModelTiepoint (i,j,k, X,Y,Z) ? raster 0,0,0 maps to originX,originY
+  // ModelTiepoint (i,j,k, X,Y,Z) — raster 0,0,0 maps to originX,originY
   dv.setFloat64(tiepoint_OFF,0,true); dv.setFloat64(tiepoint_OFF+8,0,true); dv.setFloat64(tiepoint_OFF+16,0,true);
   dv.setFloat64(tiepoint_OFF+24,originX,true); dv.setFloat64(tiepoint_OFF+32,originY,true); dv.setFloat64(tiepoint_OFF+40,0,true);
   // GeoKeyDirectory
@@ -5698,7 +5698,7 @@ function finishGeoRef(bounds,res){
       var originX=tl[0]+pxW/2, originY=tl[1]+pxH/2; // top-left pixel center
       var tif=buildGeoTIFF(crop, tl[0], tl[1], Math.abs(pxW), Math.abs(pxH), epsg);
       saveBlob(tif, 'georef_image_z'+res.z+'_'+crsTag+'.tif', 'image/tiff');
-      geoRefShow('<b>GeoTIFF exported.</b> z'+res.z+' ? '+res.cropW+'?'+res.cropH+' px ? '+crs.esri+' ('+crs.code+')<br>Georeferencing embedded ? opens placed in QGIS/ArcGIS.');
+      geoRefShow('<b>GeoTIFF exported.</b> z'+res.z+' · '+res.cropW+'×'+res.cropH+' px · '+crs.esri+' ('+crs.code+')<br>Georeferencing embedded — opens placed in QGIS/ArcGIS.');
       toast('GeoTIFF exported at z'+res.z);
     }catch(e){ toast('GeoTIFF build failed: '+e.message,true); geoRefShow('<span style="color:var(--bad)">GeoTIFF failed: '+escapeHtml(e.message)+'</span>'); }
     return;
@@ -5716,10 +5716,10 @@ function finishGeoRef(bounds,res){
   zip.file('georef_image.'+ext,b64,{base64:true});
   zip.file('georef_image.'+wld,world);
   zip.file('georef_image.prj',prj);
-  zip.file('readme.txt','Georeferenced image ? Spatial Itqan\nCRS: '+crs.esri+' ('+crs.code+')\nResolution: z'+res.z+' ? '+res.cropW+' x '+res.cropH+' px\nPixel size (CRS units): '+Math.abs(pxW).toFixed(4)+' x '+Math.abs(pxH).toFixed(4)+'\nLoad georef_image.'+ext+' in QGIS/ArcGIS; the .'+wld+' + .prj place it automatically.\n');
+  zip.file('readme.txt','Georeferenced image — Spatial Itqan\nCRS: '+crs.esri+' ('+crs.code+')\nResolution: z'+res.z+' · '+res.cropW+' x '+res.cropH+' px\nPixel size (CRS units): '+Math.abs(pxW).toFixed(4)+' x '+Math.abs(pxH).toFixed(4)+'\nLoad georef_image.'+ext+' in QGIS/ArcGIS; the .'+wld+' + .prj place it automatically.\n');
   zip.generateAsync({type:'blob'}).then(function(blob){
     saveBlob(blob, 'georef_image_z'+res.z+'_'+crsTag+'.zip', 'application/zip');
-    geoRefShow('<b>Exported.</b> z'+res.z+' ? '+res.cropW+'?'+res.cropH+' px ? '+crs.esri+' ('+crs.code+')<br>'+ext.toUpperCase()+' + world file (.'+wld+') + .prj, zipped.');
+    geoRefShow('<b>Exported.</b> z'+res.z+' · '+res.cropW+'×'+res.cropH+' px · '+crs.esri+' ('+crs.code+')<br>'+ext.toUpperCase()+' + world file (.'+wld+') + .prj, zipped.');
     toast('Georeferenced '+ext.toUpperCase()+' exported at z'+res.z);
   }).catch(function(e){ toast('Export failed: '+e.message,true); });
 }
@@ -5729,28 +5729,28 @@ var geoRefBtn=document.getElementById('geoRefExport'); if(geoRefBtn)geoRefBtn.on
 (function(){ var ov=document.getElementById('tileOverlap'); if(ov)ov.oninput=function(){var v=document.getElementById('tileOvV'); if(v)v.textContent=this.value;}; })();
 function tileShow(h){ var o=document.getElementById('tileOut'); if(o){o.style.display='block';o.innerHTML=h;} }
 (function(){ var e=document.getElementById('tileEstimate'); if(e)e.onclick=function(){
-  toast('Draw an area to estimate?');
+  toast('Draw an area to estimate…');
   var d=new L.Draw.Rectangle(map,{shapeOptions:{color:'#0EA5A4',weight:2,dashArray:'4 4',fillOpacity:.04}}); d.enable();
   map.once(L.Draw.Event.CREATED,function(ev){ map.addLayer(ev.layer);
     var z=+document.getElementById('tileZoom').value, tpx=+document.getElementById('tilePx').value;
     var s=aoiPixelSize(ev.layer.getBounds(),z);
     var cols=Math.max(1,Math.ceil(s.w/tpx)), rows=Math.max(1,Math.ceil(s.h/tpx));
     var el=document.getElementById('tileEst'); el.style.display='block';
-    el.innerHTML='At z'+z+': full image <b>'+s.w+'?'+s.h+' px</b> ? <b>'+rows+' rows ? '+cols+' cols = '+(rows*cols)+' tiles</b> of ~'+tpx+'px'+(s.tiles>900?' <span style="color:var(--bad)">(fetch too large ? lower zoom)</span>':'');
+    el.innerHTML='At z'+z+': full image <b>'+s.w+'×'+s.h+' px</b> → <b>'+rows+' rows × '+cols+' cols = '+(rows*cols)+' tiles</b> of ~'+tpx+'px'+(s.tiles>900?' <span style="color:var(--bad)">(fetch too large — lower zoom)</span>':'');
     setTimeout(function(){try{map.removeLayer(ev.layer);}catch(e){}},1800);
   });
 };})();
 function startTileExport(){
   if(typeof L.Draw==='undefined'||!L.Draw.Rectangle){ toast('Draw library not loaded',true); return; }
-  if(typeof JSZip==='undefined'){ toast('Zip library not loaded ? reload',true); return; }
+  if(typeof JSZip==='undefined'){ toast('Zip library not loaded — reload',true); return; }
   var z=+document.getElementById('tileZoom').value;
-  toast('Draw the area to tile at z'+z+'?');
+  toast('Draw the area to tile at z'+z+'…');
   tileShow('Draw a rectangle to define the mosaic area.');
   var drawer=new L.Draw.Rectangle(map,{shapeOptions:{color:'#7C3AED',weight:2,dashArray:'6 5',fillOpacity:.05}}); drawer.enable();
   map.once(L.Draw.Event.CREATED,function(e){
     var layer=e.layer; map.addLayer(layer); var b=layer.getBounds();
-    tileShow('Fetching tiles at z'+z+'? 0%');
-    renderAOIHiRes(b,z,function(d,t){ tileShow('Fetching tiles at z'+z+'? '+Math.round(d/t*100)+'%'); },function(err,res){
+    tileShow('Fetching tiles at z'+z+'… 0%');
+    renderAOIHiRes(b,z,function(d,t){ tileShow('Fetching tiles at z'+z+'… '+Math.round(d/t*100)+'%'); },function(err,res){
       try{map.removeLayer(layer);}catch(e){}
       if(err){ toast(err,true); tileShow('<span style="color:var(--bad)">'+err+'</span>'); return; }
       finishTiles(b,res);
@@ -5812,23 +5812,23 @@ function finishTiles(bounds,res){
   zip.file('README_MOSAIC.txt',tileReadme(crs,co.key,rows,cols,Math.round(overlap*100),made,Math.abs(pxW),Math.abs(pxH),res.z));
   zip.generateAsync({type:'blob'}).then(function(blob){
     saveBlob(blob, 'mosaic_tiles_z'+res.z+'_'+(co.key==='wgs84'?'wgs84':crs.esri)+'.zip', 'application/zip');
-    tileShow('<b>'+made+' tiles exported</b> ('+tfmt.toUpperCase()+') ? z'+res.z+' ? '+W+'?'+H+' px total ? '+rows+'?'+cols+' grid ? '+Math.round(overlap*100)+'% overlap<br>CRS: '+crs.esri+' ('+crs.code+')<br>Includes manifest.csv, tile_index.geojson, mosaic instructions.');
+    tileShow('<b>'+made+' tiles exported</b> ('+tfmt.toUpperCase()+') · z'+res.z+' · '+W+'×'+H+' px total · '+rows+'×'+cols+' grid · '+Math.round(overlap*100)+'% overlap<br>CRS: '+crs.esri+' ('+crs.code+')<br>Includes manifest.csv, tile_index.geojson, mosaic instructions.');
     toast(made+' georeferenced '+tfmt.toUpperCase()+' tiles exported');
   }).catch(function(e){ toast('Tile zip failed: '+e.message,true); });
 }
 function tileReadme(crs,exKey,rows,cols,ov,made,pxW,pxH,z){
   return [
-'SPATIAL ITQAN ? TILED EXPORT FOR SEAMLESS MOSAIC',
+'SPATIAL ITQAN — TILED EXPORT FOR SEAMLESS MOSAIC',
 '================================================','',
 'Tiles: '+made+'  ('+rows+' rows x '+cols+' cols, '+ov+'% edge overlap)',
 'Detail: zoom '+z,
 'CRS  : '+crs.esri+' ('+crs.code+')',
 'Pixel size (CRS units): '+pxW.toFixed(4)+' x '+pxH.toFixed(4),
-'All tiles share ONE fetch, ONE resolution, ONE origin and ONE CRS ? seamless-mosaic ready.','',
+'All tiles share ONE fetch, ONE resolution, ONE origin and ONE CRS — seamless-mosaic ready.','',
 'CONTENTS',
-'  tiles/tile_rXX_cYY.png/.pgw/.prj  ? image + world file + CRS',
-'  manifest.csv       ? every tile + extent',
-'  tile_index.geojson ? tile footprints (WGS84)','',
+'  tiles/tile_rXX_cYY.png/.pgw/.prj  — image + world file + CRS',
+'  manifest.csv       — every tile + extent',
+'  tile_index.geojson — tile footprints (WGS84)','',
 'BUILD A SEAMLESS MOSAIC (GDAL)',
 '  for f in tiles/*.png; do gdal_translate -a_srs '+crs.code+' "$f" "${f%.png}.tif"; done',
 '  gdalbuildvrt mosaic.vrt tiles/*.tif',
@@ -5882,8 +5882,8 @@ function streamUpdateProgress(summary){
   if(streamEl('expProgressBar'))streamEl('expProgressBar').style.width=pct.toFixed(2)+'%';
   if(streamEl('expElapsed'))streamEl('expElapsed').textContent=streamClock(elapsed);
   if(streamEl('expRemaining'))streamEl('expRemaining').textContent=job.finished?(job.cancel?'Stopped':'00:00'):(job.cancel?'Cancelling':(processed>=total?'00:00':streamClock(eta)));
-  if(streamEl('expCompleted'))streamEl('expCompleted').textContent=job.completed+' OK ? '+job.failed.length+' failed';
-  if(window.__svProfessionalProgress)window.__svProfessionalProgress('Imagery tile export',processed,total,summary||((job.completed||0)+' completed ? '+job.failed.length+' failed'));
+  if(streamEl('expCompleted'))streamEl('expCompleted').textContent=job.completed+' OK · '+job.failed.length+' failed';
+  if(window.__svProfessionalProgress)window.__svProfessionalProgress('Imagery tile export',processed,total,summary||((job.completed||0)+' completed · '+job.failed.length+' failed'));
 }
 function streamShowPanel(){
   var panel=streamEl('expJobPanel');if(panel)panel.classList.add('show');
@@ -5928,7 +5928,7 @@ function streamAcquireAOI(source,purpose){
   }
   return new Promise(function(resolve,reject){
     if(typeof L.Draw==='undefined'||!L.Draw.Rectangle){reject(new Error('AOI drawing library is unavailable'));return;}
-    toast('Draw the AOI rectangle for '+purpose+'?');
+    toast('Draw the AOI rectangle for '+purpose+'…');
     var drawer=new L.Draw.Rectangle(map,{shapeOptions:{color:'#38BDF8',weight:2,dashArray:'6 4',fillOpacity:.05}});
     function created(event){
       var layer=event.layer;map.addLayer(layer);
@@ -6052,10 +6052,10 @@ function streamBuildPlan(aoi,requestedZoom,tileSize,overlapPercent){
 function streamEstimatePlan(plan){
   var fmt=streamEl('expFormat').value,raw=plan.items.length*plan.tileSize*plan.tileSize*3;
   var estimated=fmt==='geotiff'?raw:(fmt==='jpg'?raw*.16:raw*.48);
-  var clamp=plan.z!==plan.requestedZoom?' ? provider capped requested z'+plan.requestedZoom+' to z'+plan.z:'';
+  var clamp=plan.z!==plan.requestedZoom?' · provider capped requested z'+plan.requestedZoom+' to z'+plan.z:'';
   var el=streamEl('tileEst');if(el){
     el.style.display='block';streamEl('geoEst').style.display='none';
-    el.innerHTML='<b>'+plan.items.length+' same-size output tiles</b> ? '+plan.rows+' rows ? '+plan.cols+' cols ? '+plan.tileSize+'?'+plan.tileSize+' px ? '+plan.sourceTiles+' unique source tiles'+clamp+'<br>Shared '+plan.crsInfo.crs.code+' grid ? '+plan.resX.toFixed(plan.crsInfo.key==='wgs84'?10:4)+' ? '+plan.resY.toFixed(plan.crsInfo.key==='wgs84'?10:4)+' CRS units/pixel<br>Estimated output: ~'+streamBytes(estimated)+' ? reprojected and streamed directly to disk; the complete AOI is not retained in memory.';
+    el.innerHTML='<b>'+plan.items.length+' same-size output tiles</b> · '+plan.rows+' rows × '+plan.cols+' cols · '+plan.tileSize+'×'+plan.tileSize+' px · '+plan.sourceTiles+' unique source tiles'+clamp+'<br>Shared '+plan.crsInfo.crs.code+' grid · '+plan.resX.toFixed(plan.crsInfo.key==='wgs84'?10:4)+' × '+plan.resY.toFixed(plan.crsInfo.key==='wgs84'?10:4)+' CRS units/pixel<br>Estimated output: ~'+streamBytes(estimated)+' · reprojected and streamed directly to disk; the complete AOI is not retained in memory.';
   }
 }
 function streamWait(ms,signal){
@@ -6099,7 +6099,7 @@ function streamWarpSourceCanvas(plan,item,sourceCanvas,sourceOriginX,sourceOrigi
   var gl=warpCanvas.getContext('webgl',{alpha:false,antialias:false,preserveDrawingBuffer:true});
   if(!gl)throw new Error('WebGL reprojection is unavailable in this browser');
   var maxTexture=gl.getParameter(gl.MAX_TEXTURE_SIZE);
-  if(sourceCanvas.width>maxTexture||sourceCanvas.height>maxTexture)throw new Error('Source texture '+sourceCanvas.width+'?'+sourceCanvas.height+' exceeds this browser GPU limit of '+maxTexture+' px');
+  if(sourceCanvas.width>maxTexture||sourceCanvas.height>maxTexture)throw new Error('Source texture '+sourceCanvas.width+'×'+sourceCanvas.height+' exceeds this browser GPU limit of '+maxTexture+' px');
   var vertexShader=streamCompileShader(gl,gl.VERTEX_SHADER,'attribute vec2 a_position;attribute vec2 a_texcoord;varying vec2 v_texcoord;void main(){gl_Position=vec4(a_position,0.0,1.0);v_texcoord=a_texcoord;}');
   var fragmentShader=streamCompileShader(gl,gl.FRAGMENT_SHADER,'precision mediump float;uniform sampler2D u_image;varying vec2 v_texcoord;void main(){gl_FragColor=texture2D(u_image,v_texcoord);}');
   var program=gl.createProgram();gl.attachShader(program,vertexShader);gl.attachShader(program,fragmentShader);gl.linkProgram(program);
@@ -6165,7 +6165,7 @@ async function streamRenderOutputTile(plan,item,job){
         if(err&&err.name==='AbortError')throw err;
         failed++;
       }
-      if((loaded+failed)%8===0||loaded+failed===tasks.length)streamUpdateProgress('Rendering R'+streamPad(item.row)+' C'+streamPad(item.col)+' ? source '+(loaded+failed)+' / '+tasks.length);
+      if((loaded+failed)%8===0||loaded+failed===tasks.length)streamUpdateProgress('Rendering R'+streamPad(item.row)+' C'+streamPad(item.col)+' · source '+(loaded+failed)+' / '+tasks.length);
     }
   }
   await Promise.all(Array.from({length:workers},worker));
@@ -6230,7 +6230,7 @@ function streamManifestCSV(job){
 }
 function streamReadme(job,status){
   return [
-    'SPATIAL ITQAN ? SEQUENTIAL AOI TILE EXPORT','===========================================','',
+    'SPATIAL ITQAN — SEQUENTIAL AOI TILE EXPORT','===========================================','',
     'Status: '+status,'AOI: '+job.plan.aoi.label,'Source: '+job.source,'Effective zoom: '+job.plan.z,
     'CRS: '+job.crsInfo.crs.esri+' ('+job.crsInfo.crs.code+')','Reprojection: shared output-CRS raster grid',
     'Pixel size: '+job.plan.resX+' x '+job.plan.resY+' CRS units','Grid origin: '+job.plan.originX+', '+job.plan.originY,
@@ -6269,9 +6269,9 @@ async function startStreamingTileExport(){
   var job={running:true,cancel:false,controller:new AbortController(),started:Date.now(),timer:null,processed:0,completed:0,total:plan.items.length,failed:[],manifest:[],indexFeatures:[],logs:[],plan:plan,prefix:prefix,source:source,folderName:folderName,rootDirectory:rootDirectory,tilesDirectory:tilesDirectory,crsInfo:co,epsg:epsg,prj:esriPrj(co.key),format:streamEl('expFormat').value};
   streamExportState.job=job;streamShowPanel();streamUpdateProgress('Preparing '+job.total+' output tiles');
   streamLog('Output folder: '+streamExportState.folder.name+'/'+folderName,'ok');
-  streamLog('AOI: '+aoi.label+' ? grid '+plan.rows+' ? '+plan.cols+' ? '+job.total+' intersecting tiles');
-  streamLog('Tile size '+tileSize+' px ? overlap '+overlap+'% ? effective zoom z'+plan.z+(plan.z!==requestedZoom?' (requested z'+requestedZoom+' capped by provider)':''));
-  streamLog('Reprojection grid: '+co.crs.code+' ? '+plan.resX+' ? '+plan.resY+' CRS units/pixel ? common origin '+plan.originX+', '+plan.originY,'ok');
+  streamLog('AOI: '+aoi.label+' · grid '+plan.rows+' × '+plan.cols+' · '+job.total+' intersecting tiles');
+  streamLog('Tile size '+tileSize+' px · overlap '+overlap+'% · effective zoom z'+plan.z+(plan.z!==requestedZoom?' (requested z'+requestedZoom+' capped by provider)':''));
+  streamLog('Reprojection grid: '+co.crs.code+' · '+plan.resX+' × '+plan.resY+' CRS units/pixel · common origin '+plan.originX+', '+plan.originY,'ok');
   if(overlap>0)streamLog('Overlap duplicates a buffer between neighboring tiles; use 0% for direct edge-to-edge mosaics.','warn');
   if(tileSize>=4096)streamLog('4096 px GeoTIFF tiles can temporarily use substantial memory; processing remains one tile at a time.','warn');
   var run=streamEl('expRun');if(run)run.disabled=true;
@@ -6296,29 +6296,29 @@ async function startStreamingTileExport(){
       }finally{
         if(canvas)canvas.width=canvas.height=0;
         job.processed++;
-        streamUpdateProgress(job.cancel?'Cancelling after current write?':'Completed tile '+job.processed+' of '+job.total);
+        streamUpdateProgress(job.cancel?'Cancelling after current write…':'Completed tile '+job.processed+' of '+job.total);
       }
       if(job.processed%5===0)await streamCheckpoint(job,'running');
     }
     var status=job.cancel?'cancelled':(job.failed.length?'completed_with_errors':'completed');
-    streamUpdateProgress(job.cancel?'Export cancelled ? writing partial manifest':'Writing manifests and completion report');
+    streamUpdateProgress(job.cancel?'Export cancelled · writing partial manifest':'Writing manifests and completion report');
     await streamFinalize(job,status);
     job.finished=true;
     if(job.cancel){
       streamLog('Export cancelled. Completed tiles and a partial manifest were retained.','warn');
-      streamUpdateProgress('Export cancelled ? partial results retained');
-      toast('Export cancelled ? '+job.completed+' completed tile(s) retained');
+      streamUpdateProgress('Export cancelled · partial results retained');
+      toast('Export cancelled — '+job.completed+' completed tile(s) retained');
       tileShow('<b>Export cancelled.</b> '+job.completed+' completed tile(s) remain in '+folderName+'. Partial manifest and log written.');
     }else{
       streamLog('Export finished: '+job.completed+' completed, '+job.failed.length+' failed.','ok');
       streamUpdateProgress(job.failed.length?'Export completed with '+job.failed.length+' failed tile(s)':'Export completed successfully');
       toast('Tiled AOI export completed: '+job.completed+' tile(s)');
-      tileShow('<b>Direct-to-folder export completed.</b> '+job.completed+' / '+job.total+' tiles ? '+job.failed.length+' failed<br>Folder: '+folderName+'<br>Includes manifest.csv, tile_index.geojson, export_job.json, export.log and README.txt.');
+      tileShow('<b>Direct-to-folder export completed.</b> '+job.completed+' / '+job.total+' tiles · '+job.failed.length+' failed<br>Folder: '+folderName+'<br>Includes manifest.csv, tile_index.geojson, export_job.json, export.log and README.txt.');
     }
   }catch(err){
     streamLog('Export stopped: '+(err&&err.message||err),'err');toast('Tiled export stopped: '+(err&&err.message||err),true);
     try{await streamFinalize(job,'failed');}catch(finalErr){}job.finished=true;
-    streamUpdateProgress('Export failed ? partial report written');
+    streamUpdateProgress('Export failed · partial report written');
   }finally{
     clearInterval(job.timer);job.running=false;job.finished=true;
     var cancel=streamEl('expCancel');if(cancel){cancel.style.display='none';cancel.disabled=true;}
@@ -6328,7 +6328,7 @@ async function startStreamingTileExport(){
 function cancelStreamingTileExport(){
   var job=streamExportState.job;if(!job||!job.running)return;
   job.cancel=true;try{job.controller.abort();}catch(err){}
-  streamLog('Cancellation requested; the current request is being stopped.','warn');streamUpdateProgress('Cancelling export?');
+  streamLog('Cancellation requested; the current request is being stopped.','warn');streamUpdateProgress('Cancelling export…');
   var button=streamEl('expCancel');if(button)button.disabled=true;
 }
 window.__svStreamingExport={
@@ -6348,7 +6348,7 @@ window.__svStreamingExport={
   function syncZoom(){ if(tileZoom&&geoZoom)tileZoom.value=geoZoom.value; }
   function syncRunLabel(){
     var button=document.getElementById('expRun');if(!button)return;
-    button.textContent=modeSel.value==='tiled'?(aoiSource&&aoiSource.value==='selected'?'Export selected AOI ? folder':'Draw AOI ? folder'):'Draw area ? export';
+    button.textContent=modeSel.value==='tiled'?(aoiSource&&aoiSource.value==='selected'?'Export selected AOI → folder':'Draw AOI → folder'):'Draw area → export';
   }
   if(geoZoom)geoZoom.addEventListener('change',syncZoom);
   modeSel.addEventListener('change',function(){
@@ -6366,17 +6366,17 @@ window.__svStreamingExport={
   var est=document.getElementById('expEstimate');
   if(est)est.onclick=function(){
     syncZoom();
-    toast('Draw an area to estimate?');
+    toast('Draw an area to estimate…');
     var d=new L.Draw.Rectangle(map,{shapeOptions:{color:'#0EA5A4',weight:2,dashArray:'4 4',fillOpacity:.04}}); d.enable();
     map.once(L.Draw.Event.CREATED,function(ev){ map.addLayer(ev.layer); var b=ev.layer.getBounds(); var z=+geoZoom.value;
       if(modeSel.value==='tiled'){
         var s=aoiPixelSize(b,z); var tpx=+document.getElementById('tilePx').value;
         var cols=Math.max(1,Math.ceil(s.w/tpx)),rows=Math.max(1,Math.ceil(s.h/tpx));
         var el=document.getElementById('tileEst'); el.style.display='block'; document.getElementById('geoEst').style.display='none';
-        el.innerHTML='At z'+z+': full image <b>'+s.w+'?'+s.h+' px</b> ? <b>'+rows+'?'+cols+' = '+(rows*cols)+' tiles</b> of ~'+tpx+'px'+(s.tiles>900?' <span style="color:var(--bad)">(too large ? lower zoom)</span>':'');
+        el.innerHTML='At z'+z+': full image <b>'+s.w+'×'+s.h+' px</b> → <b>'+rows+'×'+cols+' = '+(rows*cols)+' tiles</b> of ~'+tpx+'px'+(s.tiles>900?' <span style="color:var(--bad)">(too large — lower zoom)</span>':'');
       } else {
         var s2=aoiPixelSize(b,z); var el2=document.getElementById('geoEst'); el2.style.display='block'; document.getElementById('tileEst').style.display='none';
-        el2.innerHTML='At z'+z+': <b>'+s2.w+' ? '+s2.h+' px</b> ? ~'+s2.tiles+' tiles to fetch'+(s2.tiles>900?' <span style="color:var(--bad)">(too many ? lower zoom)</span>':'');
+        el2.innerHTML='At z'+z+': <b>'+s2.w+' × '+s2.h+' px</b> · ~'+s2.tiles+' tiles to fetch'+(s2.tiles>900?' <span style="color:var(--bad)">(too many — lower zoom)</span>':'');
       }
       setTimeout(function(){try{map.removeLayer(ev.layer);}catch(e){}},1600);
     });
@@ -6391,13 +6391,13 @@ window.__svStreamingExport={
       }catch(err){toast(err.message,true);}
       return;
     }
-    toast('Draw an area to estimate?');
+    toast('Draw an area to estimate…');
     var drawer=new L.Draw.Rectangle(map,{shapeOptions:{color:'#0EA5A4',weight:2,dashArray:'4 4',fillOpacity:.04}});drawer.enable();
     map.once(L.Draw.Event.CREATED,function(event){
       map.addLayer(event.layer);
       var bounds=event.layer.getBounds(),zoom=+geoZoom.value,size=aoiPixelSize(bounds,zoom),output=document.getElementById('geoEst');
       output.style.display='block';document.getElementById('tileEst').style.display='none';
-      output.innerHTML='At z'+zoom+': <b>'+size.w+' ? '+size.h+' px</b> ? ~'+size.tiles+' source tiles'+(size.tiles>900?' <span style="color:var(--bad)">(single image too large ? use tiled mode)</span>':'');
+      output.innerHTML='At z'+zoom+': <b>'+size.w+' × '+size.h+' px</b> · ~'+size.tiles+' source tiles'+(size.tiles>900?' <span style="color:var(--bad)">(single image too large — use tiled mode)</span>':'');
       setTimeout(function(){try{map.removeLayer(event.layer);}catch(e){}},1600);
     });
   };
@@ -6559,7 +6559,7 @@ document.getElementById('exportPDF').onclick=function(){
   /* ---- open ---- */
   function openDesigner(){
     designer.classList.add('open'); LD.open=true;
-    toast('Capturing map for layout?');
+    toast('Capturing map for layout…');
     captureMap(function(canvas){
       if(!canvas){ toast('Could not capture the map (cross-origin basemap?). Try Light Gray / OSM / Satellite.',true); }
       LD.mapCanvas=canvas;
@@ -6731,7 +6731,7 @@ document.getElementById('exportPDF').onclick=function(){
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&LD.open)closeDesigner(); });
 })();
 
-/* ================= ROUTING (OSRM, no API key ? Google-style directions) ================= */
+/* ================= ROUTING (OSRM, no API key — Google-style directions) ================= */
 (function(){
   var panel=document.getElementById('routePanel'); if(!panel)return;
   function $(id){return document.getElementById(id);}
@@ -6776,14 +6776,14 @@ document.getElementById('exportPDF').onclick=function(){
 
   function useMyLocation(){
     if(!navigator.geolocation){ toast('Geolocation not supported',true); return; }
-    setStatus('Getting your location?');
+    setStatus('Getting your location…');
     navigator.geolocation.getCurrentPosition(function(pos){
       state.from=[pos.coords.longitude,pos.coords.latitude];
       $('rpFrom').value=fmtLL(state.from);
       placeEndpointMarkers();
       map.setView([pos.coords.latitude,pos.coords.longitude],14);
       setStatus(state.to?'Ready. Press <b>Find Route</b>.':'Source set to your location. Now pick a destination.');
-    },function(){ toast('Could not get your location',true); setStatus('Location failed ? pick the source on the map instead.'); },{enableHighAccuracy:true,timeout:10000});
+    },function(){ toast('Could not get your location',true); setStatus('Location failed — pick the source on the map instead.'); },{enableHighAccuracy:true,timeout:10000});
   }
 
   function clearRoutes(){
@@ -6803,7 +6803,7 @@ document.getElementById('exportPDF').onclick=function(){
   function findRoute(){
     if(!state.from||!state.to){ toast('Set both source and destination first',true); return; }
     var alts=$('rpAlts').checked;
-    setStatus('Calculating route?');
+    setStatus('Calculating route…');
     clearRoutes();
     var coords=state.from[0]+','+state.from[1]+';'+state.to[0]+','+state.to[1];
     var url='https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=geojson&steps=true&alternatives='+(alts?'true':'false');
@@ -6814,7 +6814,7 @@ document.getElementById('exportPDF').onclick=function(){
       // fit to the primary route
       try{ var b=L.geoJSON(state.routes[0].geometry).getBounds(); map.fitBounds(b,{padding:[60,60]}); }catch(e){}
       setStatus(state.routes.length+' route'+(state.routes.length>1?'s':'')+' found. Tap one to see turn-by-turn steps.');
-    }).catch(function(e){ setStatus('<span style="color:var(--bad)">Routing failed: '+escapeHtml(e.message)+'. The free OSRM server may be busy ? try again.</span>'); });
+    }).catch(function(e){ setStatus('<span style="color:var(--bad)">Routing failed: '+escapeHtml(e.message)+'. The free OSRM server may be busy — try again.</span>'); });
   }
 
   function drawRoutes(){
@@ -6844,7 +6844,7 @@ document.getElementById('exportPDF').onclick=function(){
       }catch(e){ steps=''; }
       html+='<div class="rp-route'+(sel?' sel':'')+'" data-i="'+i+'">'
         +'<div class="rr-top"><span class="rr-name">'+(i===0?'Best route':'Alternative '+i)+'</span>'+(sel?'<span class="rr-badge">SELECTED</span>':'')+'</div>'
-        +'<div class="rr-meta"><b>'+fmtDist(rt.distance)+'</b> ? '+fmtDur(rt.duration)+'</div>'
+        +'<div class="rr-meta"><b>'+fmtDist(rt.distance)+'</b> · '+fmtDur(rt.duration)+'</div>'
         +steps+'</div>';
     });
     $('rpResults').innerHTML=html;
@@ -6888,22 +6888,22 @@ window.switchTab=switchTab;
 document.getElementById('mobToggle').onclick=function(){document.getElementById('panel').classList.toggle('open');};
 
 refreshDropdowns();
-toast('Spatial Itqan ready ? add data to begin');
+toast('Spatial Itqan ready — add data to begin');
 
 /* ================= LIVE WEATHER FOOTER (Open-Meteo, no API key) ================= */
 (function(){
-  var WMO={0:['Clear','?'],1:['Mainly clear','??'],2:['Partly cloudy','?'],3:['Overcast','?'],
-    45:['Fog','??'],48:['Rime fog','??'],51:['Light drizzle','??'],53:['Drizzle','??'],55:['Dense drizzle','??'],
-    56:['Freezing drizzle','??'],57:['Freezing drizzle','??'],61:['Light rain','??'],63:['Rain','??'],65:['Heavy rain','??'],
-    66:['Freezing rain','??'],67:['Freezing rain','??'],71:['Light snow','??'],73:['Snow','??'],75:['Heavy snow','?'],
-    77:['Snow grains','??'],80:['Rain showers','??'],81:['Rain showers','??'],82:['Violent showers','?'],
-    85:['Snow showers','??'],86:['Snow showers','??'],95:['Thunderstorm','?'],96:['Thunderstorm + hail','?'],99:['Thunderstorm + hail','?']};
+  var WMO={0:['Clear','☀'],1:['Mainly clear','🌤'],2:['Partly cloudy','⛅'],3:['Overcast','☁'],
+    45:['Fog','🌫'],48:['Rime fog','🌫'],51:['Light drizzle','🌦'],53:['Drizzle','🌦'],55:['Dense drizzle','🌧'],
+    56:['Freezing drizzle','🌧'],57:['Freezing drizzle','🌧'],61:['Light rain','🌦'],63:['Rain','🌧'],65:['Heavy rain','🌧'],
+    66:['Freezing rain','🌧'],67:['Freezing rain','🌧'],71:['Light snow','🌨'],73:['Snow','🌨'],75:['Heavy snow','❄'],
+    77:['Snow grains','🌨'],80:['Rain showers','🌦'],81:['Rain showers','🌧'],82:['Violent showers','⛈'],
+    85:['Snow showers','🌨'],86:['Snow showers','🌨'],95:['Thunderstorm','⛈'],96:['Thunderstorm + hail','⛈'],99:['Thunderstorm + hail','⛈']};
   function windDir(deg){
-    if(deg==null||isNaN(deg))return '?';
+    if(deg==null||isNaN(deg))return '—';
     var dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-    var arrows=['?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?'];
+    var arrows=['↑','↗','↗','↗','→','↘','↘','↘','↓','↙','↙','↙','←','↖','↖','↖'];
     var i=Math.round(deg/22.5)%16;
-    return arrows[i]+' '+dirs[i]+' '+Math.round(deg)+'?';
+    return arrows[i]+' '+dirs[i]+' '+Math.round(deg)+'°';
   }
   function $(id){return document.getElementById(id);}
   var lastFetch=0, busy=false;
@@ -6917,13 +6917,13 @@ toast('Spatial Itqan ready ? add data to begin');
     fetch(url).then(function(r){return r.json();}).then(function(d){
       lastFetch=Date.now(); busy=false;
       var cur=d&&d.current; if(!cur){ return; }
-      var wc=WMO[cur.weather_code]||['?','??'];
+      var wc=WMO[cur.weather_code]||['—','🌡'];
       if($('fwIcon'))$('fwIcon').textContent=wc[1];
-      if($('fwTemp'))$('fwTemp').textContent=(cur.temperature_2m!=null?Math.round(cur.temperature_2m)+'?C':'?');
+      if($('fwTemp'))$('fwTemp').textContent=(cur.temperature_2m!=null?Math.round(cur.temperature_2m)+'°C':'—');
       if($('fwCond'))$('fwCond').textContent=wc[0];
-      if($('fwHumid'))$('fwHumid').textContent='?? '+(cur.relative_humidity_2m!=null?cur.relative_humidity_2m+'%':'?');
-      if($('fwWind'))$('fwWind').textContent='?? '+windDir(cur.wind_direction_10m)+' '+(cur.wind_speed_10m!=null?Math.round(cur.wind_speed_10m)+' km/h':'');
-      if($('fwPrecip'))$('fwPrecip').textContent='?? '+(cur.precipitation!=null?cur.precipitation+' mm':'? mm');
+      if($('fwHumid'))$('fwHumid').textContent='💧 '+(cur.relative_humidity_2m!=null?cur.relative_humidity_2m+'%':'—');
+      if($('fwWind'))$('fwWind').textContent='🧭 '+windDir(cur.wind_direction_10m)+' '+(cur.wind_speed_10m!=null?Math.round(cur.wind_speed_10m)+' km/h':'');
+      if($('fwPrecip'))$('fwPrecip').textContent='🌧 '+(cur.precipitation!=null?cur.precipitation+' mm':'— mm');
     }).catch(function(){ busy=false; if($('fwCond'))$('fwCond').textContent='Weather unavailable (needs internet)'; });
   }
   // refresh when the map stops moving (debounced) and every 2 minutes
@@ -6949,14 +6949,14 @@ toast('Spatial Itqan ready ? add data to begin');
         var a=(d&&d.address)||{};
         var cc=(a.country_code||'').toLowerCase();
         if(cc){ if(cc!==lastCC){lastCC=cc;} setFlag(cc, a.country); }
-        // city/town/locality ? falls back through the address hierarchy
+        // city/town/locality — falls back through the address hierarchy
         var city=a.city||a.town||a.municipality||a.city_district||a.county||a.state_district||a.village||a.state||'';
         setCity(city);
       }).catch(function(){ flagBusy=false; });
   }
   function setCity(name){
     var el=$('fwLoc'); if(!el)return;
-    el.textContent = name ? ('? '+name) : '';
+    el.textContent = name ? ('· '+name) : '';
     el.title = name||'';
   }
   function setFlag(cc, country){
@@ -6966,7 +6966,7 @@ toast('Spatial Itqan ready ? add data to begin');
     el.title=(country||cc.toUpperCase());
   }
   function ccToEmoji(cc){
-    if(!cc||cc.length!==2)return '??';
+    if(!cc||cc.length!==2)return '🏳';
     return String.fromCodePoint(0x1F1E6 + cc.charCodeAt(0)-97) + String.fromCodePoint(0x1F1E6 + cc.charCodeAt(1)-97);
   }
   map.on('moveend',function(){ clearTimeout(window.__flagT); window.__flagT=setTimeout(function(){updateFlag(true);},1100); });
@@ -6976,32 +6976,32 @@ toast('Spatial Itqan ready ? add data to begin');
 /* ================= USER MANUAL ================= */
 var MANUAL=[
  ['Welcome to Spatial Itqan',
-  'Spatial Itqan (??????? ???????) by IUH is a professional browser-based Web-GIS suite for viewing maps, plotting and analysing spatial data, editing geometry, and producing publication-quality map layouts. Everything runs in your browser ? your data files are processed locally on your device and are not uploaded to any server. Only online basemaps, place search, reverse-geocoding, routing and live weather use external web services. Tip: use the search box at the top of this manual to jump to any topic.'],
+  'Spatial Itqan (الإتقان المكاني) by IUH is a professional browser-based Web-GIS suite for viewing maps, plotting and analysing spatial data, editing geometry, and producing publication-quality map layouts. Everything runs in your browser — your data files are processed locally on your device and are not uploaded to any server. Only online basemaps, place search, reverse-geocoding, routing and live weather use external web services. Tip: use the search box at the top of this manual to jump to any topic.'],
  ['Getting started',
-  'On first use, the app opens at a neutral world extent. After you pan, zoom, search or use <b>Locate Me</b>, that map view is remembered on this device and restored after a normal reload. <b>Factory reset session</b> clears it. Pan by dragging the map; zoom with the mouse wheel, pinch gesture, or the ? / ? buttons. Basemaps support digital overzoom to level 28; beyond a service?s native resolution, raster tiles enlarge while vector and CAD content remain sharp. The top header has global search, view controls (Theme, Tools, Focus), the active-layer indicator, the CRS selector, and Settings. Below it the tools ribbon is organised into groups: Data & Layers, Map Navigation, Go to XY, Select & Identify, and Editing. The right-side panel has tabs: Layers, Data, Edit, and Output. The bottom bar shows the coordinate readout (left), and live weather plus the country flag and city of the map centre (which updates as you pan).'],
+  'On first use, the app opens at a neutral world extent. After you pan, zoom, search or use <b>Locate Me</b>, that map view is remembered on this device and restored after a normal reload. <b>Factory reset session</b> clears it. Pan by dragging the map; zoom with the mouse wheel, pinch gesture, or the ＋ / － buttons. Basemaps support digital overzoom to level 28; beyond a service’s native resolution, raster tiles enlarge while vector and CAD content remain sharp. The top header has global search, view controls (Theme, Tools, Focus), the active-layer indicator, the CRS selector, and Settings. Below it the tools ribbon is organised into groups: Data & Layers, Map Navigation, Go to XY, Select & Identify, and Editing. The right-side panel has tabs: Layers, Data, Edit, and Output. The bottom bar shows the coordinate readout (left), and live weather plus the country flag and city of the map centre (which updates as you pan).'],
  ['The header bar',
   '<b>Search:</b> type a place, address, or "lat, lng" to fly there.<br>'+
   '<b>Theme:</b> cycles the interface colour scheme (Graphite dark, Arctic light, Midnight navy).<br>'+
   '<b>Tools:</b> shows or hides the entire tools ribbon to give the map more space.<br>'+
   '<b>Focus:</b> presentation mode that hides interface chrome for a clean map view.<br>'+
   '<b>CRS selector:</b> sets the active coordinate system (see "Coordinate systems").<br>'+
-  '<b>?? Manual:</b> opens this searchable user manual.<br>'+
-  '<b>? Settings:</b> theme picker and refresh.'],
+  '<b>📖 Manual:</b> opens this searchable user manual.<br>'+
+  '<b>⚙ Settings:</b> theme picker and refresh.'],
  ['Loading your data',
-  'Click <b>? Add Layer</b> (ribbon) or open the <b>Data</b> tab, then choose a file. Supported formats:<br>'+
-  '<b>Excel (.xlsx) / CSV:</b> coordinates are auto-detected ? latitude/longitude by value range, or Easting/Northing by magnitude. In the Data tab you can set the sheet\'s coordinate system: Auto-detect, WGS84 (EPSG:4326), or Web Mercator (EPSG:3857); UTM zones are detected automatically.<br>'+
-  '<b>Shapefile:</b> ZIP the .shp, .dbf, .shx and .prj together and load the .zip ? it auto-reprojects to WGS84.<br>'+
+  'Click <b>＋ Add Layer</b> (ribbon) or open the <b>Data</b> tab, then choose a file. Supported formats:<br>'+
+  '<b>Excel (.xlsx) / CSV:</b> coordinates are auto-detected — latitude/longitude by value range, or Easting/Northing by magnitude. In the Data tab you can set the sheet\'s coordinate system: Auto-detect, WGS84 (EPSG:4326), or Web Mercator (EPSG:3857); UTM zones are detected automatically.<br>'+
+  '<b>Shapefile:</b> ZIP the .shp, .dbf, .shx and .prj together and load the .zip — it auto-reprojects to WGS84.<br>'+
   '<b>KML / KMZ:</b> loaded directly (KMZ is unzipped automatically).<br>'+
   '<b>GPX:</b> waypoints, tracks and routes from GPS devices.<br>'+
   '<b>GeoJSON:</b> loaded directly.<br>'+
   '<b>DXF:</b> CAD line/polyline geometry.<br>'+
-  'Note: a File Geodatabase (.gdb) and proprietary formats like ECW/DWG cannot be read directly in a browser ? convert them to Shapefile or GeoJSON first.'],
+  'Note: a File Geodatabase (.gdb) and proprietary formats like ECW/DWG cannot be read directly in a browser — convert them to Shapefile or GeoJSON first.'],
  ['Basemaps',
-  'In the <b>Layers</b> tab, choose from the basemap gallery. The reliable everyday basemaps are <b>Light Gray, Voyager, Streets, Satellite</b> and <b>Topographic</b>. Also available: Dark Gray, Nat Geo, OSM Humanitarian, Terrain Hillshade, OpenTopoMap (volunteer server ? can be slow), and Blank QA (a plain white background for checking your data). The app opens on Light Gray by default. The selected basemap always sits beneath your data.'],
+  'In the <b>Layers</b> tab, choose from the basemap gallery. The reliable everyday basemaps are <b>Light Gray, Voyager, Streets, Satellite</b> and <b>Topographic</b>. Also available: Dark Gray, Nat Geo, OSM Humanitarian, Terrain Hillshade, OpenTopoMap (volunteer server — can be slow), and Blank QA (a plain white background for checking your data). The app opens on Light Gray by default. The selected basemap always sits beneath your data.'],
  ['Coordinate systems (CRS)',
-  'The <b>CRS</b> selector in the header controls the on-map coordinate readout and the coordinate system used for exports. Options: <b>Auto UTM</b> (picks the correct UTM zone automatically from the map location), <b>GCS WGS 1984 (EPSG:4326)</b> for latitude/longitude in degrees, and <b>WGS 1984 Web Mercator (EPSG:3857)</b>. The bottom-left readout updates instantly when you change this and as you move the mouse. UTM coordinates are shown as Easting/Northing in metres; GCS as Lat/Lon in degrees. Easting/Northing and Lat/Long describe the same point ? UTM in metres (best for survey and engineering distance/area), Lat/Long in angles (global reference).'],
+  'The <b>CRS</b> selector in the header controls the on-map coordinate readout and the coordinate system used for exports. Options: <b>Auto UTM</b> (picks the correct UTM zone automatically from the map location), <b>GCS WGS 1984 (EPSG:4326)</b> for latitude/longitude in degrees, and <b>WGS 1984 Web Mercator (EPSG:3857)</b>. The bottom-left readout updates instantly when you change this and as you move the mouse. UTM coordinates are shown as Easting/Northing in metres; GCS as Lat/Lon in degrees. Easting/Northing and Lat/Long describe the same point — UTM in metres (best for survey and engineering distance/area), Lat/Long in angles (global reference).'],
  ['Layers tab',
-  'Every loaded layer appears in the Layers list. Toggle its checkbox to show/hide it, click its name to zoom to it, open its attribute table, or remove it. The Smart Workflow strip guides you through Add Data ? Select Features. The on-map legend (which you can move) lists active layers. Basemap selection and View presets also live here.'],
+  'Every loaded layer appears in the Layers list. Toggle its checkbox to show/hide it, click its name to zoom to it, open its attribute table, or remove it. The Smart Workflow strip guides you through Add Data → Select Features. The on-map legend (which you can move) lists active layers. Basemap selection and View presets also live here.'],
  ['Attribute table',
   'Open from the ribbon <b>Table</b> button or a layer\'s table icon. It opens at the bottom of the screen. Click a column header to sort, type in the filter box to search, and click any row to zoom to that feature. Use "Zoom to selected" to jump to highlighted rows.'],
  ['Selecting & identifying',
@@ -7027,23 +7027,23 @@ var MANUAL=[
  ['Routing (directions)',
   'Click the <b>Route</b> button in Map Navigation to open the directions panel. Set a <b>source</b> (click "Pick" then click the map, or use "Use my current location") and a <b>destination</b>, then press <b>Find Route</b>. Powered by the free OSRM service (no API key), it draws the road route(s) and lists each with distance and estimated travel time. Tap a route to see turn-by-turn steps. Keep "Show alternative routes" on to compare options. Close the panel when done. Note: OSRM\'s free demo server is rate-limited and provides driving routes only.'],
  ['North arrow & map elements',
-  'Use the <b>North</b> toggle in Map Navigation to show or hide the on-screen north arrow. Other on-map elements (title, scale bar, legend, coordinates) can be toggled in the Layers tab under View presets ? Individual elements. Map overlays automatically reposition when you dock/hide the right panel.'],
+  'Use the <b>North</b> toggle in Map Navigation to show or hide the on-screen north arrow. Other on-map elements (title, scale bar, legend, coordinates) can be toggled in the Layers tab under View presets → Individual elements. Map overlays automatically reposition when you dock/hide the right panel.'],
  ['Clean map export (Output tab)',
-  'The Output tab exports a publication-ready map laid out like an ArcGIS page. Set an output file name and map title, choose the page (A4 / A3 / Letter / current view), orientation, resolution (1? / 2? / 3?) and page style (Light ArcGIS page by default, or Dark). Export as <b>PNG, JPG or PDF</b>. The page uses a framed map with an ESRI-standard legend (per-geometry symbols), north arrow, scale bar and CRS stamp. Editing panels are never included.'],
+  'The Output tab exports a publication-ready map laid out like an ArcGIS page. Set an output file name and map title, choose the page (A4 / A3 / Letter / current view), orientation, resolution (1× / 2× / 3×) and page style (Light ArcGIS page by default, or Dark). Export as <b>PNG, JPG or PDF</b>. The page uses a framed map with an ESRI-standard legend (per-geometry symbols), north arrow, scale bar and CRS stamp. Editing panels are never included.'],
  ['Layout Designer (drag & arrange)',
-  'For full control, click <b>?? Design layout</b> in the Output tab. This opens an interactive, ArcGIS-Pro-style layout editor where the map fills the page and every element ? map frame, title, north arrow, legend, scale bar, CRS stamp ? can be dragged to reposition and resized via its corner handle. Toggle elements on/off, set the page size, then export the arranged layout to PNG, JPG or PDF. The map shown is a snapshot taken when you open the designer ? reopen it to refresh after panning.'],
+  'For full control, click <b>🎨 Design layout</b> in the Output tab. This opens an interactive, ArcGIS-Pro-style layout editor where the map fills the page and every element — map frame, title, north arrow, legend, scale bar, CRS stamp — can be dragged to reposition and resized via its corner handle. Toggle elements on/off, set the page size, then export the arranged layout to PNG, JPG or PDF. The map shown is a snapshot taken when you open the designer — reopen it to refresh after panning.'],
  ['Advanced imagery export (georeferenced)',
   'Also in the Output tab, "Advanced imagery export" produces georeferenced imagery at a resolution you choose (independent of the screen). Use a newly drawn AOI or one selected polygon feature. Tiled exports are reprojected from the Web Mercator basemap onto one shared, north-up raster grid in the map\'s active CRS. Every tile uses the same snapped origin and pixel resolution, so adjacent edges have zero coordinate gap and no exporter-induced UTM shift. Use <b>0% overlap</b> for a direct edge-to-edge mosaic; a larger overlap intentionally duplicates a buffer for cutline or blending workflows. Tiles are written directly to disk one at a time. The live job panel reports counts, percent, elapsed time, remaining time, current work, and a detailed log. Choose <b>GeoTIFF</b>, <b>PNG + world file + .prj</b>, or <b>JPEG + world file + .prj</b>. Absolute planimetric accuracy cannot exceed the accuracy of the selected source imagery. Direct folder export requires Chrome or Edge served over HTTPS or localhost.'],
  ['Saving files & the save dialog',
   'When exporting, you can set the output file name. In Chrome and Edge (served over https or localhost) you get a native "Save As" dialog to choose both the file name and the folder. In other browsers, or when opened directly as a file://, exports download to your default folder with the chosen name.'],
  ['Live weather & location footer',
-  'The bottom bar shows live weather for the map centre (temperature, condition, humidity, wind direction/speed, precipitation) via Open-Meteo with no API key, plus the country flag and the city name of the map centre ? all of which update automatically as you pan the map.'],
+  'The bottom bar shows live weather for the map centre (temperature, condition, humidity, wind direction/speed, precipitation) via Open-Meteo with no API key, plus the country flag and the city name of the map centre — all of which update automatically as you pan the map.'],
  ['Search & navigation',
   'Search a place or address in the header, or type "lat, lng" to jump there. Use <b>Home</b> to return to the default extent and <b>Locate</b> for your live GPS position. Prev/Next step through your recent map extents, and "All" zooms to all visible layers.'],
  ['Tips & requirements',
   'An internet connection is needed the first time so the map libraries and basemap tiles can load; after that, your own data analysis runs locally. For the native folder save dialog, geolocation, and best results, serve the file over https or localhost rather than opening it directly as a file. To publish the app, host the single HTML file on GitHub Pages, Netlify, Cloudflare Pages, or an intranet/SharePoint site.'],
  ['Credits',
-  'Developed by IUH. Spatial Itqan ? smart GIS mapping, editing, QA/QC, routing and spatial-data excellence, all in a single self-contained web application.']
+  'Developed by IUH. Spatial Itqan — smart GIS mapping, editing, QA/QC, routing and spatial-data excellence, all in a single self-contained web application.']
 ];
 function manualHtml(){ return MANUAL.map(function(s,i){return '<div class="help-sec" data-sec="'+i+'"><h2>'+s[0]+'</h2><p>'+s[1]+'</p></div>';}).join(''); }
 document.getElementById('helpBody').innerHTML=manualHtml();
@@ -7165,7 +7165,7 @@ function routeSetPoint(kind,latlng,label){
 }
 function routeStopPick(){ routePickMode=null; map.getContainer().style.cursor=''; }
 function routePick(kind){
-  identifyOn=false; var ib=document.getElementById('identifyToggle'); if(ib){ib.classList.remove('on');ib.textContent='? Identify ? click to enable';}
+  identifyOn=false; var ib=document.getElementById('identifyToggle'); if(ib){ib.classList.remove('on');ib.textContent='◎ Identify — click to enable';}
   routePickMode=kind; map.getContainer().style.cursor='crosshair'; switchTab('route'); toast('Click on the map to set route '+(kind==='start'?'start':'destination'));
 }
 map.on('click',function(e){
@@ -7176,14 +7176,14 @@ map.on('click',function(e){
 });
 function routeUseLiveLocation(){
   if(!navigator.geolocation){toast('Geolocation is not supported by this browser',true);return;}
-  toast('Getting current location for route start?');
+  toast('Getting current location for route start…');
   navigator.geolocation.getCurrentPosition(function(pos){
     var ll=L.latLng(pos.coords.latitude,pos.coords.longitude); routeSetPoint('start',ll,'Live current location'); map.setView(ll,16); toast('Route start set from live location');
   },function(err){toast('Could not get live location: '+(err.message||'permission denied'),true);},{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
 }
 function routeSearchDestination(){
   var q=document.getElementById('routeDestSearch').value.trim(); if(!q){toast('Enter a destination name or address',true);return;}
-  toast('Searching destination?');
+  toast('Searching destination…');
   fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q))
     .then(function(r){return r.json();}).then(function(list){
       if(!list||!list.length){toast('Destination not found',true);return;}
@@ -7199,7 +7199,7 @@ function renderRouteSteps(steps){
   var box=document.getElementById('routeSteps');
   if(!steps||!steps.length){box.innerHTML='<div>No turn-by-turn steps returned by the routing service.</div>';return;}
   box.innerHTML=steps.slice(0,80).map(function(s,i){
-    var name=s.name||s.road||s.instruction||'Continue'; var dist=s.distance?(' ? '+(s.distance/1000).toFixed(2)+' km'):'';
+    var name=s.name||s.road||s.instruction||'Continue'; var dist=s.distance?(' — '+(s.distance/1000).toFixed(2)+' km'):'';
     var instr=s.instruction||((s.maneuver&&s.maneuver.type)?s.maneuver.type.replace(/_/g,' '):'Continue')+(name?' on '+name:'');
     return '<div><b>'+(i+1)+'.</b> '+escapeHtml(instr)+escapeHtml(dist)+'</div>';
   }).join('');
@@ -7220,7 +7220,7 @@ function routeCalculate(){
     routeStatus('Route: choose Driving or OpenRouteService');
     return;
   }
-  routeStatus('Route: calculating?');
+  routeStatus('Route: calculating…');
   if(engine==='ors'){
     var orsEl=document.getElementById('orsKey'); var key=orsEl?orsEl.value.trim():''; if(!key){toast('OpenRouteService needs an API key, or choose OSRM demo',true);routeStatus('Route: ORS API key missing');return;}
     fetch('https://api.openrouteservice.org/v2/directions/'+prof+'/geojson',{method:'POST',headers:{'Content-Type':'application/json','Authorization':key},body:JSON.stringify({coordinates:[[routeStart.lng,routeStart.lat],[routeEnd.lng,routeEnd.lat]],instructions:true})})
@@ -7276,14 +7276,14 @@ function fetchJsonWithTimeout(url,ms){
 function applyWeatherLayer(){
   var t=document.getElementById('weatherLayerType').value;
   if(t==='rainviewer_radar'){
-    weatherSetStatus('Loading latest RainViewer radar frames?');
+    weatherSetStatus('Loading latest RainViewer radar frames…');
     fetchJsonWithTimeout('https://api.rainviewer.com/public/weather-maps.json',12000).then(function(j){
       var host=j.host||'https://tilecache.rainviewer.com';
       var frames=(j.radar&&j.radar.past)||[];
       if(!frames.length)throw new Error('No radar frames returned');
       var f=frames[frames.length-1];
       var url=host+f.path+'/256/{z}/{x}/{y}/2/1_1.png';
-      addWeatherTile(url,'? RainViewer','RainViewer latest precipitation radar',7,'Source: no-key public RainViewer Weather Maps API\nFrame: '+(f.time?new Date(f.time*1000).toUTCString():'latest')+'\nTip: Public free radar max native zoom is limited; zoomed-in view may be resampled.',{maxZoom:18,maxNativeZoom:7});
+      addWeatherTile(url,'© RainViewer','RainViewer latest precipitation radar',7,'Source: no-key public RainViewer Weather Maps API\nFrame: '+(f.time?new Date(f.time*1000).toUTCString():'latest')+'\nTip: Public free radar max native zoom is limited; zoomed-in view may be resampled.',{maxZoom:18,maxNativeZoom:7});
     }).catch(function(e){weatherSetStatus('Weather radar failed: '+e.message+'\nTip: If opened directly as file://, run RUN_HTML_LOCAL_SERVER.bat and open http://localhost:8090. You can also use NASA GIBS layers because they load as map tiles.');toast('Weather radar failed',true);});
     return;
   }
@@ -7299,7 +7299,7 @@ function applyWeatherLayer(){
       gibs_goes_east_geocolor:['GOES-East_ABI_GeoColor','NASA GIBS GOES-East GeoColor','GoogleMapsCompatible_Level8','png',8],
       gibs_goes_west_geocolor:['GOES-West_ABI_GeoColor','NASA GIBS GOES-West GeoColor','GoogleMapsCompatible_Level8','png',8]
     }[t];
-    addWeatherTile(gibsUrl(cfg[0],date,cfg[2],cfg[3]),'? NASA GIBS',cfg[1],cfg[4],'Source: no-key NASA GIBS WMTS Web Mercator satellite tiles\nDate: '+date+'\nTip: If blank, try yesterday/two days back or select another sensor. GOES layers mainly cover the Americas; VIIRS/MODIS are better global layers.');
+    addWeatherTile(gibsUrl(cfg[0],date,cfg[2],cfg[3]),'© NASA GIBS',cfg[1],cfg[4],'Source: no-key NASA GIBS WMTS Web Mercator satellite tiles\nDate: '+date+'\nTip: If blank, try yesterday/two days back or select another sensor. GOES layers mainly cover the Americas; VIIRS/MODIS are better global layers.');
     return;
   }
   // No-key layers only (RainViewer radar + NASA GIBS satellite). OWM removed.
@@ -7311,7 +7311,7 @@ document.getElementById('weatherOpacity').oninput=function(){document.getElement
 
 /* ================= ULTIMATE EXPERIENCE ADD-ON ================= */
 var ultimateGridLayer=null;
-function proLog(msg){var el=document.getElementById('proLog'); if(el){el.innerHTML='<b>'+new Date().toLocaleTimeString()+'</b> ? '+escapeHtml(msg)+'\n'+el.textContent.slice(0,1200);} try{toast(msg);}catch(e){} }
+function proLog(msg){var el=document.getElementById('proLog'); if(el){el.innerHTML='<b>'+new Date().toLocaleTimeString()+'</b> — '+escapeHtml(msg)+'\n'+el.textContent.slice(0,1200);} try{toast(msg);}catch(e){} }
 function proCountFeatures(){var total=0;Object.keys(layers).forEach(function(id){var gj=layers[id].geojson;if(gj&&gj.features)total+=gj.features.length;});return total;}
 function proDrawCount(){var n=0;try{n=drawn.point.length+drawn.line.length+drawn.polygon.length+ptItems.length;}catch(e){}return n;}
 function proLiveStatus(){var live=[];try{if(weatherLayer)live.push('Weather');}catch(e){} try{if(routeLine)live.push('Route');}catch(e){} return live.length?live.join('+'):'OFF';}
@@ -7328,7 +7328,7 @@ function fitAllData(){
   var fg=L.featureGroup(); var added=false;
   Object.keys(layers).forEach(function(id){var l=layers[id];if(l.visible&&l.leaflet){try{fg.addLayer(l.leaflet);added=true;}catch(e){}}});
   try{drawnGroup.eachLayer(function(l){fg.addLayer(l);added=true;});ptGroup.eachLayer(function(l){fg.addLayer(l);added=true;});routeGroup.eachLayer(function(l){fg.addLayer(l);added=true;});}catch(e){}
-  if(!added){map.setView(HOME.center,HOME.zoom);proLog('No data loaded ? returned to Home.');return;}
+  if(!added){map.setView(HOME.center,HOME.zoom);proLog('No data loaded — returned to Home.');return;}
   try{var b=fg.getBounds();if(b&&b.isValid()){map.fitBounds(b.pad(.15));proLog('Fitted all visible data.');}}catch(e){proLog('Could not fit all data.');}
 }
 function toggleFocusMode(){document.body.classList.toggle('focus-mode');setTimeout(function(){map.invalidateSize();},260);proLog(document.body.classList.contains('focus-mode')?'Focus mode enabled':'Focus mode disabled');}
@@ -7342,7 +7342,7 @@ function buildGrid(){
   var lat0=Math.floor(sw.lat/step)*step, lng0=Math.floor(sw.lng/step)*step;
   for(var lat=lat0;lat<=ne.lat;lat+=step){L.polyline([[lat,sw.lng],[lat,ne.lng]],{color:'#22D3EE',weight:1,opacity:.35,interactive:false}).addTo(group);}
   for(var lng=lng0;lng<=ne.lng;lng+=step){L.polyline([[sw.lat,lng],[ne.lat,lng]],{color:'#22D3EE',weight:1,opacity:.35,interactive:false}).addTo(group);}
-  var c=map.getCenter();L.marker([c.lat,c.lng],{interactive:false,icon:L.divIcon({className:'grid-label',html:'Grid '+step+'?',iconSize:[80,20],iconAnchor:[40,10]})}).addTo(group);
+  var c=map.getCenter();L.marker([c.lat,c.lng],{interactive:false,icon:L.divIcon({className:'grid-label',html:'Grid '+step+'°',iconSize:[80,20],iconAnchor:[40,10]})}).addTo(group);
   return group;
 }
 function toggleGrid(){
@@ -7378,7 +7378,7 @@ function layerHealthCheck(){
     var L0=layers[id], gj=L0.geojson, cnt=0, bad=0, fields={};
     if(gj&&gj.features){gj.features.forEach(function(f){cnt++;total++;if(!f.geometry)bad++;Object.keys(f.properties||{}).slice(0,30).forEach(function(k){fields[k]=(fields[k]||0)+1;});});}
     var top=Object.keys(fields).slice(0,8).join(', ');
-    lines.push('? '+L0.name+' | '+cnt+' features | '+(L0.visible?'visible':'hidden')+' | geometry issues: '+bad+(top?' | fields: '+top:''));
+    lines.push('• '+L0.name+' | '+cnt+' features | '+(L0.visible?'visible':'hidden')+' | geometry issues: '+bad+(top?' | fields: '+top:''));
   });
   if(!lines.length)lines.push('No imported data layers loaded yet.');
   lines.unshift('Spatial Itqan layer health check');lines.unshift('Total imported features: '+total);lines.push('Drawn/marked features: '+proDrawCount());
@@ -7559,7 +7559,7 @@ var wcStartBtn=document.getElementById('wcStart');
   if(!dock)return;
   dock.onclick=function(){
     var docked=document.body.classList.toggle('panel-docked');
-    dock.textContent=docked?'?':'?';   // docked ? ? (pull back); expanded ? ? (push away)
+    dock.textContent=docked?'‹':'›';   // docked → ‹ (pull back); expanded → › (push away)
     dock.title=docked?'Show panel':'Hide panel';
     // shift on-map overlays so they track the map's right edge
     var wide=window.innerWidth<=860;
@@ -7568,13 +7568,13 @@ var wcStartBtn=document.getElementById('wcStart');
     var legend=document.querySelector('.legendbox'); if(legend)legend.style.right=rightVal;
     setTimeout(function(){try{map.invalidateSize();}catch(e){}},300);
   };
-  dock.textContent='?'; dock.title='Hide panel';
+  dock.textContent='›'; dock.title='Hide panel';
 })();
 /* Collapsible "Individual elements" advanced section */
 (function(){
   var t=document.getElementById('elemAdvToggle'), g=document.getElementById('elemAdvGrid'), c=document.getElementById('elemAdvCaret');
   if(!t||!g)return;
-  t.onclick=function(){ var open=g.style.display==='none'; g.style.display=open?'grid':'none'; if(c)c.textContent=open?'?':'?'; };
+  t.onclick=function(){ var open=g.style.display==='none'; g.style.display=open?'grid':'none'; if(c)c.textContent=open?'▾':'▸'; };
 })();
 if(wcStartBtn){ wcStartBtn.onclick=closeWelcome; }
 try{ if(typeof wireCartoTools==='function') wireCartoTools(); }catch(e){ console.warn('cartography tools init deferred',e); }
@@ -7607,11 +7607,11 @@ document.getElementById('refreshBtn').onclick=function(){
   measureOut.textContent='Pick a tool, then draw on the map.';
   if(youAreHere){ map.removeLayer(youAreHere); youAreHere=null; }
   if(geoWatchId!==null && navigator.geolocation){ navigator.geolocation.clearWatch(geoWatchId); geoWatchId=null; }
-  locationOn=false; var lb=document.getElementById('locateBtn'); lb.textContent='?'; lb.title='Locate me'; lb.classList.remove('accent'); locEl.className='ts-loc'; locEl.textContent='Location: off'; lastGeoName=''; lastGeoFetch=0;
+  locationOn=false; var lb=document.getElementById('locateBtn'); lb.textContent='◎'; lb.title='Locate me'; lb.classList.remove('accent'); locEl.className='ts-loc'; locEl.textContent='Location: off'; lastGeoName=''; lastGeoFetch=0;
   searchEl.value=''; resultsEl.innerHTML=''; resultsEl.style.display='none';
   // reset tool states
-  identifyOn=false; var ib=document.getElementById('identifyToggle'); ib.classList.remove('on'); ib.textContent='? Identify ? click to enable';
-  ptAddMode=false; var pb=document.getElementById('ptAdd'); if(pb){pb.textContent='? Add point';pb.classList.add('accent');}
+  identifyOn=false; var ib=document.getElementById('identifyToggle'); ib.classList.remove('on'); ib.textContent='◎ Identify — click to enable';
+  ptAddMode=false; var pb=document.getElementById('ptAdd'); if(pb){pb.textContent='＋ Add point';pb.classList.add('accent');}
   window.__svOpState.editMode=false;window.__svEditSession={active:false,layerId:'',baseline:null,dirty:false,started:null};svSetSaveButtons(false);if(window.__svRefreshEditorUI)window.__svRefreshEditorUI();
   map.getContainer().style.cursor='';
   // reset title + legend + view
@@ -7655,7 +7655,7 @@ document.getElementById('refreshBtn').onclick=function(){
   function vectorLayers(){return Object.keys(layers).map(function(id){var L0=layers[id];return L0&&L0.geojson?L0:null;}).filter(Boolean);}
   function getLayer(id){return layers[id]||null;}
   function fields(L0){var fs={};(L0.editSchema||[]).forEach(function(field){fs[field.name]=1;});(L0.geojson.features||[]).forEach(function(f){Object.keys(f.properties||{}).forEach(function(k){if(k!=='__sv_fid')fs[k]=1;});});return Object.keys(fs);}
-  function fillSelect(sel){ if(!sel)return; var prev=sel.value; var html=''; vectorLayers().forEach(function(l){html+='<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>';}); sel.innerHTML=html||'<option value="">? no vector layers ?</option>'; if(prev&&layers[prev]) sel.value=prev; }
+  function fillSelect(sel){ if(!sel)return; var prev=sel.value; var html=''; vectorLayers().forEach(function(l){html+='<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>';}); sel.innerHTML=html||'<option value="">— no vector layers —</option>'; if(prev&&layers[prev]) sel.value=prev; }
   function selectedFids(id){ if(window.__svSelectedFids) return window.__svSelectedFids(id)||[]; return []; }
   function selectedFeatures(L0){var ids=selectedFids(L0.id); return (L0.geojson.features||[]).filter(function(f){return ids.indexOf(String(f.properties&&f.properties.__sv_fid))>=0;});}
   function targetFeatures(L0){var s=selectedFeatures(L0); return s.length?s:(L0.geojson.features||[]);}
@@ -7668,10 +7668,10 @@ document.getElementById('refreshBtn').onclick=function(){
 
   function currentAdvLayer(){var sel=document.getElementById('editorTargetLayer')||document.getElementById('xpActiveLayer'); return getLayer(sel&&sel.value) || curTbl || vectorLayers()[0];}
   function refreshAllAdvSelects(){['editorTargetLayer','advUniqueLayer','advLabelLayer','advServiceAnchor'].forEach(function(id){fillSelect(document.getElementById(id));}); refreshAdvFieldSelects(); }
-  function refreshAdvFieldSelects(){var L0=currentAdvLayer(); var fs=L0?fields(L0):[]; ['advUniqueField','advLabelField'].forEach(function(id){var s=document.getElementById(id); if(!s)return; var prev=s.value; s.innerHTML=fs.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('')||'<option value="">? no fields ?</option>'; if(prev) s.value=prev;});}
+  function refreshAdvFieldSelects(){var L0=currentAdvLayer(); var fs=L0?fields(L0):[]; ['advUniqueField','advLabelField'].forEach(function(id){var s=document.getElementById(id); if(!s)return; var prev=s.value; s.innerHTML=fs.map(function(f){return '<option value="'+escapeHtml(f)+'">'+escapeHtml(f)+'</option>';}).join('')||'<option value="">— no fields —</option>'; if(prev) s.value=prev;});}
 
   function showModal(title,body){
-    var m=document.getElementById('advModal'); if(!m){m=document.createElement('div');m.id='advModal';m.className='adv-modal';m.innerHTML='<div class="adv-modal-card"><div class="adv-modal-head"><b id="advModalTitle"></b><span style="flex:1"></span><button class="topbtn" id="advModalClose">? Close</button></div><div class="adv-modal-body" id="advModalBody"></div></div>';document.body.appendChild(m);document.getElementById('advModalClose').onclick=function(){m.classList.remove('open');};m.onclick=function(e){if(e.target===m)m.classList.remove('open');};}
+    var m=document.getElementById('advModal'); if(!m){m=document.createElement('div');m.id='advModal';m.className='adv-modal';m.innerHTML='<div class="adv-modal-card"><div class="adv-modal-head"><b id="advModalTitle"></b><span style="flex:1"></span><button class="topbtn" id="advModalClose">✕ Close</button></div><div class="adv-modal-body" id="advModalBody"></div></div>';document.body.appendChild(m);document.getElementById('advModalClose').onclick=function(){m.classList.remove('open');};m.onclick=function(e){if(e.target===m)m.classList.remove('open');};}
     document.getElementById('advModalTitle').textContent=title; document.getElementById('advModalBody').innerHTML=body; m.classList.add('open');
   }
 
@@ -7826,7 +7826,7 @@ document.getElementById('refreshBtn').onclick=function(){
     toast('Click the selected line at the required split location');map.getContainer().style.cursor='crosshair';
     map.once('click',function(e){map.getContainer().style.cursor='';try{
       var clickPoint=turf.point([e.latlng.lng,e.latlng.lat]),nearest=turf.nearestPointOnLine(f,clickPoint,{units:'meters'}),result=turf.lineSplit(f,nearest);
-      if(!result||!result.features||result.features.length<2){toast('Could not split at that location ? click away from an endpoint',true);return;}
+      if(!result||!result.features||result.features.length<2){toast('Could not split at that location — click away from an endpoint',true);return;}
       snapshot();var stamp=Date.now(),parts=result.features.map(function(part,index){part.properties=Object.assign({},f.properties,{__sv_fid:'SPLIT'+stamp+'_'+(index+1),SPLIT_PART:index+1});return part;});
       L0.geojson.features=L0.geojson.features.filter(function(x){return x!==f;}).concat(parts);window.__svOpState.selectedSets[L0.id]={};parts.forEach(function(part){window.__svOpState.selectedSets[L0.id][part.properties.__sv_fid]=true;});
       mark();rebuild(L0);openTable(L0.id);toast('Line split into '+parts.length+' features');
@@ -7845,12 +7845,12 @@ document.getElementById('refreshBtn').onclick=function(){
     toast(feats.length+' feature(s) copied');
   }
   function pasteFeatures(){
-    if(!__svClipboard||!__svClipboard.feats.length){toast('Clipboard is empty ? Copy first',true);return;}
+    if(!__svClipboard||!__svClipboard.feats.length){toast('Clipboard is empty — Copy first',true);return;}
     var L0=currentAdvLayer(); if(!L0){toast('Select a target layer',true);return;}
     var targetBase=String(L0.geomType||geomTypeOf(L0.geojson)||'').replace(/^Multi/,'').toLowerCase(),clipBase=String(__svClipboard.layerType||'').replace(/^Multi/,'').toLowerCase();
     if(targetBase&&clipBase&&targetBase!==clipBase){toast('Copied geometry does not match the target feature layer',true);return;}
     snapshot();
-    // small offset so the paste is visible (?12 m east/south)
+    // small offset so the paste is visible (≈12 m east/south)
     var dLng=0.00012, dLat=-0.00012, n=0;
     window.__svOpState.selectedSets[L0.id]={};__svClipboard.feats.forEach(function(f){
       var nf=clone(f);
@@ -7874,7 +7874,7 @@ document.getElementById('refreshBtn').onclick=function(){
       cancelled=true;map.off('click',pickReference);map.off('click',pickDestination);finish();toast('Move cancelled');
     }
     function pickReference(e){
-      if(cancelled)return;reference=e.latlng;toast('Move: click the destination point ? Esc cancels');
+      if(cancelled)return;reference=e.latlng;toast('Move: click the destination point · Esc cancels');
       map.once('click',pickDestination);
     }
     function pickDestination(e){
@@ -7885,7 +7885,7 @@ document.getElementById('refreshBtn').onclick=function(){
       toast('Moved '+feats.length+' feature(s)');
     }
     document.addEventListener('keydown',cancel);container.style.cursor='crosshair';
-    toast('Move: click a reference point ? Esc cancels');map.once('click',pickReference);
+    toast('Move: click a reference point · Esc cancels');map.once('click',pickReference);
   }
   function rotateSelected(){
     if(typeof turf==='undefined'||!turf.transformRotate){toast('Turf rotate not available',true);return;}
@@ -7899,7 +7899,7 @@ document.getElementById('refreshBtn').onclick=function(){
         var rotated=turf.transformRotate(f,ang,{pivot:pivot});
         f.geometry=rotated.geometry; }catch(e){}
     });
-    mark(); rebuild(L0); toast('Rotated '+feats.length+' feature(s) by '+ang+'?');
+    mark(); rebuild(L0); toast('Rotated '+feats.length+' feature(s) by '+ang+'°');
   }
   function scaleSelected(){
     if(typeof turf==='undefined'||!turf.transformScale){toast('Turf scale is not available',true);return;}
@@ -7950,7 +7950,7 @@ document.getElementById('refreshBtn').onclick=function(){
     else { toast('Trace works on lines or polygons',true); return; }
     var tf={type:'Feature',properties:Object.assign({},src.properties,{__sv_fid:'TRACE'+Date.now(),TRACED_FROM:(src.properties&&src.properties.__sv_fid)||''}),geometry:{type:'LineString',coordinates:coords.map(function(c){return c.slice();})}};
     L0.geojson.features.push(tf); mark(); rebuild(L0); try{openTable(L0.id);}catch(e){}
-    toast('Traced outline added as a new line ? edit its vertices as needed');
+    toast('Traced outline added as a new line — edit its vertices as needed');
   }
   // expose hooks for the ribbon buttons
   window.__svCopy=copySelected; window.__svPaste=pasteFeatures; window.__svSplit=splitSelectedLine;
@@ -8009,7 +8009,7 @@ document.getElementById('refreshBtn').onclick=function(){
     if(!input)return;
     var root=input.replace(/\/+$/,'');
     var name=prompt('Display name:','ArcGIS REST')||'ArcGIS REST';
-    toast('Inspecting ArcGIS service?');
+    toast('Inspecting ArcGIS service…');
     arcJson(root+'?f=json').then(function(meta){
       var isServiceRoot=/\/(MapServer|FeatureServer)$/i.test(root);
       if(isServiceRoot&&/\/MapServer$/i.test(root)&&meta.singleFusedMapCache&&meta.tileInfo){
@@ -8057,7 +8057,7 @@ document.getElementById('refreshBtn').onclick=function(){
   function updateAdvStatus(){var el=document.getElementById('advStatus'); if(!el)return; var L0=currentAdvLayer(); if(!L0){el.textContent='No layer selected.';return;} el.innerHTML='<b>Advanced layer:</b> '+escapeHtml(L0.name)+'\n<b>Features:</b> '+((L0.geojson&&L0.geojson.features&&L0.geojson.features.length)||0)+'\n<b>Selected:</b> '+selectedFids(L0.id).length+'\n<b>History:</b> '+advState.history.length+' snapshot(s)';}
 
   function decorateLayerRows(){
-    setTimeout(function(){var rows=layerListEl.querySelectorAll('.layerrow'), ids=layerOrder.filter(function(id){return layers[id];}).slice().reverse(); rows.forEach(function(row,i){var id=ids[i], L0=layers[id]; if(!id||row.__advDecorated)return; row.__advDecorated=true; row.dataset.lid=id; var host=row.querySelector('.lr-top')||row; var tools=document.createElement('span'); tools.className='adv-row'; tools.innerHTML='<button class="adv-layer-btn" title="Properties">?</button><button class="adv-layer-btn" title="Unique symbology">?</button>'; host.appendChild(tools); tools.children[0].onclick=function(e){e.stopPropagation();layerProperties(id);}; tools.children[1].onclick=function(e){e.stopPropagation();uniqueSymbology(id);}; row.oncontextmenu=function(e){e.preventDefault();showContext(e.pageX,e.pageY,id,null);};});},30);
+    setTimeout(function(){var rows=layerListEl.querySelectorAll('.layerrow'), ids=layerOrder.filter(function(id){return layers[id];}).slice().reverse(); rows.forEach(function(row,i){var id=ids[i], L0=layers[id]; if(!id||row.__advDecorated)return; row.__advDecorated=true; row.dataset.lid=id; var host=row.querySelector('.lr-top')||row; var tools=document.createElement('span'); tools.className='adv-row'; tools.innerHTML='<button class="adv-layer-btn" title="Properties">ⓘ</button><button class="adv-layer-btn" title="Unique symbology">◇</button>'; host.appendChild(tools); tools.children[0].onclick=function(e){e.stopPropagation();layerProperties(id);}; tools.children[1].onclick=function(e){e.stopPropagation();uniqueSymbology(id);}; row.oncontextmenu=function(e){e.preventDefault();showContext(e.pageX,e.pageY,id,null);};});},30);
   }
   var oldRenderLayers=renderLayers; renderLayers=function(){oldRenderLayers(); decorateLayerRows(); attachAllFeatureContext();}; window.renderLayers=renderLayers;
 
@@ -8113,7 +8113,7 @@ document.getElementById('refreshBtn').onclick=function(){
     if(prev&&layers[prev])sel.value=prev; else if(ids[0])sel.value=ids[0];
     var editor=$('editorTargetLayer');
     if(editor){
-      var editorPrev=editor.value;editor.innerHTML=ids.length?'':'<option value="">? no vector layers ?</option>';
+      var editorPrev=editor.value;editor.innerHTML=ids.length?'':'<option value="">— no vector layers —</option>';
       ids.forEach(function(id){var o=document.createElement('option');o.value=id;o.textContent=layers[id].name;editor.appendChild(o);});
       if(window.__svEditSession&&window.__svEditSession.active)editor.value=window.__svEditSession.layerId;
       else if(editorPrev&&layers[editorPrev])editor.value=editorPrev;else editor.value=sel.value;
@@ -8123,12 +8123,12 @@ document.getElementById('refreshBtn').onclick=function(){
   }
   function updateRibbonState(){
     var session=window.__svEditSession||{},editing=!!session.active,id=editing?session.layerId:activeLayerId(),L0=layers[id],dirty=!!(session.dirty||window.__svHasUnsavedEdits),chip=$('xpModeChip');
-    if(chip) chip.innerHTML='Layer: <b>'+escapeHtml(L0?L0.name:'None')+'</b>'+(editing?' ? <b>EDITING</b>':'');
+    if(chip) chip.innerHTML='Layer: <b>'+escapeHtml(L0?L0.name:'None')+'</b>'+(editing?' · <b>EDITING</b>':'');
     var b=$('xpStartEdit');if(b){b.disabled=!L0||editing;b.classList.toggle('edit-active',editing);}
     var stop=$('xpStopEdit');if(stop)stop.disabled=!editing;
     var save=$('xpSaveEdit');if(save)save.disabled=!editing||!dirty;
     var editorTarget=$('editorTargetLayer');if(editorTarget){editorTarget.disabled=false;if(L0)editorTarget.value=id;}
-    var badge=$('editorSessionBadge');if(badge){badge.textContent=editing?('Editing ? '+(L0?L0.name:'Layer')):'Not editing';badge.classList.toggle('on',editing);badge.classList.toggle('dirty',editing&&dirty);}
+    var badge=$('editorSessionBadge');if(badge){badge.textContent=editing?('Editing · '+(L0?L0.name:'Layer')):'Not editing';badge.classList.toggle('on',editing);badge.classList.toggle('dirty',editing&&dirty);}
     var geometry=$('editorGeometryBadge');if(geometry)geometry.textContent=L0?(L0.geomType||geomTypeOf(L0.geojson)||'Feature'):'No target';
     var editorStart=$('editorStart');if(editorStart)editorStart.disabled=!L0||editing;
     var editorStop=$('editorStop');if(editorStop)editorStop.disabled=!editing;
@@ -8155,7 +8155,7 @@ document.getElementById('refreshBtn').onclick=function(){
     }
     try{map.getContainer().style.cursor=window.__svSelectToolOn?'default':'';}catch(e){}
     updateRibbonState();
-    if(!silent)safeToast(window.__svSelectToolOn?'Arrow selection on ? click a feature; double-click opens vertices ? Shift adds ? Ctrl toggles':'Select tool off');
+    if(!silent)safeToast(window.__svSelectToolOn?'Arrow selection on — click a feature; double-click opens vertices · Shift adds · Ctrl toggles':'Select tool off');
   }
   function toggleSelectTool(){setSelectTool(!window.__svSelectToolOn,false);}
   window.__svEnableEditorSelection=function(){setSelectTool(true,true);};
@@ -8177,7 +8177,7 @@ document.getElementById('refreshBtn').onclick=function(){
     svSelectDrag=null;
     if(svSelectRectLayer){try{map.removeLayer(svSelectRectLayer);}catch(err){} svSelectRectLayer=null;}
     var pxSpan=map.latLngToContainerPoint(start).distanceTo(map.latLngToContainerPoint(e.latlng));
-    if(pxSpan<8)return; // treat as a plain click ? the feature's own click handler (if any) already ran
+    if(pxSpan<8)return; // treat as a plain click — the feature's own click handler (if any) already ran
     svBoxSelect(b,mod);
   });
   function svBoxSelect(bounds,mod){
@@ -8204,7 +8204,7 @@ document.getElementById('refreshBtn').onclick=function(){
     var baselines={};visibleVectorLayerIds().forEach(function(layerId){baselines[layerId]=cloneEditorData(layers[layerId].geojson);});
     window.__svEditSession={active:true,layerId:id,baseline:cloneEditorData(L0.geojson),baselines:baselines,dirty:false,started:new Date().toISOString()};
     window.__svOpState.editMode=true;setActiveLayer(id);updateRibbonState();
-    setSelectTool(true,true);safeToast('Editing started ? arrow selection is active on '+L0.name);
+    setSelectTool(true,true);safeToast('Editing started — arrow selection is active on '+L0.name);
   }
   function finishActiveConstruction(){
     try{if(window.__svActiveDrawHandler)window.__svActiveDrawHandler.disable();}catch(e){}
@@ -8240,7 +8240,7 @@ document.getElementById('refreshBtn').onclick=function(){
     var row=document.createElement('tr');
     row.innerHTML='<td><input class="editor-field-name" type="text" placeholder="Example: ASSET_ID"></td>'+
       '<td><select class="editor-field-type"><option value="text">Text</option><option value="integer">Integer</option><option value="double">Double</option><option value="date">Date</option><option value="boolean">Boolean</option></select></td>'+
-      '<td><button class="layer-field-remove" type="button" title="Remove field">?</button></td>';
+      '<td><button class="layer-field-remove" type="button" title="Remove field">✕</button></td>';
     row.querySelector('.editor-field-name').value=name||'';row.querySelector('.editor-field-type').value=type||'text';
     row.querySelector('.layer-field-remove').onclick=function(){row.remove();};body.appendChild(row);
   }
@@ -8255,7 +8255,7 @@ document.getElementById('refreshBtn').onclick=function(){
     var modal=$('editorLayerModal'),name=$('editorLayerName'),geometry=$('editorLayerGeometry'),rows=$('editorFieldRows');
     if(!modal)return;layerDesignerMode='new';layerDesignerTargetId='';
     if($('editorLayerModalTitle'))$('editorLayerModalTitle').textContent='New Feature Layer';
-    if($('editorLayerCreate'))$('editorLayerCreate').textContent='? Create Layer';
+    if($('editorLayerCreate'))$('editorLayerCreate').textContent='✓ Create Layer';
     if(name){name.disabled=false;name.value='';}if(geometry){geometry.disabled=false;geometry.value=kind;}if(rows)rows.innerHTML='';
     addDesignerField('NAME','text');modal.classList.add('open');setTimeout(function(){if(name)name.focus();},30);
   }
@@ -8263,8 +8263,8 @@ document.getElementById('refreshBtn').onclick=function(){
     var L0=editingLayer()||layers[activeLayerId()];if(!L0||!L0.geojson){safeToast('Choose a target feature layer first',true);return;}
     var modal=$('editorLayerModal'),name=$('editorLayerName'),geometry=$('editorLayerGeometry'),rows=$('editorFieldRows');if(!modal)return;
     layerDesignerMode='fields';layerDesignerTargetId=L0.id;
-    if($('editorLayerModalTitle'))$('editorLayerModalTitle').textContent='Add Fields ? '+L0.name;
-    if($('editorLayerCreate'))$('editorLayerCreate').textContent='? Add Fields';
+    if($('editorLayerModalTitle'))$('editorLayerModalTitle').textContent='Add Fields · '+L0.name;
+    if($('editorLayerCreate'))$('editorLayerCreate').textContent='✓ Add Fields';
     if(name){name.value=L0.name;name.disabled=true;}if(geometry){geometry.value=editorGeometryFamily(L0)||'polygon';geometry.disabled=true;}if(rows)rows.innerHTML='';
     addDesignerField('','text');modal.classList.add('open');setTimeout(function(){var input=rows&&rows.querySelector('.editor-field-name');if(input)input.focus();},30);
   }
@@ -8296,7 +8296,7 @@ document.getElementById('refreshBtn').onclick=function(){
     layers[id].geomType=geom;layers[id].editSchema=schema;
     if(wasEditing){window.__svEditSession.baselines=window.__svEditSession.baselines||{};window.__svEditSession.baselines[id]=null;}
     rememberTemplateTarget(id);refreshRibbonLayers();setActiveLayer(id);if(!wasEditing)beginEditSession();closeLayerDesigner();
-    safeToast(name+' created ? '+kind+' geometry ? '+schema.length+' field(s)');return id;
+    safeToast(name+' created · '+kind+' geometry · '+schema.length+' field(s)');return id;
   }
   function createEditableLayer(forcedKind){openLayerDesigner(typeof forcedKind==='string'?forcedKind:'polygon');}
   function editorSafeFileName(value){return String(value||'layer').replace(/[^A-Za-z0-9_\-]+/g,'_').replace(/^_+|_+$/g,'')||'layer';}
@@ -8345,7 +8345,7 @@ document.getElementById('refreshBtn').onclick=function(){
     });
     zip.file('manifest.json',JSON.stringify(manifest,null,2));
     zip.file('README.txt','Spatial Itqan complete project package\r\n\r\nOpen SpatialItqan_Project.svproject from the WebGIS project loader.\r\nThe layers folder contains WGS84 GeoJSON data and field schema definitions.');
-    safeToast('Building complete project package?');
+    safeToast('Building complete project package…');
     zip.generateAsync({type:'blob'}).then(function(blob){saveBlob(blob,'SpatialItqan_Complete_Project.zip','application/zip');safeToast('Complete project package exported');}).catch(function(error){safeToast('Package export failed: '+error.message,true);});
   }
   function eachEditorCoordinate(geometry,callback){
@@ -8418,13 +8418,13 @@ document.getElementById('refreshBtn').onclick=function(){
   var editorSnapMarker=null,editorSnapState=null;
   function showEditorSnap(snap){
     var status=$('editorSnapStatus');editorSnapState=snap||null;
-    if(!snap){if(editorSnapMarker&&map.hasLayer(editorSnapMarker))map.removeLayer(editorSnapMarker);if(status){status.classList.remove('hot');status.textContent='?? Magnet snapping ready ? vertex and edge';}return;}
+    if(!snap){if(editorSnapMarker&&map.hasLayer(editorSnapMarker))map.removeLayer(editorSnapMarker);if(status){status.classList.remove('hot');status.textContent='🧲 Magnet snapping ready — vertex and edge';}return;}
     if(!editorSnapMarker){
       editorSnapMarker=L.circleMarker(snap.latlng,{radius:9,color:'#22C55E',weight:3,fillColor:'#0F172A',fillOpacity:.85,interactive:false});
-      editorSnapMarker.bindTooltip('?? SNAP',{permanent:true,direction:'right',offset:[11,0],className:'snap-magnet-label'});
+      editorSnapMarker.bindTooltip('🧲 SNAP',{permanent:true,direction:'right',offset:[11,0],className:'snap-magnet-label'});
     }
     editorSnapMarker.setLatLng(snap.latlng);if(!map.hasLayer(editorSnapMarker))editorSnapMarker.addTo(map);
-    if(status){status.classList.add('hot');status.textContent='?? Snapped to '+snap.kind+' ? '+snap.layer+' ? '+snap.distance.toFixed(2)+' '+(snap.units==='pixels'?'px':'m');}
+    if(status){status.classList.add('hot');status.textContent='🧲 Snapped to '+snap.kind+' · '+snap.layer+' · '+snap.distance.toFixed(2)+' '+(snap.units==='pixels'?'px':'m');}
   }
   function wireVertexSnapping(target){
     var markers=[];
@@ -8498,14 +8498,14 @@ document.getElementById('refreshBtn').onclick=function(){
           if(!window.__svEditSession.active||window.__svEditSession.layerId!==L0.id||activeCreateHandler!==created)return;
           window.__svActiveDrawHandler=h;activeHandler=h;try{h.enable();}catch(err){}
         },20);
-        safeToast('Feature created ? continue drawing in '+L0.name+' or press Esc to stop');
+        safeToast('Feature created — continue drawing in '+L0.name+' or press Esc to stop');
       }else{
         setSelectTool(true,true);
-        safeToast('Feature created in '+L0.name+(snapped?' ? '+snapped+' vertex/vertices snapped':''));
+        safeToast('Feature created in '+L0.name+(snapped?' — '+snapped+' vertex/vertices snapped':''));
       }
     }
     activeCreateHandler=created;map.on(L.Draw.Event.CREATED,created);h.enable();
-    showDigibar(drawType==='point'?('Creating points in '+L0.name+' ? click repeatedly; Esc stops'):drawType==='rectangle'?('Creating rectangles in '+L0.name+' ? drag repeatedly; Esc stops'):('Creating '+drawType+' features in '+L0.name+' ? double-click each feature; Esc stops'));
+    showDigibar(drawType==='point'?('Creating points in '+L0.name+' — click repeatedly; Esc stops'):drawType==='rectangle'?('Creating rectangles in '+L0.name+' — drag repeatedly; Esc stops'):('Creating '+drawType+' features in '+L0.name+' — double-click each feature; Esc stops'));
     safeToast(drawType==='point'?'Click repeatedly to create points; press Esc when finished':(drawType==='rectangle'?'Drag repeatedly to create rectangles; press Esc when finished':'Click vertices and double-click to finish each feature; press Esc when finished'));
   }
   function editorGeometryFamily(L0){
@@ -8553,7 +8553,7 @@ document.getElementById('refreshBtn').onclick=function(){
   }
   function editSelectedShape(){
     var id=activeLayerId(), L0=layers[id]; if(!L0||!L0.geojson){safeToast('Open a vector layer first',true);return;}
-    if(!window.__svOpState.editMode){safeToast('Click ? Edit to start an edit session first',true);return;}
+    if(!window.__svOpState.editMode){safeToast('Click ✎ Edit to start an edit session first',true);return;}
     var fids=Object.keys(svSelSet(id));
     if(window.__svEditingLayer){
       // second click = finish editing whatever shape is currently being edited
@@ -8571,7 +8571,7 @@ document.getElementById('refreshBtn').onclick=function(){
     L0.leaflet.eachLayer(function(ly){ var f=ly.feature; if(f&&String(f.properties&&f.properties.__sv_fid)===fid) target=ly; });
     if(!target||!target.editing){safeToast('This geometry type can\u2019t be vertex-edited here',true);return;}
     finishActiveConstruction();setSelectTool(false,true);target.editing.enable();window.__svEditingLayer=target;wireVertexSnapping(target);setVertexPanel(true);
-    safeToast('Vertex Editor ON ? drag the visible handles, then click Finish');
+    safeToast('Vertex Editor ON — drag the visible handles, then click Finish');
   }
   function saveEditsToLocal(){
     try{
@@ -8595,7 +8595,7 @@ document.getElementById('refreshBtn').onclick=function(){
     try{ if(typeof drawnGroup!=='undefined') drawnGroup.eachLayer(function(l){fg.addLayer(l);added=true;}); }catch(e){}
     try{ if(typeof ptGroup!=='undefined') ptGroup.eachLayer(function(l){fg.addLayer(l);added=true;}); }catch(e){}
     try{ if(added&&fg.getBounds().isValid()){map.fitBounds(fg.getBounds().pad(.12));return;} }catch(e){}
-    map.setView(HOME.center,HOME.zoom); safeToast('No layer extent found ? returned to home');
+    map.setView(HOME.center,HOME.zoom); safeToast('No layer extent found — returned to home');
   }
   var persistentPan=false,temporaryPan=false,suppressPanClickUntil=0;
   function editorTyping(){
@@ -8612,7 +8612,7 @@ document.getElementById('refreshBtn').onclick=function(){
   function activatePanTool(){
     if(persistentPan){setPanMode(false,true);safeToast('Pan tool off');return;}
     if(window.__svActiveDrawHandler)finishActiveConstruction();
-    setSelectTool(false,true);setPanMode(true,true);safeToast('Pan tool on ? drag the map; select another tool when finished');
+    setSelectTool(false,true);setPanMode(true,true);safeToast('Pan tool on — drag the map; select another tool when finished');
   }
   function beginTemporaryPan(e){
     if(temporaryPan||editorTyping())return;
@@ -8760,7 +8760,7 @@ document.getElementById('refreshBtn').onclick=function(){
   document.addEventListener('keyup',function(e){if(String(e.key).toLowerCase()==='c')endTemporaryPan();});
   window.addEventListener('blur',endTemporaryPan);
   bindRibbon(); if(window.__svDigitizingBar&&window.__svDigitizingBar.bind)window.__svDigitizingBar.bind(); refreshRibbonLayers(); setInterval(updateRibbonState,1500);
-  safeToast('Advanced experience ribbon ready ? high-frequency GIS tools are grouped at the top');
+  safeToast('Advanced experience ribbon ready — high-frequency GIS tools are grouped at the top');
 })();
 
 /* ================= ATTRIBUTE TABLE ESSENTIALS (ESRI-STYLE) ================= */
@@ -8786,9 +8786,9 @@ document.getElementById('refreshBtn').onclick=function(){
   function pasteAttrs(){var L0=editable();if(!L0)return;if(!attributeClipboard){toast('Copy attributes first',true);return;}var sel=selected(L0);if(!sel.length){toast('Select target feature(s)',true);return;}snapshot();sel.forEach(function(f){var fid=f.properties&&f.properties.__sv_fid;f.properties=Object.assign({},f.properties||{},clone(attributeClipboard));if(fid)f.properties.__sv_fid=fid;});changed(L0,'Pasted attributes to '+sel.length+' feature(s)');}
   function repairGeometry(){var L0=editable();if(!L0)return;var rows=selected(L0);if(!rows.length){toast('Select one or more features to repair',true);return;}var n=0;snapshot();rows.forEach(function(f){try{var cleaned=turf.cleanCoords(f);if(cleaned&&JSON.stringify(cleaned.geometry)!==JSON.stringify(f.geometry)){f.geometry=cleaned.geometry;n++;}}catch(e){}});changed(L0,'Geometry repair completed: '+n+' changed');}
   function exportTable(fmt){var L0=active();if(!L0)return;var rows=selected(L0);if(!rows.length)rows=svCurrentTableFeatures();var fs=fields(L0),data=rows.map(function(f){var o={};fs.forEach(function(k){o[k]=(f.properties||{})[k];});return o;});if(fmt==='xlsx'&&window.XLSX){var wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(data);XLSX.utils.book_append_sheet(wb,ws,'Attributes');XLSX.writeFile(wb,(L0.name||'attributes')+'.xlsx');}else{var esc=function(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};var csv=fs.map(esc).join(',')+'\n'+data.map(function(r){return fs.map(function(k){return esc(r[k]);}).join(',');}).join('\n');dl(csv,(L0.name||'attributes')+'.csv','text/csv');}log('Exported '+rows.length+' table row(s)');}
-  function showHistory(){var m=document.getElementById('attrHistoryModal');if(!m){m=document.createElement('div');m.id='attrHistoryModal';m.className='modal';m.innerHTML='<div class="modal-card" style="max-width:560px"><div class="modal-head"><b>Edit History</b><span class="grow"></span><button class="topbtn" id="attrHistoryClose">Close</button></div><div class="modal-body" id="attrHistoryBody"></div></div>';document.body.appendChild(m);m.querySelector('#attrHistoryClose').onclick=function(){m.classList.remove('open');};}m.querySelector('#attrHistoryBody').innerHTML=history.length?history.map(function(h){return '<div style="padding:8px;border-bottom:1px solid var(--line)"><b>'+escapeHtml(h.time)+'</b> ? '+escapeHtml(h.action)+'</div>';}).join(''):'<p class="hint">No edits recorded in this session.</p>';m.classList.add('open');}
+  function showHistory(){var m=document.getElementById('attrHistoryModal');if(!m){m=document.createElement('div');m.id='attrHistoryModal';m.className='modal';m.innerHTML='<div class="modal-card" style="max-width:560px"><div class="modal-head"><b>Edit History</b><span class="grow"></span><button class="topbtn" id="attrHistoryClose">Close</button></div><div class="modal-body" id="attrHistoryBody"></div></div>';document.body.appendChild(m);m.querySelector('#attrHistoryClose').onclick=function(){m.classList.remove('open');};}m.querySelector('#attrHistoryBody').innerHTML=history.length?history.map(function(h){return '<div style="padding:8px;border-bottom:1px solid var(--line)"><b>'+escapeHtml(h.time)+'</b> · '+escapeHtml(h.action)+'</div>';}).join(''):'<p class="hint">No edits recorded in this session.</p>';m.classList.add('open');}
   function addButton(bar,id,label,title,fn){if(document.getElementById(id))return;var b=document.createElement('button');b.id=id;b.textContent=label;b.title=title;b.onclick=fn;bar.appendChild(b);}
-  function build(){var drawerEl=document.getElementById('attrDrawer'),head=drawerEl&&drawerEl.querySelector('.head');if(!drawerEl||!head)return;var st=document.createElement('style');st.textContent='.attr-essential-bar{display:flex;align-items:center;gap:5px;padding:5px 8px;overflow-x:auto;flex:none;background:var(--bg-2);border-bottom:1px solid var(--line)}.attr-essential-bar button{height:28px;flex:none;border:1px solid var(--line);border-radius:6px;background:var(--chip);color:var(--ink);font-size:10.5px;font-weight:700;padding:0 8px;cursor:pointer}.attr-essential-bar button:hover{border-color:var(--brand);color:var(--brand-2)}';document.head.appendChild(st);var bar=document.createElement('div');bar.className='attr-essential-bar';bar.setAttribute('aria-label','Attribute editing tools');head.insertAdjacentElement('afterend',bar);addButton(bar,'attrDeleteSel','?? Delete','Delete selected features',deleteSelected);addButton(bar,'attrDiscard','? Discard','Discard unsaved table changes',discard);addButton(bar,'attrAddField','? Field','Add field',addField);addButton(bar,'attrRenameField','? Field','Rename field',renameField);addButton(bar,'attrDeleteField','? Field','Delete field',deleteField);addButton(bar,'attrFindReplace','? Replace','Find and replace',findReplace);addButton(bar,'attrDuplicate','? Duplicate','Duplicate selected features',duplicate);addButton(bar,'attrCopyAttrs','? Attr','Copy attributes',copyAttrs);addButton(bar,'attrPasteAttrs','? Attr','Paste attributes',pasteAttrs);addButton(bar,'attrRepairGeom','? Repair','Repair selected geometries',repairGeometry);addButton(bar,'attrHistory','? History','View edit history',showHistory);addButton(bar,'attrExportCsv','CSV','Export visible or selected rows to CSV',function(){exportTable('csv');});addButton(bar,'attrExportXlsx','XLSX','Export visible or selected rows to Excel',function(){exportTable('xlsx');});}
+  function build(){var drawerEl=document.getElementById('attrDrawer'),head=drawerEl&&drawerEl.querySelector('.head');if(!drawerEl||!head)return;var st=document.createElement('style');st.textContent='.attr-essential-bar{display:flex;align-items:center;gap:5px;padding:5px 8px;overflow-x:auto;flex:none;background:var(--bg-2);border-bottom:1px solid var(--line)}.attr-essential-bar button{height:28px;flex:none;border:1px solid var(--line);border-radius:6px;background:var(--chip);color:var(--ink);font-size:10.5px;font-weight:700;padding:0 8px;cursor:pointer}.attr-essential-bar button:hover{border-color:var(--brand);color:var(--brand-2)}';document.head.appendChild(st);var bar=document.createElement('div');bar.className='attr-essential-bar';bar.setAttribute('aria-label','Attribute editing tools');head.insertAdjacentElement('afterend',bar);addButton(bar,'attrDeleteSel','🗑 Delete','Delete selected features',deleteSelected);addButton(bar,'attrDiscard','↩ Discard','Discard unsaved table changes',discard);addButton(bar,'attrAddField','＋ Field','Add field',addField);addButton(bar,'attrRenameField','✎ Field','Rename field',renameField);addButton(bar,'attrDeleteField','− Field','Delete field',deleteField);addButton(bar,'attrFindReplace','⌕ Replace','Find and replace',findReplace);addButton(bar,'attrDuplicate','⧉ Duplicate','Duplicate selected features',duplicate);addButton(bar,'attrCopyAttrs','⧉ Attr','Copy attributes',copyAttrs);addButton(bar,'attrPasteAttrs','▣ Attr','Paste attributes',pasteAttrs);addButton(bar,'attrRepairGeom','⚕ Repair','Repair selected geometries',repairGeometry);addButton(bar,'attrHistory','☷ History','View edit history',showHistory);addButton(bar,'attrExportCsv','CSV','Export visible or selected rows to CSV',function(){exportTable('csv');});addButton(bar,'attrExportXlsx','XLSX','Export visible or selected rows to Excel',function(){exportTable('xlsx');});}
   var oldOpenTable=openTable;openTable=function(){oldOpenTable.apply(this,arguments);baselineLayerId=null;snapshot();};window.openTable=openTable;
   build();
 })();

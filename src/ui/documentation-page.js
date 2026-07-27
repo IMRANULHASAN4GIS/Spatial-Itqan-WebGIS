@@ -8,15 +8,15 @@
         [
           'Search',
           'Find a place, address or latitude/longitude pair and move the map.',
-          'Search ?Al Ain Oasis? or enter 24.2075, 55.7447.',
+          'Search “Al Ain Oasis” or enter 24.2075, 55.7447.',
         ],
         [
-          'Workspace ? Full GIS',
+          'Workspace — Full GIS',
           'Shows every ribbon group and is the recommended default for experienced users.',
           'Use Full GIS when editing and QA tools must remain immediately available.',
         ],
         [
-          'Workspace ? Data / Edit / Analyze / Present',
+          'Workspace — Data / Edit / Analyze / Present',
           'Reduces visible commands to the selected task without deleting or disabling tools.',
           'Switch back to Full GIS whenever a command appears missing.',
         ],
@@ -68,7 +68,7 @@
         [
           'Install App',
           'Installs the PWA when HTTPS or localhost requirements are met.',
-          'On iOS use Safari Share ? Add to Home Screen.',
+          'On iOS use Safari Share → Add to Home Screen.',
         ],
         [
           'Settings and Manual',
@@ -210,7 +210,7 @@
           'Changes the layer attribute schema.',
           'Add Inspection_Date as a Date field.',
         ],
-        ['Replace', 'Replaces matching values in a field.', 'Replace ?Maint.? with ?Maintenance?.'],
+        ['Replace', 'Replaces matching values in a field.', 'Replace “Maint.” with “Maintenance”.'],
         [
           'Duplicate / Copy / Paste Attributes',
           'Copies records or field values according to the command context.',
@@ -419,7 +419,7 @@
         [
           'Map PNG / JPEG / PDF',
           'Produces a composed map with marginal elements.',
-          'Export A3 landscape PDF at 2? resolution.',
+          'Export A3 landscape PDF at 2× resolution.',
         ],
         [
           'Layout Designer',
@@ -641,11 +641,11 @@
       year: 'numeric',
     }).format(now);
     document.getElementById('sideDate').textContent = 'Current date: ' + date;
-    document.getElementById('heroDate').textContent = 'Updated dynamically ? ' + date;
+    document.getElementById('heroDate').textContent = 'Updated dynamically · ' + date;
     document.getElementById('manualFooter').textContent =
-      '? ' +
+      '© ' +
       now.getFullYear() +
-      ' Imran Ul Hasan. All rights reserved. ? Spatial Itqan Version 1.1.0 ? ' +
+      ' Imran Ul Hasan. All rights reserved. · Spatial Itqan Version 1.1.0 · ' +
       date;
     var nav = document.getElementById('manualNav');
     document.getElementById('navUp').onclick = function () {

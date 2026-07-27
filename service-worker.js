@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spatial-itqan-shell-v1.1.0-r6';
+const CACHE_NAME = 'spatial-itqan-shell-v1.1.0-r7';
 const APP_SHELL = [
   './',
   './index.html',

@@ -60,8 +60,8 @@
     if (formFactor === 'desktop' || document.querySelector('.pwa-device-chip')) return;
     var chip = document.createElement('div');
     chip.className = 'pwa-device-chip';
-    chip.textContent = formFactor.toUpperCase() + ' ? ' + os + ' ? ' +
-      screen.width + '?' + screen.height + ' ? ' + (devicePixelRatio || 1) + 'x';
+    chip.textContent = formFactor.toUpperCase() + ' · ' + os + ' · ' +
+      screen.width + '×' + screen.height + ' · ' + (devicePixelRatio || 1) + 'x';
     chip.setAttribute('aria-hidden', 'true');
     document.body.appendChild(chip);
     setTimeout(function () { if (chip.parentNode) chip.remove(); }, 5000);
@@ -88,10 +88,10 @@
     stamp.className = 'app-release-stamp';
     stamp.setAttribute('aria-label', 'Software version, developer and current date');
     stamp.innerHTML =
-      '<span class="copyright-owner">? ' + now.getFullYear() + ' Imran Ul Hasan</span>' +
-      '<span aria-hidden="true">?</span><strong>Version 1.1.0</strong>' +
-      '<span aria-hidden="true">?</span><span>' + fullDate + '</span>' +
-      '<span aria-hidden="true">?</span><span>All rights reserved</span>';
+      '<span class="copyright-owner">© ' + now.getFullYear() + ' Imran Ul Hasan</span>' +
+      '<span aria-hidden="true">•</span><strong>Version 1.1.0</strong>' +
+      '<span aria-hidden="true">•</span><span>' + fullDate + '</span>' +
+      '<span aria-hidden="true">•</span><span>All rights reserved</span>';
     footer.appendChild(stamp);
   }
 
@@ -103,7 +103,7 @@
     button.id = 'pwaInstallBtn';
     button.className = 'pwa-install-button';
     button.type = 'button';
-    button.innerHTML = '<span aria-hidden="true">?</span><span class="pwa-install-label">Install App</span>';
+    button.innerHTML = '<span aria-hidden="true">⬇</span><span class="pwa-install-label">Install App</span>';
     button.title = 'Install Spatial Itqan on this device';
     button.hidden = standalone;
     bar.appendChild(button);
@@ -117,8 +117,8 @@
       }
       var isiOS = os === 'iOS/iPadOS';
       var message = isiOS ?
-        'To install Spatial Itqan: open the Share menu, then choose ?Add to Home Screen?.' :
-        'Installation becomes available after this site is served over HTTPS. You can also use your browser menu and choose ?Install app? or ?Add to Home screen?.';
+        'To install Spatial Itqan: open the Share menu, then choose “Add to Home Screen”.' :
+        'Installation becomes available after this site is served over HTTPS. You can also use your browser menu and choose “Install app” or “Add to Home screen”.';
       if (typeof window.toast === 'function') window.toast(message);
       else alert(message);
     });
@@ -147,7 +147,7 @@
       badge = document.createElement('div');
       badge.className = 'pwa-offline-badge';
       badge.setAttribute('role', 'status');
-      badge.textContent = 'Offline ? saved app shell available';
+      badge.textContent = 'Offline · saved app shell available';
       document.body.appendChild(badge);
     }
   }
