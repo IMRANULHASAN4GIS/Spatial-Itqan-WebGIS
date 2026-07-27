@@ -159,7 +159,7 @@
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     addEventListener('load', function () {
-      navigator.serviceWorker.register('./service-worker.js').catch(function (error) {
+      navigator.serviceWorker.register('./service-worker.js?v=1.1.0-r8').catch(function (error) {
         console.warn('Offline support was not registered:', error);
       });
     });

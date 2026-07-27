@@ -1,20 +1,20 @@
-const CACHE_NAME = 'spatial-itqan-shell-v1.1.0-r7';
+const CACHE_NAME = 'spatial-itqan-shell-v1.1.0-r8';
 const APP_SHELL = [
   './',
   './index.html',
   './documentation.html',
-  './app.js',
-  './mobile-pwa.js',
-  './src/security/restricted-expression.js',
-  './src/storage/indexeddb-storage.js',
-  './src/workers/geo-worker-client.js',
-  './src/ui/workspace-controller.js',
-  './src/api/client.js',
-  './src/ui/documentation.js',
-  './src/ui/documentation-page.js',
+  './app.js?v=1.1.0-r8',
+  './mobile-pwa.js?v=1.1.0-r8',
+  './src/security/restricted-expression.js?v=1.1.0-r8',
+  './src/storage/indexeddb-storage.js?v=1.1.0-r8',
+  './src/workers/geo-worker-client.js?v=1.1.0-r8',
+  './src/ui/workspace-controller.js?v=1.1.0-r8',
+  './src/api/client.js?v=1.1.0-r8',
+  './src/ui/documentation.js?v=1.1.0-r8',
+  './src/ui/documentation-page.js?v=1.1.0-r8',
   './workers/geo-worker.js',
-  './manifest.webmanifest',
-  './icon.png',
+  './manifest.webmanifest?v=1.1.0-r8',
+  './icon.png?v=1.1.0-r8',
   './vendor/shpwrite.js',
   './vendor/shp-write-LICENSE.txt'
 ];
