@@ -1,5 +1,56 @@
 # Spatial Itqan WebGIS fixes
 
+## 1.1.0 map startup and precision navigation
+
+- Removed the fixed Al Ain startup extent. First use now opens at a neutral world view.
+- The latest center and zoom are saved automatically and restored after a normal reload.
+- Device location remains private and opt-in through Locate Me.
+- Factory reset clears the session and returns to the neutral world view.
+- The map and bundled basemaps now allow digital overzoom to level 28 while preserving
+  each tile provider's native maximum resolution.
+
+## Release 1.1.0 ? installation, header and complete documentation
+
+- Kept the Install App control visible, readable and aligned across desktop,
+  compact desktop, tablet and phone layouts.
+- Added breakpoint-specific header compaction and a mobile floating install
+  action so installation is never clipped outside the viewport.
+- Added an application-wide version identifier and updated the PWA cache.
+- Rebuilt the in-app manual as a responsive, searchable documentation center.
+- Added curated workflow guidance plus an automatically generated reference for
+  every button, selector, input and interface control present in the app.
+- Added category navigation and a standalone downloadable HTML manual.
+- Kept the documentation control available on small mobile interfaces.
+- Changed Manual from an overlaid dialog to a dedicated documentation page with
+  a Return to WebGIS action.
+- Added an independently scrolling documentation sidebar with visible up/down
+  controls.
+- Added professional tool tables, operating procedures, prerequisites, worked
+  examples, expected results and troubleshooting guidance.
+- Added visible dynamic release metadata to the application and manual:
+  developer name, copyright year, full current date, Version 1.1.0 and
+  ?All rights reserved.?
+- Added Professional Navy, Survey White, Graphite GIS and Desert Survey while
+  retaining the original Graphite, Arctic and Midnight themes.
+- Standardized focus outlines, disabled controls, selection, snapping, warning,
+  success and error visibility across all seven themes.
+- Added theme persistence, project restoration compatibility and theme-matched
+  basemap defaults.
+
+## Mobile, device adaptation and installable PWA
+
+- Added phone, tablet and desktop form-factor recognition.
+- Added OS-family, touch, screen resolution, viewport and pixel-ratio detection.
+- Added responsive safe-area-aware layouts for mobile top bars, GIS ribbons,
+  maps, layer panels, attribute drawers and editing dialogs.
+- Added mobile orientation and visual-viewport handling, including map resizing.
+- Added a web app manifest, install button, Apple mobile metadata and standalone
+  display support.
+- Added a service worker that caches the local application shell and provides a
+  controlled offline fallback.
+- Added online/offline status feedback and platform-specific installation help.
+- Added `MOBILE_PWA.md` with HTTPS, installation and offline limitations.
+
 Resolved in this package:
 
 - Corrected public OSRM routing profile handling. Walking and cycling now
@@ -54,7 +105,7 @@ when the application is used.
   choose Point, Line, or Polygon geometry, and add any number of fields using
   Text, Integer, Double, Date, or Boolean data types. Fields initialize blank
   and remain typed in saved projects.
-- Added “Add Fields to Target” using the same visible typed-field designer, so
+- Added ?Add Fields to Target? using the same visible typed-field designer, so
   existing layers can receive new fields without hidden text prompts.
 - Added a visible Output & Package section in the Feature Editor. The current
   target layer can be exported as Shapefile ZIP (including PRJ), KML, or
@@ -172,7 +223,7 @@ Validation results:
 
 - Removed the Leaflet blue map-pin preview from point feature construction.
   Point digitizing now uses a small precision crosshair and center-square cursor
-  without the “place marker” pin or tooltip.
+  without the ?place marker? pin or tooltip.
 - Added a dedicated Symbol Selector dialog for point, line, and polygon feature
   layers with searchable symbol galleries and a current-symbol preview.
 - Added point symbols including circle, square, diamond, triangle, cross, X,
@@ -185,7 +236,7 @@ Validation results:
 - Added color, outline color, size/width, angle, and opacity controls, plus
   Reset and Save As/My Styles.
 - Added a Symbol Selector command to the Feature Editor.
-- Double-clicking a vector layer’s symbol or name in the TOC now opens its
+- Double-clicking a vector layer?s symbol or name in the TOC now opens its
   Symbol Selector. Double-clicking its on-map legend entry does the same.
 - Applied symbols are reflected in the map, TOC, categorized legend entries,
   and normal legend entries.

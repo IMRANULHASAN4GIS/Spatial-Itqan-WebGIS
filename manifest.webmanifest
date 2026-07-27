@@ -1,0 +1,30 @@
+{
+  "id": "./",
+  "name": "Spatial Itqan WebGIS",
+  "short_name": "Spatial Itqan",
+  "description": "Spatial Itqan WebGIS 1.1.0 ? professional mobile and desktop GIS editing, analysis and export suite.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#14171C",
+  "theme_color": "#14171C",
+  "categories": ["productivity", "utilities", "navigation"],
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open WebGIS",
+      "short_name": "Map",
+      "url": "./",
+      "icons": [{"src": "icon.png", "sizes": "256x256", "type": "image/png"}]
+    }
+  ]
+}

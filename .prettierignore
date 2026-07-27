@@ -1,0 +1,6 @@
+app.js
+index.html
+vendor/
+node_modules/
+dist/
+package-lock.json

@@ -1,0 +1,40 @@
+{
+  "name": "spatial-itqan-webgis",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Production-hardened Spatial Itqan WebGIS client and authenticated spatial API",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build --configLoader runner",
+    "preview": "vite preview --host 127.0.0.1",
+    "start:api": "node server/index.js",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{js,mjs,json,md,html,css}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,json,md,html,css}\"",
+    "test": "node --test tests/*.test.js",
+    "test:security": "node --test tests/security/*.test.js",
+    "check": "npm run lint && npm run test && npm run build",
+    "audit:prod": "npm audit --omit=dev --audit-level=high"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "eslint": "^10.0.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4",
+    "vite": "^7.2.4"
+  }
+}
